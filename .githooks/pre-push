@@ -1,0 +1,156 @@
+#!/bin/bash
+
+# Define text colors
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${YELLOW}Running pre-push checks...${NC}"
+
+# Store the exit status
+EXIT_STATUS=0
+
+# First, run pre-commit checks on all files
+echo -e "${YELLOW}Running pre-commit checks on all files...${NC}"
+
+# Check for secrets with local gitleaks
+echo -e "${YELLOW}Checking for secrets with local gitleaks...${NC}"
+# Use our local gitleaks script
+LOCAL_GITLEAKS="./tools/gitleaks/gitleaks.sh"
+
+chmod +x ./tools/gitleaks/gitleaks.sh
+
+if [ -x "$LOCAL_GITLEAKS" ]; then
+  ./tools/gitleaks/gitleaks.sh -v
+  if [[ $? -ne 0 ]]; then
+    echo -e "${RED}Secrets detected by gitleaks! Please remove them before committing.${NC}"
+    EXIT_STATUS=1
+  else
+    echo -e "${GREEN}No secrets detected.${NC}"
+  fi
+else
+  echo -e "${RED}Local gitleaks script not found or not executable.${NC}"
+  echo -e "${YELLOW}Make sure ./tools/gitleaks/gitleaks.sh exists and is executable.${NC}"
+  EXIT_STATUS=1
+fi
+
+# Check Terraform files
+if command -v terraform >/dev/null 2>&1; then
+  echo -e "${YELLOW}Checking Terraform files...${NC}"
+  
+  # Find terraform directories
+  TERRAFORM_DIRS=$(find . -name "*.tf" -not -path "*/\.*" | xargs -I{} dirname {} | sort | uniq)
+  
+  for dir in $TERRAFORM_DIRS; do
+    echo -e "Checking directory: $dir"
+    
+    # Run terraform fmt and validate
+    pushd "$dir" > /dev/null
+    terraform fmt -recursive -check
+    if [[ $? -ne 0 ]]; then
+      echo -e "${RED}Terraform fmt check failed.${NC}"
+      EXIT_STATUS=1
+    fi
+    
+    terraform validate
+    if [[ $? -ne 0 ]]; then
+      echo -e "${RED}Terraform validation failed.${NC}"
+      EXIT_STATUS=1
+    fi
+    popd > /dev/null
+    
+    # Run tflint with config if available 
+    if command -v tflint >/dev/null 2>&1; then
+      echo -e "Running tflint with config for all files..."
+      # Get the workspace root directory
+      WORKSPACE_ROOT="$(git rev-parse --show-toplevel)"
+      # Initialize tflint in the workspace directory first to ensure proper plugin setup
+      pushd "${WORKSPACE_ROOT}" > /dev/null
+      echo -e "Initializing tflint..."
+      tflint --init --config="${WORKSPACE_ROOT}/terraform/.tflint.hcl"
+      popd > /dev/null
+      
+      # Run tflint in the terraform directory with absolute path config
+      pushd "$dir" > /dev/null
+      tflint --config="${WORKSPACE_ROOT}/terraform/.tflint.hcl" --recursive
+      if [[ $? -ne 0 ]]; then
+        echo -e "${RED}tflint check failed!${NC}"
+        EXIT_STATUS=1
+      fi
+      popd > /dev/null
+    fi
+  done
+fi
+
+# Check Python files
+if command -v uv >/dev/null 2>&1; then
+  echo -e "${YELLOW}Checking Python files...${NC}"
+  
+  # Run ruff and mypy on all Python files
+  echo -e "Running ruff..."
+  uv run ruff check .
+  if [[ $? -ne 0 ]]; then
+    echo -e "${RED}ruff check failed!${NC}"
+    EXIT_STATUS=1
+  fi
+  
+  echo -e "Running pyright..."
+  uv run pyright .
+  if [[ $? -ne 0 ]]; then
+    echo -e "${RED}pyright type check failed!${NC}"
+    EXIT_STATUS=1
+  fi
+fi
+
+# Now run tests regardless of branch
+echo -e "${YELLOW}Running all tests...${NC}"
+
+# Check if we're using uv
+if command -v uv >/dev/null 2>&1; then
+  echo -e "Running tests with uv..."
+  uv run pytest
+  if [[ $? -ne 0 ]]; then
+    echo -e "${RED}Tests failed!${NC}"
+    EXIT_STATUS=1
+  else
+    echo -e "${GREEN}All tests passed!${NC}"
+  fi
+else
+  # Try running with pytest directly
+  if command -v pytest >/dev/null 2>&1; then
+    echo -e "Running tests with pytest..."
+    pytest
+    if [[ $? -ne 0 ]]; then
+      echo -e "${RED}Tests failed!${NC}"
+      EXIT_STATUS=1
+    else
+      echo -e "${GREEN}All tests passed!${NC}"
+    fi
+  else
+    echo -e "${YELLOW}pytest not installed. Skipping tests.${NC}"
+    echo -e "${YELLOW}It's recommended to run tests before pushing.${NC}"
+  fi
+fi
+
+echo -e "${BLUE}TODO: Add test coverage checks in the future.${NC}"
+echo -e "${BLUE}Consider adding: uv run pytest --cov=app --cov-report=term --cov-report=html${NC}"
+
+# Check if we're pushing to protected branches for additional checks
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+PROTECTED_BRANCHES="^(main|master|develop|release|production)$"
+
+if [[ $BRANCH =~ $PROTECTED_BRANCHES ]]; then
+  echo -e "${YELLOW}You're pushing to $BRANCH which is a protected branch.${NC}"
+  echo -e "${YELLOW}Running additional checks...${NC}"
+fi
+
+if [[ $EXIT_STATUS -eq 0 ]]; then
+  echo -e "${GREEN}All push checks passed!${NC}"
+else
+  echo -e "${RED}Some checks failed. Please fix the issues before pushing.${NC}"
+  echo -e "${YELLOW}You can bypass this hook with 'git push --no-verify' if needed.${NC}"
+fi
+
+exit $EXIT_STATUS 

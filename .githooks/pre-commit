@@ -1,0 +1,144 @@
+#!/bin/bash
+
+# Define text colors
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+echo -e "${YELLOW}Running pre-commit checks...${NC}"
+
+# Store the exit status
+EXIT_STATUS=0
+
+# Get staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Check for secrets with local gitleaks
+echo -e "${YELLOW}Checking for secrets with local gitleaks...${NC}"
+# Use our local gitleaks script
+LOCAL_GITLEAKS="./tools/gitleaks/gitleaks.sh"
+
+chmod +x ./tools/gitleaks/gitleaks.sh
+
+if [ -x "$LOCAL_GITLEAKS" ]; then
+  # Check only staged files
+  ./tools/gitleaks/gitleaks.sh -v
+  if [[ $? -ne 0 ]]; then
+    echo -e "${RED}Secrets detected by gitleaks! Please remove them before committing.${NC}"
+    EXIT_STATUS=1
+  else
+    echo -e "${GREEN}No secrets detected.${NC}"
+  fi
+else
+  echo -e "${RED}Local gitleaks script not found or not executable.${NC}"
+  echo -e "${YELLOW}Make sure ./tools/gitleaks/gitleaks.sh exists and is executable.${NC}"
+  EXIT_STATUS=1
+fi
+
+# Check Terraform files
+TERRAFORM_FILES=$(echo "$STAGED_FILES" | grep -E '\.tf$')
+if [[ -n "$TERRAFORM_FILES" ]]; then
+  echo -e "${YELLOW}Checking Terraform files...${NC}"
+  
+  # Get directories containing terraform files
+  TERRAFORM_DIRS=$(echo "$TERRAFORM_FILES" | xargs -I{} dirname {} | sort | uniq)
+  
+  for dir in $TERRAFORM_DIRS; do
+    echo -e "Checking directory: $dir"
+    
+    # Run terraform fmt if available
+    if command -v terraform >/dev/null 2>&1; then
+      echo -e "Running terraform fmt..."
+      pushd "$dir" > /dev/null
+      terraform fmt -recursive -check
+      if [[ $? -ne 0 ]]; then
+        echo -e "${RED}Terraform fmt check failed.${NC}"
+        echo -e "${YELLOW}Run 'terraform fmt -recursive' to format your Terraform files.${NC}"
+        EXIT_STATUS=1
+      fi
+      
+      terraform validate
+      if [[ $? -ne 0 ]]; then
+        echo -e "${RED}Terraform validation failed.${NC}"
+        EXIT_STATUS=1
+      fi
+      popd > /dev/null
+    else
+      echo -e "${RED}terraform not installed. Please install terraform to proceed.${NC}"
+      EXIT_STATUS=1
+    fi
+    
+    if command -v tflint >/dev/null 2>&1; then
+      echo -e "Running tflint with config for all files..."
+      # Get the workspace root directory
+      WORKSPACE_ROOT="$(git rev-parse --show-toplevel)"
+      # Initialize tflint in the workspace directory first to ensure proper plugin setup
+      pushd "${WORKSPACE_ROOT}" > /dev/null
+      echo -e "Initializing tflint..."
+      tflint --init --config="${WORKSPACE_ROOT}/terraform/.tflint.hcl"
+      popd > /dev/null
+      
+      # Run tflint in the terraform directory with absolute path config
+      pushd "$dir" > /dev/null
+      tflint --config="${WORKSPACE_ROOT}/terraform/.tflint.hcl" --recursive
+      if [[ $? -ne 0 ]]; then
+        echo -e "${RED}tflint check failed!${NC}"
+        EXIT_STATUS=1
+      fi
+      popd > /dev/null
+    fi
+  done
+fi
+
+# Check Python files
+PYTHON_FILES=$(echo "$STAGED_FILES" | grep -E '\.py$')
+if [[ -n "$PYTHON_FILES" ]]; then
+  echo -e "${YELLOW}Checking Python files...${NC}"
+  
+  # Check if uv is installed and use it to run commands
+  if command -v uv >/dev/null 2>&1; then
+    echo -e "${YELLOW}Using uv to run tools from pyproject.toml...${NC}"
+    
+    # Run ruff for formatting, linting and import sorting
+    if uv run ruff --version >/dev/null 2>&1; then
+      echo -e "Running ruff..."
+      echo "$PYTHON_FILES" | xargs uv run ruff check
+      if [[ $? -ne 0 ]]; then
+        echo -e "${RED}ruff check failed!${NC}"
+        echo -e "${YELLOW}Run 'uv run ruff check --fix' to fix the issues.${NC}"
+        EXIT_STATUS=1
+      fi
+    else
+      echo -e "${RED}ruff not found in the uv environment.${NC}"
+      echo -e "${YELLOW}Run 'uv add ruff' to install it.${NC}"
+      EXIT_STATUS=1
+    fi
+    
+    # Run pyright for type checking
+    if uv run pyright --version >/dev/null 2>&1; then
+      echo -e "${YELLOW}Running pyright type check...${NC}"
+      echo "$PYTHON_FILES" | xargs uv run pyright
+      if [[ $? -ne 0 ]]; then
+        echo -e "${RED}pyright type check failed!${NC}"
+        EXIT_STATUS=1
+      fi
+    else
+      echo -e "${RED}pyright not found in the uv environment.${NC}"
+      echo -e "${YELLOW}Run 'uv add pyright' to install it.${NC}"
+      EXIT_STATUS=1
+    fi
+  else
+    echo -e "${RED}uv not installed. Please install uv to manage Python dependencies.${NC}"
+    echo -e "${YELLOW}See https://github.com/astral-sh/uv for installation instructions.${NC}"
+    EXIT_STATUS=1
+  fi
+fi
+
+if [[ $EXIT_STATUS -eq 0 ]]; then
+  echo -e "${GREEN}All checks passed!${NC}"
+else
+  echo -e "${RED}Some checks failed. Please fix the issues before committing.${NC}"
+fi
+
+exit $EXIT_STATUS

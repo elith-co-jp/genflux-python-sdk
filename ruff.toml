@@ -1,0 +1,10 @@
+# 最大行長の指定（少し長めに設定)
+line-length = 120
+[lint]
+# チェックするエラーコードの一覧
+select = ["E", "F", "W", "I", "D", "PTH"]
+# 無視するエラーコードの一覧
+ignore = ["D100", "D107", "D415", "D212"]
+
+[lint.pydocstyle]
+convention = "google"

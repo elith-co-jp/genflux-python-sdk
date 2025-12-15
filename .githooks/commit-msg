@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+# The commit message file is passed as the first argument
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Skip merge commits
+if [[ "$COMMIT_MSG" =~ ^Merge\ branch|\[CI\ SKIP\]|Merge\ pull\ request ]]; then
+    echo -e "${YELLOW}Merge commit detected. Skipping commit message validation.${NC}"
+    exit 0
+fi
+
+# Define the regex pattern for conventional commits
+# Format: type(scope): description
+PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9-]+\))?: .{1,100}"
+
+# Check if commit message matches the pattern
+if ! [[ "$COMMIT_MSG" =~ $PATTERN ]]; then
+    echo -e "${RED}Invalid commit message format.${NC}"
+    echo -e "${YELLOW}Please use the conventional commit format:${NC}"
+    echo -e "${GREEN}type(scope): description${NC}"
+    echo -e ""
+    echo -e "Examples:"
+    echo -e "${GREEN}feat(api): add new endpoint for user registration${NC}"
+    echo -e "${GREEN}fix(auth): resolve login issue with expired tokens${NC}"
+    echo -e "${GREEN}docs: update README with setup instructions${NC}"
+    echo -e ""
+    echo -e "Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+    echo -e "Scope is optional and should describe the section of the codebase"
+    echo -e "Description should be in present tense and not end with a period"
+    echo -e ""
+    echo -e "${YELLOW}Your commit message:${NC} $COMMIT_MSG"
+    echo -e ""
+    exit 1
+fi
+
+# Message is valid
+echo -e "${GREEN}Commit message format is valid.${NC}"
+exit 0 

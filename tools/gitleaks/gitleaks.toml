@@ -1,0 +1,18 @@
+# Security scanning configuration
+# Custom configuration extending the default gitleaks settings
+# Default config reference: https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
+
+title = "Custom Security Scanner Configuration"
+
+# Use the base configuration from gitleaks
+[extend]
+useDefault = true
+
+# Define exceptions and allowlists
+[allowlist]
+description = "Patterns and files to exclude from security scanning"
+commits = []
+paths = []
+regexTarget = "line"
+regexes = ["EC_prime256v1"]
+stopwords = []

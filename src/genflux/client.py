@@ -49,6 +49,7 @@ class GenFlux:
             base_url=self.base_url,
             timeout=self.timeout,
             headers=self._get_headers(),
+            follow_redirects=True,  # Follow 307 redirects
         )
 
         # Initialize sub-clients

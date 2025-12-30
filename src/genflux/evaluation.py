@@ -73,7 +73,7 @@ class EvaluationClient:
             execution_type="quick_evaluate",
             config_id=self._config_id,
             data={
-                "metric": metric,
+                "metric_name": metric,
                 "question": question,
                 "answer": answer,
                 "contexts": contexts or [],
@@ -96,7 +96,7 @@ class EvaluationClient:
             raise ValueError("Job completed but no results found")
 
         return MetricResult(
-            metric=completed_job.results["metric"],
+            metric=completed_job.results.get("metric_name", completed_job.results.get("metric")),
             score=completed_job.results["score"],
             reason=completed_job.results.get("reason"),
             engine=completed_job.results["engine"],
@@ -108,6 +108,7 @@ class EvaluationClient:
         answer: str,
         contexts: list[str],
         timeout: int = 300,
+        on_progress: Callable[[Job], None] | None = None,
     ) -> MetricResult:
         """Evaluate faithfulness (answers based on contexts).
 
@@ -116,6 +117,7 @@ class EvaluationClient:
             answer: Answer text
             contexts: Context/retrieval texts
             timeout: Maximum wait time in seconds
+            on_progress: Optional progress callback
 
         Returns:
             MetricResult with faithfulness score
@@ -133,6 +135,8 @@ class EvaluationClient:
             answer=answer,
             contexts=contexts,
             timeout=timeout,
+            callback=on_progress,
+            show_progress=(on_progress is None),
         )
 
     def answer_relevancy(

@@ -53,8 +53,8 @@ class JobsClient:
         }
 
         if data:
-            # Store data in checkpoint_data for quick_evaluate
-            payload["checkpoint_data"] = {"data": data}
+            # Store data directly in checkpoint_data for quick_evaluate
+            payload["checkpoint_data"] = data
 
         response = self._client._post("/jobs", payload)
         return Job.from_dict(response)

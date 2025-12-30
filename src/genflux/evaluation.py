@@ -4,6 +4,7 @@ from typing import Callable
 
 from .jobs import JobsClient
 from .models import Job, MetricResult
+from .progress import create_progress_callback
 
 
 class EvaluationClient:
@@ -31,6 +32,7 @@ class EvaluationClient:
         contexts: list[str] | None = None,
         timeout: int = 300,
         callback: Callable[[Job], None] | None = None,
+        show_progress: bool = True,
     ) -> MetricResult:
         """Evaluate a single question-answer pair.
 
@@ -43,7 +45,8 @@ class EvaluationClient:
             answer: Answer text
             contexts: Context/retrieval texts (optional)
             timeout: Maximum wait time in seconds (default: 300)
-            callback: Optional progress callback
+            callback: Optional progress callback (overrides show_progress)
+            show_progress: Show progress bar (default: True, ignored if callback is provided)
 
         Returns:
             MetricResult with score and reason
@@ -76,6 +79,10 @@ class EvaluationClient:
                 "contexts": contexts or [],
             },
         )
+
+        # Use provided callback or create default progress bar
+        if callback is None and show_progress:
+            callback = create_progress_callback(enable=True)
 
         # Wait for completion
         completed_job = self._jobs.wait(

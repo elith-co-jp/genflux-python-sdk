@@ -13,6 +13,7 @@ from .exceptions import (
 )
 from .jobs import JobsClient
 from .models import Job, JobProgress, MetricResult
+from .progress import ProgressBar, create_progress_callback
 
 __all__ = [
     "GenFlux",
@@ -21,6 +22,8 @@ __all__ = [
     "Job",
     "JobProgress",
     "MetricResult",
+    "ProgressBar",
+    "create_progress_callback",
     "GenFluxError",
     "APIError",
     "TimeoutError",

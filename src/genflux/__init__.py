@@ -1,6 +1,7 @@
 """GenFlux Python SDK."""
 
 from .client import GenFlux
+from .evaluation import EvaluationClient
 from .exceptions import (
     APIError,
     GenFluxError,
@@ -10,10 +11,13 @@ from .exceptions import (
     TimeoutError,
     ValidationError,
 )
+from .jobs import JobsClient
 from .models import Job, JobProgress, MetricResult
 
 __all__ = [
     "GenFlux",
+    "EvaluationClient",
+    "JobsClient",
     "Job",
     "JobProgress",
     "MetricResult",

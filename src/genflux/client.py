@@ -6,6 +6,7 @@ from typing import Any
 
 import httpx
 
+from .evaluation import EvaluationClient
 from .exceptions import APIError, NotFoundError, RateLimitError, ValidationError
 from .jobs import JobsClient
 
@@ -51,6 +52,26 @@ class GenFlux:
 
         # Initialize sub-clients
         self.jobs = JobsClient(self)
+
+    def evaluation(self, config_id: str) -> EvaluationClient:
+        """Create an evaluation client for the given config.
+
+        Args:
+            config_id: Config ID to use for evaluations
+
+        Returns:
+            EvaluationClient instance
+
+        Example:
+            >>> client = GenFlux(api_key="pk_xxx")
+            >>> evaluator = client.evaluation(config_id="config_123")
+            >>> result = evaluator.faithfulness(
+            ...     question="What is Python?",
+            ...     answer="Python is a programming language.",
+            ...     contexts=["Python is..."],
+            ... )
+        """
+        return EvaluationClient(self.jobs, config_id)
 
     def _get_headers(self) -> dict[str, str]:
         """Get HTTP headers for API requests.

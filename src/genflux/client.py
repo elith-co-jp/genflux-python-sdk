@@ -6,6 +6,7 @@ from typing import Any
 
 import httpx
 
+from .configs import ConfigClient
 from .evaluation import EvaluationClient
 from .exceptions import APIError, NotFoundError, RateLimitError, ValidationError
 from .jobs import JobsClient
@@ -51,6 +52,7 @@ class GenFlux:
         )
 
         # Initialize sub-clients
+        self.configs = ConfigClient(self)
         self.jobs = JobsClient(self)
 
     def evaluation(self, config_id: str) -> EvaluationClient:
@@ -128,6 +130,42 @@ class GenFlux:
         except httpx.HTTPStatusError as e:
             self._handle_http_error(e)
             raise  # Never reached, but makes type checker happy
+
+    def _put(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
+        """Send PUT request to API.
+
+        Args:
+            path: API endpoint path
+            data: Request body data
+
+        Returns:
+            Response data
+
+        Raises:
+            APIError: If request fails
+        """
+        try:
+            response = self._http_client.put(path, json=data)
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            self._handle_http_error(e)
+            raise  # Never reached, but makes type checker happy
+
+    def _delete(self, path: str) -> None:
+        """Send DELETE request to API.
+
+        Args:
+            path: API endpoint path
+
+        Raises:
+            APIError: If request fails
+        """
+        try:
+            response = self._http_client.delete(path)
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            self._handle_http_error(e)
 
     def _handle_http_error(self, error: httpx.HTTPStatusError) -> None:
         """Handle HTTP errors and raise appropriate exceptions.

@@ -1,6 +1,7 @@
 """GenFlux Python SDK."""
 
 from .client import GenFlux
+from .configs import ConfigClient
 from .evaluation import EvaluationClient
 from .exceptions import (
     APIError,
@@ -12,13 +13,15 @@ from .exceptions import (
     ValidationError,
 )
 from .jobs import JobsClient
-from .models import Job, JobProgress, MetricResult
+from .models import Config, Job, JobProgress, MetricResult
 from .progress import ProgressBar, create_progress_callback
 
 __all__ = [
     "GenFlux",
+    "ConfigClient",
     "EvaluationClient",
     "JobsClient",
+    "Config",
     "Job",
     "JobProgress",
     "MetricResult",

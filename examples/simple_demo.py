@@ -3,14 +3,17 @@
 import os
 from genflux import GenFlux
 
-# 初期化
-os.environ["GENFLUX_API_KEY"] = "test_api_key"
+# 初期化 (環境変数 GENFLUX_API_KEY を使用)
 client = GenFlux(base_url="http://localhost:8000/api/v1/external")
 
 # Config取得
-configs = client.configs.list()
-config_id = configs[0].id
-print(f"Using config: {configs[0].name}")
+configs_response = client.configs.list()
+if not configs_response.configs:
+    print("❌ No configs found. Please create a config first.")
+    exit(1)
+
+config_id = str(configs_response.configs[0].id)
+print(f"Using config: {configs_response.configs[0].name}")
 
 # 評価実行
 print("\n🚀 Evaluating...")

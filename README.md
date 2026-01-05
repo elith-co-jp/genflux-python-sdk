@@ -1,72 +1,220 @@
-# テンプレートリポジトリ
+# GenFlux Python SDK
 
-## 初期設定
-**この項目は、初期設定後に削除してください。**  
-template-python リポジトリをテンプレートとしたリポジトリを作成した場合、以下の手順で初期設定を行ってください。
-1. src/python_template ディレクトリ名をプロジェクト名等の適切な名称に変更する (以降 `xx` とします)。
-2. pyproject.toml の name, packages も `xx` に変更する。
-3. 下記のディレクトリ構成図も上記変更に合わせて修正する。
+Python SDK for interacting with the GenFlux API.
 
-
-## ディレクトリ構成
-```
-python_template/
-├─ README.md                # プロジェクト概要、セットアップ手順などを記載
-├─ pyproject.toml           # poetry の設定ファイル
-├─ .gitignore               # Git管理除外ファイル
-├─ .githooks/               # Git hooks for code quality and standards
-├─ src/                     # アプリケーション本体のソースコード
-│   ├─ app/                 # 実際の Python パッケージ
-│   ├─ notebooks/           # Notebook (実験用) をまとめるディレクトリ
-│   └─ scripts/             # 便利スクリプトやコマンドラインツール (必要に応じて)
-├─ tests/                   # テストコード
-│   ├─ __init__.py
-│   └─ test_*.py           # テストファイル (pytest 等を利用)
-├─ scripts/                 # プロジェクト全体に関わるスクリプト
-│   └─ setup-git-hooks.sh  # Git hooks の設定スクリプト
-└─ docs/                    # ドキュメント (設計書、仕様書、APIドキュメントなど)
-```
-
-
-## 開発者向けセットアップ方法
-
-### 1. uv のインストール
-uv がインストールされていない場合は、以下のコマンドでインストールしてください ([参考](https://docs.astral.sh/uv/))。
+## インストール
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+# リポジトリをクローン
+git clone https://github.com/elith-co-jp/genflux-python-sdk.git
+cd genflux-python-sdk
 
-### 2. 依存パッケージのインストール
-以下のコマンドで依存パッケージを全てインストールできます。
-
-```bash
+# 依存関係をインストール
 uv sync
 ```
 
-### 3. git hooks の設定
-git hooks を利用して、コミット時にコードのフォーマットや静的解析を行うための設定を行います。以下のコマンドを実行してください。
+## クイックスタート
+
+### 1. API Key を取得
+
+GenFlux Platform から API Key を発行してください。
+
+### 2. 環境変数を設定
 
 ```bash
-./scripts/setup-git-hooks.sh
+export GENFLUX_API_KEY="your_api_key_here"
 ```
 
-これにより、以下の git hooks が有効になります：
+### 3. SDK を使用
 
-- pre-commit: コミット前にコードの品質チェックを行います
-- commit-msg: コミットメッセージの形式をチェックします
-- pre-push: プッシュ前に全てのファイルの品質チェックとテスト実行を行います
+```python
+from genflux import ConfigClient, ConfigCreate
 
-詳細は `.githooks/README.md` をご覧ください。
+# クライアントを初期化
+client = ConfigClient(api_key="your_api_key_here")
 
-## 開発者向けの注意
-本プロジェクトでは、Google スタイルの docstring を採用しています。詳細は以下のリンクを参照してください。
+# Configを作成
+config = client.create(
+    ConfigCreate(
+        name="My First Config",
+        api_endpoint="https://api.openai.com/v1/chat/completions",
+        auth_type="bearer_token",
+        auth_token="your_openai_api_key",
+        evaluation_metrics={
+            "faithfulness": True,
+            "answer_relevancy": True,
+        },
+        total_prompt_count=10,
+    )
+)
 
-- https://google.github.io/styleguide/pyguide.html
+print(f"Created config: {config.id}")
 
-また、コードの品質を保つために、以下のツールを利用しています。
+# Configを取得
+retrieved_config = client.get(config.id)
+print(f"Config name: {retrieved_config.name}")
 
-- ruff: コードフォーマット、静的解析を行うツール
-- pyright: 型チェックを行うツール
+# Configを削除
+client.delete(config.id)
+```
 
-git hooks により、コミット時やプッシュ時にこれらのツールが実行されます。エラーが発生した場合は、修正してからコミットしてください。
+## サンプルコード
+
+### 基本的な使い方
+
+```bash
+# 最もシンプルなサンプル
+uv run python examples/quickstart.py
+
+# 詳細なサンプル
+uv run python examples/config_example.py
+
+# 全機能のテスト
+uv run python examples/test_config_client.py
+```
+
+## 主な機能
+
+### ConfigClient - Config管理
+
+```python
+from genflux import ConfigClient, ConfigCreate, ConfigUpdate
+
+client = ConfigClient(api_key="your_api_key")
+
+# Create
+config = client.create(ConfigCreate(...))
+
+# Read
+config = client.get(config_id)
+configs = client.list()
+
+# Update
+updated = client.update(config_id, ConfigUpdate(name="New Name"))
+
+# Delete
+client.delete(config_id)
+```
+
+## API Reference
+
+### ConfigClient
+
+#### `create(config: ConfigCreate) -> Config`
+新しい Config を作成します。
+
+**Parameters:**
+- `config` (ConfigCreate): Config作成パラメータ
+
+**Returns:**
+- `Config`: 作成された Config
+
+**Example:**
+```python
+config = client.create(
+    ConfigCreate(
+        name="My Config",
+        api_endpoint="https://api.example.com",
+        auth_type="bearer_token",
+        auth_token="token",
+        evaluation_metrics={"faithfulness": True},
+        total_prompt_count=10,
+    )
+)
+```
+
+#### `get(config_id: str | UUID) -> Config`
+Config を ID で取得します。
+
+**Parameters:**
+- `config_id` (str | UUID): Config ID
+
+**Returns:**
+- `Config`: Config オブジェクト
+
+**Raises:**
+- `NotFoundError`: Config が見つからない場合
+
+#### `list(limit: int = 100, offset: int = 0) -> ConfigListResponse`
+Config 一覧を取得します。
+
+**Parameters:**
+- `limit` (int): 最大取得件数（デフォルト: 100）
+- `offset` (int): スキップする件数（デフォルト: 0）
+
+**Returns:**
+- `ConfigListResponse`: Config リスト
+
+#### `update(config_id: str | UUID, config_update: ConfigUpdate) -> Config`
+Config を更新します。
+
+**Parameters:**
+- `config_id` (str | UUID): Config ID
+- `config_update` (ConfigUpdate): 更新パラメータ
+
+**Returns:**
+- `Config`: 更新された Config
+
+#### `delete(config_id: str | UUID) -> bool`
+Config を削除します。
+
+**Parameters:**
+- `config_id` (str | UUID): Config ID
+
+**Returns:**
+- `bool`: 削除成功の場合 True
+
+## エラーハンドリング
+
+```python
+from genflux import ConfigClient
+from genflux.exceptions import (
+    APIError,
+    AuthenticationError,
+    NotFoundError,
+    ValidationError,
+)
+
+client = ConfigClient(api_key="your_api_key")
+
+try:
+    config = client.get("invalid_id")
+except NotFoundError as e:
+    print(f"Config not found: {e}")
+except AuthenticationError as e:
+    print(f"Authentication failed: {e}")
+except ValidationError as e:
+    print(f"Validation error: {e}")
+except APIError as e:
+    print(f"API error {e.status_code}: {e.message}")
+```
+
+## 開発
+
+### テストの実行
+
+```bash
+# 全テストを実行
+uv run pytest
+
+# 特定のテストを実行
+uv run pytest tests/test_config_client.py -v
+```
+
+### Linter & Formatter
+
+```bash
+# Lint
+uv run ruff check .
+
+# Format
+uv run ruff format .
+```
+
+## ライセンス
+
+MIT License
+
+## サポート
+
+問題が発生した場合は、[Issues](https://github.com/elith-co-jp/genflux-python-sdk/issues) を作成してください。

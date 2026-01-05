@@ -89,7 +89,7 @@ class GenFlux:
         }
 
         if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
+            headers["X-API-Key"] = self.api_key
 
         return headers
 

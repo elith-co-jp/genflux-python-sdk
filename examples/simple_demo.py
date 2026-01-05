@@ -8,12 +8,12 @@ client = GenFlux(base_url="http://localhost:8000/api/v1/external")
 
 # Config取得
 configs_response = client.configs.list()
-if not configs_response.items:
+if not configs_response.configs:
     print("❌ No configs found. Please create a config first.")
     exit(1)
 
-config_id = configs_response.items[0].id
-print(f"Using config: {configs_response.items[0].name}")
+config_id = str(configs_response.configs[0].id)
+print(f"Using config: {configs_response.configs[0].name}")
 
 # 評価実行
 print("\n🚀 Evaluating...")

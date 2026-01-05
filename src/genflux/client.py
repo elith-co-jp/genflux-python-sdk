@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-from .configs import ConfigClient
+from .clients.config import ConfigClient
 from .evaluation import EvaluationClient
 from .exceptions import APIError, NotFoundError, RateLimitError, ValidationError
 from .jobs import JobsClient
@@ -53,7 +53,9 @@ class GenFlux:
         )
 
         # Initialize sub-clients
-        self.configs = ConfigClient(self)
+        # New ConfigClient uses BaseClient (independent HTTP client)
+        self.configs = ConfigClient(api_key=self.api_key, base_url=self.base_url, timeout=int(self.timeout))
+        # Old-style clients use GenFlux instance
         self.jobs = JobsClient(self)
 
     def evaluation(self, config_id: str) -> EvaluationClient:
@@ -189,18 +191,18 @@ class GenFlux:
         message = response_data.get("detail", f"HTTP {status_code} error")
 
         if status_code == 404:
-            raise NotFoundError(message, response=response_data)
+            raise NotFoundError("Resource", "unknown", response_data)
         elif status_code == 400:
-            raise ValidationError(message, response=response_data)
+            raise ValidationError(message, response_data)
         elif status_code == 429:
             retry_after = error.response.headers.get("Retry-After")
             raise RateLimitError(
                 message,
                 retry_after=int(retry_after) if retry_after else None,
-                response=response_data,
+                details=response_data,
             )
         else:
-            raise APIError(message, status_code=status_code, response=response_data)
+            raise APIError(status_code, message, response_data)
 
     def __del__(self) -> None:
         """Clean up HTTP client."""

@@ -1,46 +1,8 @@
-"""GenFlux SDK data models."""
+"""Job-related data models for GenFlux SDK."""
 
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
-
-
-@dataclass
-class Config:
-    """Config (evaluation configuration) model."""
-
-    id: str
-    tenant_id: str
-    user_id: str
-    name: str
-    description: str | None
-    metric_flags: dict[str, bool]
-    created_at: datetime
-    updated_at: datetime
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Config":
-        """Create Config from API response dict.
-
-        Args:
-            data: API response dictionary
-
-        Returns:
-            Config instance
-        """
-        created_at = datetime.fromisoformat(data["created_at"])
-        updated_at = datetime.fromisoformat(data["updated_at"])
-
-        return cls(
-            id=data["id"],
-            tenant_id=data["tenant_id"],
-            user_id=data["user_id"],
-            name=data["name"],
-            description=data.get("description"),
-            metric_flags=data.get("metric_flags", {}),
-            created_at=created_at,
-            updated_at=updated_at,
-        )
 
 
 @dataclass
@@ -145,4 +107,3 @@ class MetricResult:
     reason: str | None
     engine: str
     execution_time_seconds: float | None = None
-

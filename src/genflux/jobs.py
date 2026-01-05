@@ -82,7 +82,7 @@ class JobsClient:
             return Job.from_dict(response)
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 404:
-                raise NotFoundError(f"Job not found: {job_id}")
+                raise NotFoundError("job", str(job_id))
             raise
 
     def wait(
@@ -133,9 +133,8 @@ class JobsClient:
 
             if job.is_failed:
                 raise JobFailedError(
-                    f"Job failed: {job.error_message or 'Unknown error'}",
-                    job_id=job_id,
-                    error_message=job.error_message,
+                    job_id=job.id,
+                    error_message=job.error_message or 'Unknown error',
                 )
 
             # Wait before next poll
@@ -143,9 +142,8 @@ class JobsClient:
 
         # Timeout
         raise TimeoutError(
-            f"Job timeout after {timeout} seconds",
-            job_id=job_id,
-            dashboard_url=None,  # TODO: Add dashboard URL when available
+            operation=f"Job {job_id}",
+            timeout=timeout,
         )
 
     def cancel(self, job_id: str) -> Job:

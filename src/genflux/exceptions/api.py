@@ -94,3 +94,18 @@ class JobFailedError(GenFluxError):
         self.error_message = error_message
         super().__init__(f"Job {job_id} failed: {error_message}")
 
+
+class RateLimitError(APIError):
+    """Rate limit exceeded (429)."""
+
+    def __init__(self, message: str = "Rate limit exceeded", retry_after: int | None = None, details: dict | None = None):
+        """Initialize rate limit error.
+
+        Args:
+            message: Error message
+            retry_after: Seconds to wait before retry
+            details: Additional error details
+        """
+        super().__init__(429, message, details)
+        self.retry_after = retry_after
+

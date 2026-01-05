@@ -6,6 +6,7 @@ from genflux.exceptions.api import (
     GenFluxError,
     JobFailedError,
     NotFoundError,
+    RateLimitError,
     TimeoutError,
     ValidationError,
 )
@@ -18,5 +19,5 @@ __all__ = [
     "ValidationError",
     "TimeoutError",
     "JobFailedError",
+    "RateLimitError",
 ]
-

@@ -7,6 +7,7 @@ from typing import Any
 import httpx
 
 from .clients.config import ConfigClient
+from .clients.reports import ReportsClient
 from .evaluation import EvaluationClient
 from .exceptions import APIError, NotFoundError, RateLimitError, ValidationError
 from .jobs import JobsClient
@@ -55,21 +56,31 @@ class GenFlux:
         # Initialize sub-clients
         # New ConfigClient uses BaseClient (independent HTTP client)
         self.configs = ConfigClient(api_key=self.api_key, base_url=self.base_url, timeout=int(self.timeout))
+        self.reports = ReportsClient(api_key=self.api_key, base_url=self.base_url, timeout=int(self.timeout))
         # Old-style clients use GenFlux instance
         self.jobs = JobsClient(self)
 
-    def evaluation(self, config_id: str) -> EvaluationClient:
+    def evaluation(self, config_id: str | None = None) -> EvaluationClient:
         """Create an evaluation client for the given config.
 
         Args:
-            config_id: Config ID to use for evaluations
+            config_id: Config ID to use for evaluations (optional, uses default if not provided)
 
         Returns:
             EvaluationClient instance
 
         Example:
+            >>> # With explicit config
             >>> client = GenFlux(api_key="pk_xxx")
             >>> evaluator = client.evaluation(config_id="config_123")
+            >>> result = evaluator.faithfulness(
+            ...     question="What is Python?",
+            ...     answer="Python is a programming language.",
+            ...     contexts=["Python is..."],
+            ... )
+            >>>
+            >>> # Without config (uses default)
+            >>> evaluator = client.evaluation()
             >>> result = evaluator.faithfulness(
             ...     question="What is Python?",
             ...     answer="Python is a programming language.",

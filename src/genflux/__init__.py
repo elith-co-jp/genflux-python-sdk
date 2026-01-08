@@ -8,6 +8,7 @@ from genflux.client import GenFlux
 
 # Specialized clients
 from genflux.clients.config import ConfigClient
+from genflux.clients.reports import ReportsClient
 from genflux.evaluation import EvaluationClient
 from genflux.jobs import JobsClient
 
@@ -18,6 +19,17 @@ from genflux.models.config import (
     ConfigListResponse,
     ConfigUpdate,
 )
+from genflux.models.report import (
+    CategoryBreakdown,
+    EvaluationSummary,
+    FailedCase,
+    PolicySummary,
+    RedTeamSummary,
+    Report,
+    ReportDetails,
+    ReportSummary,
+    Violation,
+)
 
 # Progress
 from genflux.progress import ProgressBar, create_progress_callback
@@ -25,14 +37,16 @@ from genflux.progress import ProgressBar, create_progress_callback
 # Exceptions
 from genflux.exceptions import (
     APIError,
+    AuthenticationError,
+    ConfigNotFoundError,
     GenFluxError,
     JobFailedError,
     NotFoundError,
     RateLimitError,
+    ResourceNotFoundError,
     TimeoutError,
     ValidationError,
 )
-from genflux.exceptions.api import AuthenticationError
 
 __version__ = "0.1.0"
 
@@ -43,6 +57,7 @@ __all__ = [
     "ConfigClient",
     "EvaluationClient",
     "JobsClient",
+    "ReportsClient",
     # Models
     "Config",
     "ConfigCreate",
@@ -51,6 +66,15 @@ __all__ = [
     "Job",
     "JobProgress",
     "MetricResult",
+    "Report",
+    "ReportSummary",
+    "ReportDetails",
+    "EvaluationSummary",
+    "RedTeamSummary",
+    "PolicySummary",
+    "CategoryBreakdown",
+    "FailedCase",
+    "Violation",
     # Progress
     "ProgressBar",
     "create_progress_callback",
@@ -63,4 +87,6 @@ __all__ = [
     "TimeoutError",
     "JobFailedError",
     "RateLimitError",
+    "ConfigNotFoundError",
+    "ResourceNotFoundError",
 ]

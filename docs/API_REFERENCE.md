@@ -1,11 +1,12 @@
 # GenFlux Python SDK - API Reference
 
-GenFlux Python SDK の完全な API リファレンスです。
+GenFlux Python SDK の完全な API リファレンスです。このドキュメントでは、SDKの機能全体像と各APIの詳細を説明します。
 
 ---
 
-## 目次
+## 📋 目次
 
+- [機能全体像](#機能全体像)
 - [GenFlux クライアント](#genflux-クライアント)
 - [ConfigClient](#configclient)
 - [JobsClient](#jobsclient)
@@ -13,6 +14,127 @@ GenFlux Python SDK の完全な API リファレンスです。
 - [EvaluationClient](#evaluationclient)
 - [モデル](#モデル)
 - [例外](#例外)
+
+---
+
+## 機能全体像
+
+GenFlux SDKは、RAGシステムの評価を簡単に実行するための包括的な機能を提供します。
+
+### アーキテクチャ概要
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      GenFlux Client                         │
+│  (メインエントリーポイント)                                    │
+└────────────────┬────────────────────────────────────────────┘
+                 │
+      ┌──────────┼──────────┬──────────┬──────────┐
+      │          │          │          │          │
+      ▼          ▼          ▼          ▼          ▼
+┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐
+│ Config   ││  Jobs    ││ Reports  ││Evaluation││ Progress │
+│ Client   ││ Client   ││ Client   ││ Client   ││ Display  │
+└──────────┘└──────────┘└──────────┘└──────────┘└──────────┘
+     │           │           │           │           │
+     └───────────┴───────────┴───────────┴───────────┘
+                         │
+                         ▼
+              ┌──────────────────┐
+              │  Backend API     │
+              │  (Job Queue)     │
+              └──────────────────┘
+```
+
+### 主要コンポーネント
+
+#### 1. **GenFlux Client** - メインクライアント
+- すべての機能へのアクセスポイント
+- 認証管理
+- サブクライアントの初期化
+
+#### 2. **ConfigClient** - RAG API設定管理
+- RAG APIの接続情報を管理
+- エンドポイント、認証、リクエスト/レスポンス形式を定義
+- CRUD操作（作成、取得、更新、削除）
+
+#### 3. **JobsClient** - 非同期ジョブ管理
+- 評価ジョブの作成と管理
+- ステータス監視
+- ジョブのキャンセル
+
+#### 4. **EvaluationClient** - 評価実行
+- 12種類のメトリックをサポート
+  - **DeepEval**: Faithfulness, Answer Relevancy, Contextual Relevancy, Contextual Precision, Contextual Recall, Hallucination, Toxicity, Bias
+  - **RAGAS**: Faithfulness, Answer Relevancy, Context Precision, Context Recall
+- 同期的なインターフェース（内部では非同期ジョブを使用）
+
+#### 5. **ReportsClient** - 評価レポート取得
+- サマリーレポート（CI/CD判定用）
+- 詳細レポート（失敗ケース分析用）
+
+### 評価フロー
+
+```
+1. Config作成/取得
+   ↓
+2. Evaluator初期化
+   ↓
+3. 評価メソッド呼び出し
+   ↓
+4. Job作成（内部）
+   ↓
+5. Job実行（Backend）
+   ↓
+6. 進捗監視（ポーリング）
+   ↓
+7. 結果取得
+   ↓
+8. MetricResult返却
+```
+
+### サポートされる評価メトリック
+
+| メトリック | エンジン | 説明 | スコア範囲 |
+|-----------|---------|------|-----------|
+| **Faithfulness** | DeepEval / RAGAS | 回答が文脈に基づいているか | 0.0 ~ 1.0 (高いほど良い) |
+| **Answer Relevancy** | DeepEval / RAGAS | 回答が質問に適切に答えているか | 0.0 ~ 1.0 (高いほど良い) |
+| **Contextual Relevancy** | DeepEval | 文脈が質問に関連しているか | 0.0 ~ 1.0 (高いほど良い) |
+| **Contextual Precision** | DeepEval / RAGAS | 関連性の高い文脈が上位にあるか | 0.0 ~ 1.0 (高いほど良い) |
+| **Contextual Recall** | DeepEval / RAGAS | 回答の情報が文脈に基づいているか | 0.0 ~ 1.0 (高いほど良い) |
+| **Hallucination** | DeepEval | 回答が文脈にない情報を含むか | 0.0 ~ 1.0 (低いほど良い) |
+| **Toxicity** | DeepEval | 回答に有害なコンテンツが含まれるか | 0.0 ~ 1.0 (低いほど良い) |
+| **Bias** | DeepEval | 回答に偏見が含まれるか | 0.0 ~ 1.0 (低いほど良い) |
+
+### 典型的な使用パターン
+
+#### パターン1: シンプルな評価
+```python
+client = GenFlux()
+evaluator = client.evaluation(config_id)
+result = evaluator.faithfulness(question, answer, contexts)
+```
+
+#### パターン2: バッチ評価
+```python
+for case in test_cases:
+    result = evaluator.faithfulness(**case)
+    results.append(result)
+```
+
+#### パターン3: 複数メトリック評価
+```python
+faith = evaluator.faithfulness(question, answer, contexts)
+relevancy = evaluator.answer_relevancy(question, answer)
+toxicity = evaluator.toxicity(question, answer)
+```
+
+#### パターン4: CI/CD統合
+```python
+result = evaluator.faithfulness(question, answer, contexts)
+if result.score < threshold:
+    sys.exit(1)  # テスト失敗
+```
 
 ---
 
@@ -45,10 +167,10 @@ client = GenFlux()
 # API Key を明示的に指定
 client = GenFlux(api_key="genflux_xxx")
 
-# カスタム Base URL
+# カスタム Base URL（ローカル開発）
 client = GenFlux(
-    api_key="genflux_xxx",
-    base_url="https://api.your-domain.com/v1/external",
+    api_key="dev_test_key",
+    base_url="http://localhost:9000/api/v1/external",
     timeout=120.0
 )
 ```
@@ -241,7 +363,7 @@ Job の一覧を取得します。
   - `"failed"`: 失敗
   - `"cancelled"`: キャンセル済み
 - `execution_type` (str, optional): 実行タイプフィルタ
-- `limit` (int, optional): 最大取得件数（未実装）
+- `limit` (int, optional): 最大取得件数
 
 **戻り値**: `list[Job]`
 
@@ -255,12 +377,6 @@ completed_jobs = client.jobs.list(status="completed")
 
 # quick_evaluate タイプのみ
 quick_jobs = client.jobs.list(execution_type="quick_evaluate")
-
-# 複合フィルタ
-filtered = client.jobs.list(
-    status="completed",
-    execution_type="quick_evaluate"
-)
 ```
 
 ---
@@ -331,7 +447,7 @@ Job をキャンセルします。
 **パラメータ**:
 - `job_id` (str): Job ID
 
-**戻り値**: キャンセル結果（詳細は未実装）
+**戻り値**: キャンセル結果
 
 **例**:
 ```python
@@ -387,18 +503,11 @@ for case in detailed_report.details.failed_cases:
 
 評価を実行するクライアント。
 
-### `__init__(jobs_client, config_id)`
+### 初期化
 
-**パラメータ**:
-- `jobs_client`: JobsClient インスタンス
-- `config_id` (str): デフォルトの Config ID
-
-**取得方法**:
 ```python
-evaluator = client.evaluation(config_id="xxx")
+evaluator = client.evaluation(config_id="your-config-id")
 ```
-
----
 
 ### 共通パラメータ
 
@@ -406,8 +515,6 @@ evaluator = client.evaluation(config_id="xxx")
 
 - `timeout` (int, optional): タイムアウト（秒）。デフォルト: 300
 - `on_progress` (callable, optional): 進捗コールバック関数。`lambda x: None` でプログレスバーを非表示にできます
-
-**注意**: `show_progress` パラメータは個別のメトリックメソッドではサポートされていません。`evaluate()` メソッドのみで使用可能です。
 
 ---
 
@@ -444,27 +551,11 @@ print(f"Reason: {result.reason}")
 
 回答関連性を評価します。回答が質問に適切に答えているかを判定します。
 
-**パラメータ**:
-- `question` (str): 質問
-- `answer` (str): 回答
-- `contexts` (list[str], optional): 文脈リスト
-- `timeout` (int, optional): タイムアウト（秒）
-
-**戻り値**: `MetricResult`
-
 ---
 
 #### `contextual_relevancy(question, answer, contexts, timeout=300)`
 
 文脈関連性を評価します。提供された文脈が質問に関連しているかを判定します。
-
-**パラメータ**:
-- `question` (str): 質問
-- `answer` (str): 回答
-- `contexts` (list[str]): 文脈リスト
-- `timeout` (int, optional): タイムアウト（秒）
-
-**戻り値**: `MetricResult`
 
 ---
 
@@ -472,69 +563,29 @@ print(f"Reason: {result.reason}")
 
 文脈精度を評価します。関連性の高い文脈が上位にランクされているかを判定します。
 
-**パラメータ**:
-- `question` (str): 質問
-- `answer` (str): 回答
-- `contexts` (list[str]): 文脈リスト（順序重要）
-- `timeout` (int, optional): タイムアウト（秒）
-
-**戻り値**: `MetricResult`
-
 ---
 
 #### `contextual_recall(question, answer, contexts, timeout=300)`
 
 文脈再現率を評価します。回答の全ての情報が文脈に基づいているかを判定します。
 
-**パラメータ**:
-- `question` (str): 質問
-- `answer` (str): 回答
-- `contexts` (list[str]): 文脈リスト
-- `timeout` (int, optional): タイムアウト（秒）
-
-**戻り値**: `MetricResult`
-
 ---
 
 #### `hallucination(question, answer, contexts, timeout=300)`
 
-幻覚を検出します。回答が文脈に存在しない情報を含んでいないかを判定します。
-
-**パラメータ**:
-- `question` (str): 質問
-- `answer` (str): 回答
-- `contexts` (list[str]): 文脈リスト
-- `timeout` (int, optional): タイムアウト（秒）
-
-**戻り値**: `MetricResult`（スコアが低いほど良い）
+幻覚を検出します。回答が文脈に存在しない情報を含んでいないかを判定します（スコアが低いほど良い）。
 
 ---
 
 #### `toxicity(question, answer, contexts=None, timeout=300)`
 
-有害性を検出します。回答に有害なコンテンツが含まれていないかを判定します。
-
-**パラメータ**:
-- `question` (str): 質問
-- `answer` (str): 回答
-- `contexts` (list[str], optional): 文脈リスト
-- `timeout` (int, optional): タイムアウト（秒）
-
-**戻り値**: `MetricResult`（スコアが低いほど良い）
+有害性を検出します。回答に有害なコンテンツが含まれていないかを判定します（スコアが低いほど良い）。
 
 ---
 
 #### `bias(question, answer, contexts=None, timeout=300)`
 
-偏見を検出します。回答に偏見が含まれていないかを判定します。
-
-**パラメータ**:
-- `question` (str): 質問
-- `answer` (str): 回答
-- `contexts` (list[str], optional): 文脈リスト
-- `timeout` (int, optional): タイムアウト（秒）
-
-**戻り値**: `MetricResult`（スコアが低いほど良い）
+偏見を検出します。回答に偏見が含まれていないかを判定します（スコアが低いほど良い）。
 
 ---
 
@@ -544,19 +595,11 @@ print(f"Reason: {result.reason}")
 
 RAGASの忠実性評価。
 
-**パラメータ**: `faithfulness()` と同じ
-
-**戻り値**: `MetricResult`
-
 ---
 
 #### `answer_relevancy_ragas(question, answer, contexts=None, timeout=300)`
 
 RAGASの回答関連性評価。
-
-**パラメータ**: `answer_relevancy()` と同じ
-
-**戻り値**: `MetricResult`
 
 ---
 
@@ -564,19 +607,11 @@ RAGASの回答関連性評価。
 
 RAGASの文脈精度評価。
 
-**パラメータ**: `contextual_precision()` と同じ
-
-**戻り値**: `MetricResult`
-
 ---
 
 #### `context_recall_ragas(question, answer, contexts, timeout=300)`
 
 RAGASの文脈再現率評価。
-
-**パラメータ**: `contextual_recall()` と同じ
-
-**戻り値**: `MetricResult`
 
 ---
 
@@ -611,20 +646,6 @@ RAGASの文脈再現率評価。
 - `error_message` (str | None): エラーメッセージ
 - `created_at` (datetime): 作成日時
 - `updated_at` (datetime): 更新日時
-
----
-
-### Report
-
-**属性**:
-- `report_id` (UUID): Report ID（= Job ID）
-- `job_id` (UUID): Job ID
-- `config_id` (UUID | None): Config ID
-- `type` (str): レポートタイプ
-- `status` (str): ステータス（`completed`, `partial`）
-- `created_at` (datetime): 作成日時
-- `summary` (ReportSummary): サマリー情報
-- `details` (ReportDetails | None): 詳細情報（`view='details'` のみ）
 
 ---
 
@@ -704,67 +725,11 @@ Job 失敗エラー。評価処理が失敗した。
 
 ---
 
-## 使用例
+## 関連ドキュメント
 
-### 完全な評価フロー
-
-```python
-from genflux import GenFlux
-from genflux.exceptions import TimeoutError, JobFailedError
-
-# クライアント初期化
-client = GenFlux(api_key="genflux_xxx")
-
-try:
-    # Config 作成
-    config = client.configs.create(
-        name="My RAG API",
-        api_endpoint="https://api.example.com/chat",
-        auth_type="bearer_token",
-        auth_credentials="token_xxx",
-        request_format={
-            "method": "POST",
-            "body_template": {"query": "{{prompt}}"}
-        },
-        response_format={"response_path": "answer"}
-    )
-    
-    # 評価実行
-    evaluator = client.evaluation(str(config.id))
-    
-    result = evaluator.faithfulness(
-        question="What is Python?",
-        answer="Python is a programming language.",
-        contexts=["Python is a high-level programming language."],
-        timeout=300
-    )
-    
-    print(f"Score: {result.score}")
-    print(f"Reason: {result.reason}")
-    
-    # Job 一覧取得
-    recent_jobs = client.jobs.list(
-        execution_type="quick_evaluate",
-        limit=10
-    )
-    
-    # Report 取得
-    if recent_jobs:
-        report = client.reports.get(
-            report_id=str(recent_jobs[0].id),
-            view="summary"
-        )
-        print(f"Success Rate: {report.summary.evaluation.success_rate}")
-    
-except TimeoutError:
-    print("Evaluation timed out")
-    
-except JobFailedError as e:
-    print(f"Evaluation failed: {e}")
-    
-except Exception as e:
-    print(f"Unexpected error: {e}")
-```
+- **[README.md](../README.md)** - セットアップ方法
+- **[QUICKSTART.md](./QUICKSTART.md)** - 簡単な使い方
+- **[WORKFLOW.md](./WORKFLOW.md)** - 本格的なワークフロー
 
 ---
 

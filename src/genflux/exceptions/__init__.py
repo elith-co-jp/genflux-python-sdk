@@ -3,10 +3,12 @@
 from genflux.exceptions.api import (
     APIError,
     AuthenticationError,
+    ConfigNotFoundError,
     GenFluxError,
     JobFailedError,
     NotFoundError,
     RateLimitError,
+    ResourceNotFoundError,
     TimeoutError,
     ValidationError,
 )
@@ -20,4 +22,6 @@ __all__ = [
     "TimeoutError",
     "JobFailedError",
     "RateLimitError",
+    "ConfigNotFoundError",
+    "ResourceNotFoundError",
 ]

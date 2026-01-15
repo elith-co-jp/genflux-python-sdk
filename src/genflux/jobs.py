@@ -1,5 +1,6 @@
 """Jobs Client for GenFlux SDK."""
 
+import logging
 import time
 from typing import Any, Callable
 
@@ -7,6 +8,8 @@ import httpx
 
 from .exceptions import JobFailedError, NotFoundError, TimeoutError
 from .models import Job
+
+logger = logging.getLogger(__name__)
 
 
 class JobsClient:
@@ -23,14 +26,14 @@ class JobsClient:
     def create(
         self,
         execution_type: str,
-        config_id: str,
+        config_id: str | None = None,
         data: dict[str, Any] | None = None,
     ) -> Job:
         """Create a new job.
 
         Args:
             execution_type: Execution type (e.g., 'quick_evaluate', 'evaluation')
-            config_id: Config ID
+            config_id: Config ID (optional, uses default if not provided)
             data: Additional data for the job (for quick_evaluate)
 
         Returns:
@@ -41,16 +44,26 @@ class JobsClient:
             ValidationError: If request validation fails
 
         Example:
+            >>> # With explicit config
             >>> job = client.jobs.create(
             ...     execution_type="quick_evaluate",
             ...     config_id="config_123",
             ...     data={"metric": "faithfulness", "question": "...", ...}
             ... )
+            >>>
+            >>> # Without config (uses default)
+            >>> job = client.jobs.create(
+            ...     execution_type="quick_evaluate",
+            ...     data={"metric": "faithfulness", "question": "...", ...}
+            ... )
         """
         payload: dict[str, Any] = {
             "execution_type": execution_type,
-            "config_id": config_id,
         }
+
+        # Add config_id if provided (optional)
+        if config_id:
+            payload["config_id"] = config_id
 
         if data:
             # Store data directly in checkpoint_data for quick_evaluate
@@ -58,6 +71,49 @@ class JobsClient:
 
         response = self._client._post("/jobs", payload)
         return Job.from_dict(response)
+
+    def list(
+        self,
+        status: str | None = None,
+        execution_type: str | None = None,
+        limit: int = 100,
+    ) -> list[Job]:
+        """List jobs.
+
+        Args:
+            status: Filter by status (e.g., 'completed', 'running', 'failed')
+            execution_type: Filter by execution type (e.g., 'quick_evaluate', 'redteam_static')
+            limit: Maximum number of jobs to return (not yet implemented in backend)
+
+        Returns:
+            List of Job objects
+
+        Raises:
+            APIError: If API request fails
+
+        Example:
+            >>> # Get all jobs
+            >>> jobs = client.jobs.list()
+            >>>
+            >>> # Get completed jobs only
+            >>> completed_jobs = client.jobs.list(status="completed")
+            >>>
+            >>> # Get RedTeam jobs
+            >>> redteam_jobs = client.jobs.list(execution_type="redteam_static")
+        """
+        params = {}
+        if status:
+            params["status_filter"] = status
+        if execution_type:
+            params["type_filter"] = execution_type
+
+        response = self._client._http_client.get("/jobs", params=params)
+        if not response.is_success:
+            response.raise_for_status()
+
+        data = response.json()
+        jobs_data = data.get("jobs", [])
+        return [Job.from_dict(job_data) for job_data in jobs_data]
 
     def get(self, job_id: str) -> Job:
         """Get job by ID.
@@ -119,31 +175,81 @@ class JobsClient:
             ... )
         """
         start_time = time.time()
+        last_job = None
+        error_count = 0
+        max_errors = 3
 
         while time.time() - start_time < timeout:
-            job = self.get(job_id)
+            try:
+                job = self.get(job_id)
+                last_job = job
+                error_count = 0  # Reset error count on success
 
-            # Call callback if provided
-            if callback:
-                callback(job)
+                # Call callback if provided
+                if callback:
+                    try:
+                        callback(job)
+                    except Exception as e:
+                        logger.warning(f"Callback error for job {job_id}: {e}")
 
-            # Check status
-            if job.is_completed:
-                return job
+                # Check status
+                if job.is_completed:
+                    logger.info(f"Job {job_id} completed successfully")
+                    return job
 
-            if job.is_failed:
-                raise JobFailedError(
-                    job_id=job.id,
-                    error_message=job.error_message or 'Unknown error',
+                if job.is_failed:
+                    error_msg = job.error_message or "Unknown error"
+                    logger.error(f"Job {job_id} failed: {error_msg}")
+                    raise JobFailedError(
+                        job_id=job.id,
+                        error_message=error_msg,
+                        error_details={"error": job.error_message},
+                    )
+
+                # Wait before next poll
+                time.sleep(poll_interval)
+
+            except (JobFailedError, TimeoutError):
+                # Re-raise job-specific errors
+                raise
+            except Exception as e:
+                # Handle network errors or API errors
+                error_count += 1
+                logger.warning(
+                    f"Error polling job {job_id} (attempt {error_count}/{max_errors}): {e}"
                 )
 
-            # Wait before next poll
-            time.sleep(poll_interval)
+                if error_count >= max_errors:
+                    logger.error(
+                        f"Max errors reached while polling job {job_id}"
+                    )
+                    raise
 
-        # Timeout
+                # Check if timeout reached after error
+                if time.time() - start_time >= timeout:
+                    break
+
+                # Backoff on error
+                time.sleep(min(poll_interval * 2, 10))
+
+        # Timeout reached
+        progress_info = None
+        if last_job:
+            if last_job.total_count and last_job.total_count > 0:
+                progress_info = (
+                    f"{last_job.progress_count}/{last_job.total_count}"
+                )
+
+        logger.error(
+            f"Job {job_id} timed out after {timeout}s "
+            f"(status: {last_job.status if last_job else 'unknown'})"
+        )
         raise TimeoutError(
-            operation=f"Job {job_id}",
+            operation="Job execution",
             timeout=timeout,
+            job_id=job_id,
+            current_status=last_job.status if last_job else "unknown",
+            progress=progress_info,
         )
 
     def cancel(self, job_id: str) -> Job:

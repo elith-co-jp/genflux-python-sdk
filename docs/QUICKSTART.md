@@ -84,20 +84,23 @@ Reason: The answer is based on the provided context.
 
 ```python
 from genflux import GenFlux
+from genflux.models.config import ConfigCreate
 
 client = GenFlux(base_url="http://localhost:9000/api/v1/external")
 
 # Config を作成
 config = client.configs.create(
-    name="My RAG API",
-    api_endpoint="https://api.example.com/chat",
-    auth_type="bearer_token",
-    auth_credentials="your_token_here",
-    request_format={
-        "method": "POST",
-        "body_template": {"query": "{{prompt}}"}
-    },
-    response_format={"response_path": "answer"}
+    ConfigCreate(
+        name="My RAG API",
+        api_endpoint="https://api.example.com/chat",
+        auth_type="bearer_token",
+        auth_token="your_token_here",
+        request_format={
+            "method": "POST",
+            "body_template": {"query": "{{prompt}}"}
+        },
+        response_format={"response_path": "answer"}
+    )
 )
 
 # 作成したConfigを使用

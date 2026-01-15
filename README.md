@@ -107,7 +107,7 @@ docker-compose exec api uv run alembic upgrade head
 curl http://localhost:9000/health
 
 # 期待される出力:
-# {"status":"healthy"}
+# {"status":"ok"}
 ```
 
 ### 5. SDK のインストール

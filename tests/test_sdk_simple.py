@@ -18,7 +18,7 @@ def test_api_health():
     import httpx
     response = httpx.get("http://localhost:8000/health")
     print(f"✅ API Health: {response.json()}")
-    return response.status_code == 200
+    assert response.status_code == 200
 
 
 def test_external_api_endpoints():
@@ -34,14 +34,14 @@ def test_external_api_endpoints():
     response = httpx.get("http://localhost:8000/api/v1/external/configs/")
     print(f"✅ Status: {response.status_code}")
     print(f"   Response: {response.json()}")
+    assert response.status_code == 200
 
     # GET /jobs
     print("\n2️⃣  Testing GET /jobs...")
     response = httpx.get("http://localhost:8000/api/v1/external/jobs/")
     print(f"✅ Status: {response.status_code}")
     print(f"   Response: {response.json()}")
-
-    return True
+    assert response.status_code == 200
 
 
 def test_sdk_client():
@@ -60,7 +60,8 @@ def test_sdk_client():
     print(f"   Has configs: {hasattr(client, 'configs')}")
     print(f"   Has jobs: {hasattr(client, 'jobs')}")
 
-    return True
+    assert hasattr(client, "configs")
+    assert hasattr(client, "jobs")
 
 
 def main():

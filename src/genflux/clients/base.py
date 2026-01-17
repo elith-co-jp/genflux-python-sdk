@@ -18,14 +18,14 @@ class BaseClient:
 
     def __init__(
         self,
-        api_key: str,
+        api_key: str | None,
         base_url: str = "http://localhost:8000/api/v1/external",
         timeout: int = 30,
     ):
         """Initialize base client.
 
         Args:
-            api_key: API key for authentication
+            api_key: API key for authentication (optional)
             base_url: Base URL for API endpoints
             timeout: Request timeout in seconds
         """
@@ -52,7 +52,10 @@ class BaseClient:
         Returns:
             Request headers
         """
-        return {"X-API-Key": self.api_key, "Content-Type": "application/json"}
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["X-API-Key"] = self.api_key
+        return headers
 
     def _build_url(self, path: str) -> str:
         """Build full URL from path.

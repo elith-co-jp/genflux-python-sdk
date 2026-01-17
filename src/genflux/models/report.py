@@ -97,5 +97,7 @@ class Report(BaseModel):
     details: ReportDetails | None = None
 
     class Config:
+        """Pydantic configuration."""
+
         from_attributes = True
 

@@ -10,6 +10,20 @@ from genflux.client import GenFlux
 from genflux.clients.config import ConfigClient
 from genflux.clients.reports import ReportsClient
 from genflux.evaluation import EvaluationClient
+
+# Exceptions
+from genflux.exceptions import (
+    APIError,
+    AuthenticationError,
+    ConfigNotFoundError,
+    GenFluxError,
+    JobFailedError,
+    NotFoundError,
+    RateLimitError,
+    ResourceNotFoundError,
+    TimeoutError,
+    ValidationError,
+)
 from genflux.jobs import JobsClient
 
 # Models
@@ -33,20 +47,6 @@ from genflux.models.report import (
 
 # Progress
 from genflux.progress import ProgressBar, create_progress_callback
-
-# Exceptions
-from genflux.exceptions import (
-    APIError,
-    AuthenticationError,
-    ConfigNotFoundError,
-    GenFluxError,
-    JobFailedError,
-    NotFoundError,
-    RateLimitError,
-    ResourceNotFoundError,
-    TimeoutError,
-    ValidationError,
-)
 
 __version__ = "0.1.0"
 

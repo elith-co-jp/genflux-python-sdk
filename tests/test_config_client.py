@@ -25,7 +25,7 @@ def client(api_key):
 def test_config_create_and_get(client):
     """Test creating and getting a config."""
     # Create config
-    config_create = ConfigCreate(
+    config_create = ConfigCreate(  # type: ignore[call-arg]
         name="Test Config",
         description="Test configuration",
         api_endpoint="https://api.openai.com/v1/chat/completions",
@@ -66,7 +66,7 @@ def test_config_list(client):
 def test_config_update(client):
     """Test updating a config."""
     # Create config
-    config_create = ConfigCreate(
+    config_create = ConfigCreate(  # type: ignore[call-arg]
         name="Test Config for Update",
         api_endpoint="https://api.openai.com/v1/chat/completions",
         auth_type="bearer_token",
@@ -99,7 +99,7 @@ def test_config_update(client):
 def test_config_delete(client):
     """Test deleting a config."""
     # Create config
-    config_create = ConfigCreate(
+    config_create = ConfigCreate(  # type: ignore[call-arg]
         name="Test Config for Delete",
         api_endpoint="https://api.openai.com/v1/chat/completions",
         auth_type="bearer_token",

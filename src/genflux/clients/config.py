@@ -47,7 +47,7 @@ class ConfigClient(BaseClient):
         response_data = super().post("/configs/", json=config.model_dump(exclude_none=True))
         return Config.model_validate(response_data)
 
-    def get(self, config_id: str | UUID) -> Config:
+    def get(self, config_id: str | UUID) -> Config:  # type: ignore[override]
         """Get config by ID.
 
         Args:
@@ -124,7 +124,7 @@ class ConfigClient(BaseClient):
         response_data = super().put(f"/configs/{config_id}", json=config_update.model_dump(exclude_none=True))
         return Config.model_validate(response_data)
 
-    def delete(self, config_id: str | UUID) -> bool:
+    def delete(self, config_id: str | UUID) -> bool:  # type: ignore[override]
         """Delete config.
 
         Args:

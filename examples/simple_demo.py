@@ -1,6 +1,5 @@
 """GenFlux SDK - Simple Demo"""
 
-import os
 from genflux import GenFlux
 
 # 初期化 (環境変数 GENFLUX_API_KEY を使用)

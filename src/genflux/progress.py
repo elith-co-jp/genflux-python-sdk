@@ -1,6 +1,7 @@
 """Progress display utilities for GenFlux SDK."""
 
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TextIO
 
@@ -62,7 +63,7 @@ class ProgressBar:
         self.update(current, message)
 
 
-def create_progress_callback(enable: bool = True) -> callable:
+def create_progress_callback(enable: bool = True) -> Callable[[Job], None]:
     """Create a progress callback for job.wait().
 
     Args:

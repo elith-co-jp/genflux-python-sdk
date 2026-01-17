@@ -1,6 +1,4 @@
-"""
-Test quick evaluation with real API call
-"""
+"""Test quick evaluation with real API call"""
 
 import os
 import sys
@@ -18,31 +16,31 @@ def test_quick_evaluation():
     print("\n" + "=" * 60)
     print("🧪 Testing Quick Evaluation")
     print("=" * 60)
-    
+
     # Initialize client
     print("\n📡 Initializing GenFlux client...")
     print(f"   Base URL: {BASE_URL}")
     client = GenFlux(base_url=BASE_URL)
     print("✅ Client initialized")
-    
+
     # Use existing config (first one from list)
     print("\n1️⃣  Getting existing config...")
     try:
         configs = client.configs.list()
-        print(f"   Found {len(configs)} configs")
+        print(f"   Found {len(configs.configs)} configs")
     except Exception as e:
         print(f"❌ Failed to get configs: {e}")
         return False
-    
+
     if not configs:
         print("❌ No configs found. Please create a config first.")
         return False
-    
-    config = configs[0]
+
+    config = configs.configs[0]
     print(f"✅ Using config: {config.id}")
     print(f"   Name: {config.name}")
     print(f"   Created: {config.created_at}")
-    
+
     try:
         # Perform quick evaluation using high-level API
         print("\n2️⃣  Starting quick evaluation (faithfulness)...")
@@ -50,12 +48,12 @@ def test_quick_evaluation():
         print("   Question: What is the capital of France?")
         print("   Answer: Paris is the capital of France.")
         print("   Contexts: 1 context provided")
-        
-        evaluator = client.evaluation(config_id=config.id)
+
+        evaluator = client.evaluation(config_id=str(config.id))
         print("\n⏳ Creating evaluation job...")
-        
+
         start_time = time.time()
-        
+
         # Define progress callback
         def progress_callback(job):
             elapsed = time.time() - start_time
@@ -63,7 +61,7 @@ def test_quick_evaluation():
                 print(f"   [{elapsed:.1f}s] Progress: {job.progress.percentage:.1f}% - {job.progress.message}")
             else:
                 print(f"   [{elapsed:.1f}s] Status: {job.status} ({job.progress_count}/{job.total_count})")
-        
+
         print("📊 Waiting for evaluation to complete...")
         result = evaluator.faithfulness(
             question="What is the capital of France?",
@@ -72,7 +70,7 @@ def test_quick_evaluation():
             timeout=300,  # 5 minutes timeout
             on_progress=progress_callback,
         )
-        
+
         elapsed = time.time() - start_time
         print(f"\n✅ Evaluation complete! (took {elapsed:.1f}s)")
         print("=" * 60)
@@ -82,9 +80,9 @@ def test_quick_evaluation():
         print(f"   Reason: {result.reason}")
         print(f"   Engine: {result.engine}")
         print("=" * 60)
-        
+
         return True
-        
+
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback

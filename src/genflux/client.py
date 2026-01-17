@@ -37,7 +37,7 @@ class GenFlux:
     """
 
     api_key: str | None = field(default=None, repr=False)
-    base_url: str = "http://localhost:8000/api/v1/external"
+    base_url: str = "http://localhost:9000/api/v1/external"
     timeout: float = 60.0
 
     def __post_init__(self) -> None:

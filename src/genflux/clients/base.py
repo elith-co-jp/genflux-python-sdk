@@ -19,7 +19,7 @@ class BaseClient:
     def __init__(
         self,
         api_key: str | None,
-        base_url: str = "http://localhost:8000/api/v1/external",
+        base_url: str = "http://localhost:9000/api/v1/external",
         timeout: int = 30,
     ):
         """Initialize base client.

@@ -6,9 +6,10 @@ import time
 
 from genflux import GenFlux
 
-# Set environment
-os.environ["GENFLUX_API_KEY"] = "test_api_key"
-BASE_URL = "http://localhost:8000/api/v1/external"
+# Set environment - 環境変数から取得、なければデフォルト値
+if "GENFLUX_API_KEY" not in os.environ:
+    os.environ["GENFLUX_API_KEY"] = "dev_test_key_12345"
+BASE_URL = "http://localhost:9000/api/v1/external"
 
 
 def test_quick_evaluation():

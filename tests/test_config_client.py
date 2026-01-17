@@ -10,16 +10,14 @@ from genflux import ConfigClient, ConfigCreate
 @pytest.fixture
 def api_key():
     """Get API key from environment."""
-    key = os.getenv("GENFLUX_API_KEY")
-    if not key:
-        pytest.skip("GENFLUX_API_KEY not set")
+    key = os.getenv("GENFLUX_API_KEY", "dev_test_key_12345")
     return key
 
 
 @pytest.fixture
 def client(api_key):
     """Create ConfigClient."""
-    return ConfigClient(api_key=api_key)
+    return ConfigClient(api_key=api_key, base_url="http://localhost:9000/api/v1/external")
 
 
 def test_config_create_and_get(client):

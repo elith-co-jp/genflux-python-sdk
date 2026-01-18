@@ -11,7 +11,7 @@ from genflux.models.report import Report
 class ReportsClient(BaseClient):
     """Client for Reports API."""
 
-    def get(
+    def get(  # type: ignore[override]
         self,
         report_id: str | UUID,
         view: Literal["summary", "details"] = "summary",
@@ -59,5 +59,5 @@ class ReportsClient(BaseClient):
             data = super().get(f"/reports/{report_id_str}", params={"view": view})
             return Report(**data)
         except NotFoundError:
-            raise NotFoundError(f"Report {report_id_str} not found")
+            raise NotFoundError("Report", report_id_str)
 

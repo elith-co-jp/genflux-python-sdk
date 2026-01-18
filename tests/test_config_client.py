@@ -10,22 +10,20 @@ from genflux import ConfigClient, ConfigCreate
 @pytest.fixture
 def api_key():
     """Get API key from environment."""
-    key = os.getenv("GENFLUX_API_KEY")
-    if not key:
-        pytest.skip("GENFLUX_API_KEY not set")
+    key = os.getenv("GENFLUX_API_KEY", "dev_test_key_12345")
     return key
 
 
 @pytest.fixture
 def client(api_key):
     """Create ConfigClient."""
-    return ConfigClient(api_key=api_key)
+    return ConfigClient(api_key=api_key, base_url="http://localhost:9000/api/v1/external")
 
 
 def test_config_create_and_get(client):
     """Test creating and getting a config."""
     # Create config
-    config_create = ConfigCreate(
+    config_create = ConfigCreate(  # type: ignore[call-arg]
         name="Test Config",
         description="Test configuration",
         api_endpoint="https://api.openai.com/v1/chat/completions",
@@ -66,7 +64,7 @@ def test_config_list(client):
 def test_config_update(client):
     """Test updating a config."""
     # Create config
-    config_create = ConfigCreate(
+    config_create = ConfigCreate(  # type: ignore[call-arg]
         name="Test Config for Update",
         api_endpoint="https://api.openai.com/v1/chat/completions",
         auth_type="bearer_token",
@@ -99,7 +97,7 @@ def test_config_update(client):
 def test_config_delete(client):
     """Test deleting a config."""
     # Create config
-    config_create = ConfigCreate(
+    config_create = ConfigCreate(  # type: ignore[call-arg]
         name="Test Config for Delete",
         api_endpoint="https://api.openai.com/v1/chat/completions",
         auth_type="bearer_token",

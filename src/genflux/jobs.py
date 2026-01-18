@@ -2,12 +2,15 @@
 
 import logging
 import time
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 import httpx
 
 from .exceptions import JobFailedError, NotFoundError, TimeoutError
 from .models import Job
+
+if TYPE_CHECKING:
+    from genflux import GenFlux
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +18,7 @@ logger = logging.getLogger(__name__)
 class JobsClient:
     """Client for Job (Execution) management."""
 
-    def __init__(self, client: "GenFlux"):  # noqa: F821
+    def __init__(self, client: "GenFlux"):
         """Initialize JobsClient.
 
         Args:

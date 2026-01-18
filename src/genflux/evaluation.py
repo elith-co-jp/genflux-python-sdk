@@ -34,6 +34,7 @@ class EvaluationClient:
         question: str,
         answer: str,
         contexts: list[str] | None = None,
+        ground_truth: str | None = None,
         timeout: int = 300,
         callback: Callable[[Job], None] | None = None,
         show_progress: bool = True,
@@ -48,6 +49,7 @@ class EvaluationClient:
             question: Question text
             answer: Answer text
             contexts: Context/retrieval texts (optional)
+            ground_truth: Ground truth answer (required for contextual_recall)
             timeout: Maximum wait time in seconds (default: 300)
             callback: Optional progress callback (overrides show_progress)
             show_progress: Show progress bar (default: True, ignored if callback is provided)
@@ -73,15 +75,19 @@ class EvaluationClient:
             >>> print(f"Score: {result.score}, Reason: {result.reason}")
         """
         # Create job with data
+        data = {
+            "metric_name": metric,
+            "question": question,
+            "answer": answer,
+            "contexts": contexts or [],
+        }
+        if ground_truth is not None:
+            data["ground_truth"] = ground_truth
+
         job = self._jobs.create(
             execution_type="quick_evaluate",
             config_id=self._config_id,
-            data={
-                "metric_name": metric,
-                "question": question,
-                "answer": answer,
-                "contexts": contexts or [],
-            },
+            data=data,
         )
 
         # Use provided callback or create default progress bar
@@ -102,7 +108,7 @@ class EvaluationClient:
         # Check job status
         if completed_job.status == "failed":
             error_msg = (
-                completed_job.error
+                completed_job.error_message
                 or "Unknown error occurred during evaluation"
             )
             logger.error(f"Job {completed_job.id} failed: {error_msg}")
@@ -282,6 +288,7 @@ class EvaluationClient:
         question: str,
         answer: str,
         contexts: list[str],
+        ground_truth: str,
         timeout: int = 300,
     ) -> MetricResult:
         """Evaluate contextual recall (answer can be attributed to contexts).
@@ -290,6 +297,7 @@ class EvaluationClient:
             question: Question text
             answer: Answer text
             contexts: Context/retrieval texts
+            ground_truth: Ground truth answer (required for contextual_recall)
             timeout: Maximum wait time in seconds
 
         Returns:
@@ -300,6 +308,7 @@ class EvaluationClient:
             question=question,
             answer=answer,
             contexts=contexts,
+            ground_truth=ground_truth,
             timeout=timeout,
         )
 

@@ -2,9 +2,10 @@
 
 import os
 import sys
+from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from genflux import ConfigClient, ConfigCreate
 
@@ -24,7 +25,7 @@ def main():
 
     # Test 1: Create config
     print("\n1️⃣  Creating config...")
-    config_create = ConfigCreate(
+    config_create = ConfigCreate(  # type: ignore[call-arg]
         name="Test Config from SDK",
         description="Test configuration created by ConfigClient",
         api_endpoint="https://api.openai.com/v1/chat/completions",
@@ -74,7 +75,7 @@ def main():
     print(f"✅ Deleted: {success}")
 
     # Verify deletion
-    print(f"\n6️⃣  Verifying deletion...")
+    print("\n6️⃣  Verifying deletion...")
     try:
         client.get(config.id)
         print("❌ Config still exists!")

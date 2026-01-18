@@ -182,11 +182,19 @@ for metric_key, metric_name in metrics:
     try:
         # メトリックに応じて適切なメソッドを呼び出す
         method = getattr(evaluator, metric_key)
-        result = method(
+        if metric_key == "contextual_recall":
+            # contextual_recallはground_truthが必要
+            result = method(
+                question=question,
+                answer=answer,
+                contexts=contexts,
+                ground_truth=ground_truth
+            )
+        else:
+            result = method(
             question=question,
             answer=answer,
             contexts=contexts,
-            on_progress=lambda x: None
         )
         
         results[metric_name] = {
@@ -370,18 +378,18 @@ job = client.jobs.create(
 print(f"Job ID: {job.id}")
 print(f"初期ステータス: {job.status}")
 
-# Job監視（最大30秒）
+# Job監視（最大60秒）
 print("\nJob監視中...")
-max_wait = 30
+max_wait = 60
 start_time = time.time()
 
 while time.time() - start_time < max_wait:
     job_status = client.jobs.get(job.id)
     
     elapsed = int(time.time() - start_time)
-    progress_pct = (job_status.progress / job_status.total_count * 100) if job_status.total_count > 0 else 0
+    progress_pct = (job_status.progress_count / job_status.total_count * 100) if job_status.total_count > 0 else 0
     
-    print(f"[{elapsed}s] Status: {job_status.status} | Progress: {job_status.progress}/{job_status.total_count} ({progress_pct:.1f}%)")
+    print(f"[{elapsed}s] Status: {job_status.status} | Progress: {job_status.progress_count}/{job_status.total_count} ({progress_pct:.1f}%)")
     
     if job_status.status in ["completed", "failed", "cancelled"]:
         print(f"\nJob終了: {job_status.status}")
@@ -471,7 +479,6 @@ def main():
             question=case["question"],
             answer=case["answer"],
             contexts=case["contexts"],
-            on_progress=lambda x: None
         )
         
         faith_passed = faith_result.score >= FAITHFULNESS_THRESHOLD
@@ -487,7 +494,7 @@ def main():
         rel_result = evaluator.answer_relevancy(
             question=case["question"],
             answer=case["answer"],
-            on_progress=lambda x: None
+            contexts=case["contexts"],
         )
         
         rel_passed = rel_result.score >= RELEVANCY_THRESHOLD
@@ -581,9 +588,9 @@ def custom_callback(job):
     }
     
     emoji = status_emoji.get(job.status, "❓")
-    progress_pct = (job.progress / job.total_count * 100) if job.total_count > 0 else 0
+    progress_pct = (job.progress_count / job.total_count * 100) if job.total_count > 0 else 0
     
-    print(f"{emoji} Status: {job.status} | Progress: {job.progress}/{job.total_count} ({progress_pct:.1f}%)")
+    print(f"{emoji} Status: {job.status} | Progress: {job.progress_count}/{job.total_count} ({progress_pct:.1f}%)")
 
 result = evaluator.faithfulness(
     question="What is Python?",
@@ -596,13 +603,10 @@ result = evaluator.faithfulness(
 def logging_callback(job):
     """ログファイルに進捗を記録"""
     timestamp = datetime.datetime.now().isoformat()
-    log_entry = f"[{timestamp}] Job {job.id}: {job.status} - {job.progress}/{job.total_count}\n"
+    log_entry = f"[{timestamp}] Job {job.id}: {job.status} - {job.progress_count}/{job.total_count}\n"
     
     with open("evaluation_progress.log", "a") as f:
         f.write(log_entry)
-    
-    # コンソールにも表示
-    print(log_entry.strip())
 
 result = evaluator.faithfulness(
     question="What is Python?",
@@ -645,7 +649,7 @@ if jobs:
     
     if summary_report.summary.evaluation:
         eval_summary = summary_report.summary.evaluation
-        print(f"成功率: {eval_summary.success_rate:.1%}")
+        print(f"成功率: {eval_summary.success_rate}")
         print(f"総テスト数: {eval_summary.total_tests}")
         print(f"合格: {eval_summary.passed}")
         print(f"不合格: {eval_summary.failed}")

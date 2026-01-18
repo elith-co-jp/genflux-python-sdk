@@ -87,6 +87,8 @@ class ReportDetails(BaseModel):
 class Report(BaseModel):
     """Report model."""
 
+    model_config = {"from_attributes": True}
+
     report_id: UUID
     job_id: UUID
     config_id: UUID | None
@@ -95,7 +97,4 @@ class Report(BaseModel):
     created_at: datetime
     summary: ReportSummary
     details: ReportDetails | None = None
-
-    class Config:
-        from_attributes = True
 

@@ -1,9 +1,14 @@
-"""GenFlux SDK - Simple Demo"""
+"""GenFlux SDK - Simple Demo
+
+環境変数の設定:
+  export GENFLUX_API_KEY="your_api_key_here"
+  export GENFLUX_API_BASE_URL="http://localhost:9000/api/v1/external"  # ローカル開発の場合
+"""
 
 from genflux import GenFlux
 
-# 初期化 (環境変数 GENFLUX_API_KEY を使用)
-client = GenFlux(base_url="http://localhost:8000/api/v1/external")
+# 初期化 (環境変数から自動取得)
+client = GenFlux()
 
 # Config取得
 configs_response = client.configs.list()

@@ -1,5 +1,6 @@
 """Base HTTP client for GenFlux API."""
 
+import os
 from typing import Any
 from urllib.parse import urljoin
 
@@ -19,17 +20,22 @@ class BaseClient:
     def __init__(
         self,
         api_key: str | None,
-        base_url: str = "http://localhost:9000/api/v1/external",
+        base_url: str | None = None,
         timeout: int = 30,
     ):
         """Initialize base client.
 
         Args:
             api_key: API key for authentication (optional)
-            base_url: Base URL for API endpoints
+            base_url: Base URL for API endpoints (uses GENFLUX_API_BASE_URL env var if not provided)
             timeout: Request timeout in seconds
         """
         self.api_key = api_key
+        if base_url is None:
+            base_url = os.getenv(
+                "GENFLUX_API_BASE_URL",
+                "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external"
+            )
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self._client = httpx.Client(timeout=timeout, follow_redirects=True)

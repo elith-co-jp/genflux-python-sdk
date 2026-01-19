@@ -26,7 +26,7 @@
 from genflux import GenFlux
 
 # クライアント初期化
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+client = GenFlux()
 
 # Config取得
 configs = client.configs.list()
@@ -152,7 +152,7 @@ if failed_tests:
 ```python
 from genflux import GenFlux
 
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+client = GenFlux()
 configs = client.configs.list()
 config_id = str(configs.configs[0].id)
 
@@ -256,7 +256,7 @@ from genflux.exceptions import (
     APIError
 )
 
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+client = GenFlux()
 
 def evaluate_with_retry(
     evaluator,
@@ -360,7 +360,7 @@ Job の作成、監視、キャンセルの例です。
 import time
 from genflux import GenFlux
 
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+client = GenFlux()
 
 # Job作成（低レベルAPI）
 print("Job作成中...")
@@ -440,7 +440,7 @@ FAITHFULNESS_THRESHOLD = 0.7
 RELEVANCY_THRESHOLD = 0.7
 
 def main():
-    client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+    client = GenFlux()
     
     # Configを取得
     configs = client.configs.list()
@@ -563,7 +563,7 @@ jobs:
 from genflux import GenFlux
 import datetime
 
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+client = GenFlux()
 configs = client.configs.list()
 config_id = str(configs.configs[0].id)
 evaluator = client.evaluation(config_id)
@@ -625,7 +625,7 @@ result = evaluator.faithfulness(
 ```python
 from genflux import GenFlux
 
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+client = GenFlux()
 
 # 最近のJobを取得
 jobs = client.jobs.list(

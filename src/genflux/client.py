@@ -19,7 +19,8 @@ class GenFlux:
 
     Args:
         api_key: API key for authentication. If not provided, uses GENFLUX_API_KEY env var.
-        base_url: Base URL for the GenFlux API.
+        base_url: Base URL for the GenFlux API. If not provided, uses GENFLUX_API_BASE_URL env var,
+                  or defaults to production URL.
         timeout: Request timeout in seconds (default: 60)
 
     Example:
@@ -37,13 +38,19 @@ class GenFlux:
     """
 
     api_key: str | None = field(default=None, repr=False)
-    base_url: str = "http://localhost:9000/api/v1/external"
+    base_url: str | None = field(default=None)
     timeout: float = 60.0
 
     def __post_init__(self) -> None:
-        """Initialize the client with API key from environment if not provided."""
+        """Initialize the client with API key and base URL from environment if not provided."""
         if self.api_key is None:
             self.api_key = os.getenv("GENFLUX_API_KEY")
+        
+        if self.base_url is None:
+            self.base_url = os.getenv(
+                "GENFLUX_API_BASE_URL",
+                "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external"
+            )
 
         # Initialize HTTP client
         self._http_client = httpx.Client(

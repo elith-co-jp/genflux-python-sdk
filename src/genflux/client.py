@@ -21,7 +21,7 @@ class GenFlux:
         api_key: API key for authentication. If not provided, uses GENFLUX_API_KEY env var.
         base_url: Base URL for the GenFlux API. If not provided, uses GENFLUX_API_BASE_URL env var
                   or constructs from environment setting.
-        environment: Environment name ("dev" or "prod"). Uses GENFLUX_ENVIRONMENT env var if not provided.
+        environment: Environment name ("local", "dev", or "prod"). Uses GENFLUX_ENVIRONMENT env var if not provided.
                      Defaults to "prod".
         timeout: Request timeout in seconds (default: 60)
 
@@ -34,8 +34,8 @@ class GenFlux:
         >>> # Development
         >>> client = GenFlux(api_key="pk_xxx", environment="dev")
         >>> 
-        >>> # Custom URL
-        >>> client = GenFlux(api_key="pk_xxx", base_url="http://localhost:9000/api/v1/external")
+        >>> # Local development
+        >>> client = GenFlux(api_key="dev_test_key", environment="local")
     """
 
     api_key: str | None = field(default=None, repr=False)
@@ -45,6 +45,7 @@ class GenFlux:
 
     # Environment-specific URLs
     _ENV_URLS = {
+        "local": "http://localhost:9000/api/v1/external",
         "dev": "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external",
         "prod": "https://api.genflux.ai/api/v1/external",  # TODO: 本番URLに置き換え
     }

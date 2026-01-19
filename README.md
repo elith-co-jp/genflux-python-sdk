@@ -151,19 +151,24 @@ export GENFLUX_ENVIRONMENT="dev"
 # API Key（ローカル開発用ダミー値）
 export GENFLUX_API_KEY="dev_test_key_12345"
 
-# カスタムURL（ローカルのバックエンドサーバー）
-export GENFLUX_API_BASE_URL="http://localhost:9000/api/v1/external"
+# 環境指定
+export GENFLUX_ENVIRONMENT="local"
 ```
 
 **環境変数の優先順位**:
 1. `GENFLUX_API_BASE_URL` - 明示的なURL指定（最優先）
-2. `GENFLUX_ENVIRONMENT` - 環境名から自動決定（"dev" または "prod"）
+2. `GENFLUX_ENVIRONMENT` - 環境名から自動決定（"local", "dev", "prod"）
 3. デフォルト: "prod"（本番環境）
+
+**利用可能な環境**:
+- `local`: ローカル開発環境（http://localhost:9000）
+- `dev`: クラウド開発環境
+- `prod`: 本番環境（デフォルト）
 
 **注意**: 
 - `GENFLUX_API_KEY`: GenFlux Platform の管理画面から取得してください
 - `GENFLUX_ENVIRONMENT`: 省略した場合、**本番環境（prod）がデフォルト**です
-- `GENFLUX_API_BASE_URL`: ローカル開発や特殊な環境でのみ使用
+- `GENFLUX_API_BASE_URL`: カスタムURLが必要な特殊な環境でのみ使用
 
 ---
 
@@ -183,7 +188,7 @@ client = GenFlux()  # 環境変数 GENFLUX_API_KEY が必要
 client = GenFlux(environment="dev")
 
 # ローカル開発
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+client = GenFlux(environment="local")
 
 # 評価を実行（デフォルトのConfigを使用）
 evaluator = client.evaluation()

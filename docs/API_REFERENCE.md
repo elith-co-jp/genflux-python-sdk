@@ -147,7 +147,7 @@ if result.score < threshold:
 **パラメータ**:
 - `api_key` (str, optional): API Key。省略時は環境変数 `GENFLUX_API_KEY` から取得
 - `base_url` (str, optional): Backend API の Base URL。環境変数 `GENFLUX_API_BASE_URL` から取得。省略時は `environment` に応じた URL を使用
-- `environment` (str, optional): 環境名（"dev" または "prod"）。環境変数 `GENFLUX_ENVIRONMENT` から取得。デフォルトは "prod"
+- `environment` (str, optional): 環境名（"local", "dev", "prod"）。環境変数 `GENFLUX_ENVIRONMENT` から取得。デフォルトは "prod"
 - `timeout` (float, optional): リクエストタイムアウト（秒）。デフォルト: 60.0
 
 **属性**:

@@ -19,6 +19,7 @@ class BaseClient:
 
     # Environment-specific URLs
     _ENV_URLS = {
+        "local": "http://localhost:9000/api/v1/external",
         "dev": "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external",
         "prod": "https://api.genflux.ai/api/v1/external",  # TODO: 本番URLに置き換え
     }

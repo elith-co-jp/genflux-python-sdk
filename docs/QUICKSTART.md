@@ -53,8 +53,8 @@ export GENFLUX_ENVIRONMENT="dev"
 # API Key（ローカル開発用ダミー値）
 export GENFLUX_API_KEY="dev_test_key_12345"
 
-# カスタムURL（ローカルのバックエンドサーバー）
-export GENFLUX_API_BASE_URL="http://localhost:9000/api/v1/external"
+# 環境指定
+export GENFLUX_ENVIRONMENT="local"
 ```
 
 ### 2. SDK をインポート
@@ -68,8 +68,8 @@ client = GenFlux()
 # 開発環境
 client = GenFlux(environment="dev")
 
-# ローカル開発（カスタムURL）
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+# ローカル開発
+client = GenFlux(environment="local")
 ```
 
 ---

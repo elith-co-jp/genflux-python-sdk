@@ -19,38 +19,58 @@ class GenFlux:
 
     Args:
         api_key: API key for authentication. If not provided, uses GENFLUX_API_KEY env var.
-        base_url: Base URL for the GenFlux API. If not provided, uses GENFLUX_API_BASE_URL env var,
-                  or defaults to production URL.
+        base_url: Base URL for the GenFlux API. If not provided, uses GENFLUX_API_BASE_URL env var
+                  or constructs from environment setting.
+        environment: Environment name ("dev" or "prod"). Uses GENFLUX_ENVIRONMENT env var if not provided.
+                     Defaults to "prod".
         timeout: Request timeout in seconds (default: 60)
 
     Example:
         >>> from genflux import GenFlux
+        >>> 
+        >>> # Production (default)
         >>> client = GenFlux(api_key="pk_xxx")
-        >>>
-        >>> # Create and wait for job
-        >>> job = client.jobs.create(
-        ...     execution_type="quick_evaluate",
-        ...     config_id="config_123",
-        ...     data={"metric": "faithfulness", ...}
-        ... )
-        >>> job = client.jobs.wait(job.id)
-        >>> print(job.results)
+        >>> 
+        >>> # Development
+        >>> client = GenFlux(api_key="pk_xxx", environment="dev")
+        >>> 
+        >>> # Custom URL
+        >>> client = GenFlux(api_key="pk_xxx", base_url="http://localhost:9000/api/v1/external")
     """
 
     api_key: str | None = field(default=None, repr=False)
     base_url: str | None = field(default=None)
+    environment: str | None = field(default=None)
     timeout: float = 60.0
+
+    # Environment-specific URLs
+    _ENV_URLS = {
+        "dev": "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external",
+        "prod": "https://api.genflux.ai/api/v1/external",  # TODO: 本番URLに置き換え
+    }
 
     def __post_init__(self) -> None:
         """Initialize the client with API key and base URL from environment if not provided."""
         if self.api_key is None:
             self.api_key = os.getenv("GENFLUX_API_KEY")
         
+        # Determine base_url
         if self.base_url is None:
-            self.base_url = os.getenv(
-                "GENFLUX_API_BASE_URL",
-                "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external"
-            )
+            # Check env var first
+            self.base_url = os.getenv("GENFLUX_API_BASE_URL")
+            
+            if self.base_url is None:
+                # Use environment-specific URL
+                if self.environment is None:
+                    self.environment = os.getenv("GENFLUX_ENVIRONMENT", "prod")
+                
+                if self.environment not in self._ENV_URLS:
+                    raise ValueError(
+                        f"Invalid environment: {self.environment}. "
+                        f"Must be one of: {', '.join(self._ENV_URLS.keys())}"
+                    )
+                
+                self.base_url = self._ENV_URLS[self.environment]
 
         # Initialize HTTP client
         self._http_client = httpx.Client(

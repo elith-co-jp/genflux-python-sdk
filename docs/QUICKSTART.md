@@ -27,24 +27,34 @@
 
 ### 1. 環境変数を設定
 
-#### ローカル開発環境の場合
-
-```bash
-# API Key（開発環境ではダミー値を使用）
-export GENFLUX_API_KEY="dev_test_key_12345"
-
-# Base URL（ローカルのバックエンドサーバーを指定）
-export GENFLUX_API_BASE_URL="http://localhost:9000/api/v1/external"
-```
-
-#### クラウド環境（Dev/Prod）の場合
+#### 本番環境（Production）
 
 ```bash
 # API Key（GenFlux Platform の管理画面から取得）
 export GENFLUX_API_KEY="genflux_your_api_key_here"
 
-# Base URL（省略可: デフォルトでdev環境のURLを使用）
-# export GENFLUX_API_BASE_URL="https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external"
+# 環境指定（省略可: デフォルトは "prod"）
+export GENFLUX_ENVIRONMENT="prod"
+```
+
+#### 開発環境（Development）
+
+```bash
+# API Key（開発環境用）
+export GENFLUX_API_KEY="genflux_dev_api_key"
+
+# 環境指定
+export GENFLUX_ENVIRONMENT="dev"
+```
+
+#### ローカル開発環境
+
+```bash
+# API Key（ローカル開発用ダミー値）
+export GENFLUX_API_KEY="dev_test_key_12345"
+
+# カスタムURL（ローカルのバックエンドサーバー）
+export GENFLUX_API_BASE_URL="http://localhost:9000/api/v1/external"
 ```
 
 ### 2. SDK をインポート
@@ -52,8 +62,14 @@ export GENFLUX_API_KEY="genflux_your_api_key_here"
 ```python
 from genflux import GenFlux
 
-# クライアント初期化（環境変数から自動取得）
+# 本番環境（デフォルト）
 client = GenFlux()
+
+# 開発環境
+client = GenFlux(environment="dev")
+
+# ローカル開発（カスタムURL）
+client = GenFlux(base_url="http://localhost:9000/api/v1/external")
 ```
 
 ---

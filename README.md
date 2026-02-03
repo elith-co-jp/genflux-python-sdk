@@ -123,15 +123,52 @@ pip install -e .
 uv pip install -e .
 ```
 
-### 6. API Key の取得（開発環境）
+### 6. 環境変数の設定
 
-開発環境では、ダミーのAPI Keyを使用できます：
+#### 本番環境（Production）
 
 ```bash
-export GENFLUX_API_KEY="dev_test_key_12345"
+# API Key（GenFlux Platform の管理画面から取得）
+export GENFLUX_API_KEY="genflux_your_api_key_here"
+
+# 環境指定（省略可: デフォルトは "prod"）
+export GENFLUX_ENVIRONMENT="prod"
 ```
 
-**注意**: 本番環境では、GenFlux Platform の管理画面から正式なAPI Keyを取得してください。
+#### 開発環境（Development）
+
+```bash
+# API Key（開発環境用）
+export GENFLUX_API_KEY="genflux_dev_api_key"
+
+# 環境指定
+export GENFLUX_ENVIRONMENT="dev"
+```
+
+#### ローカル開発環境
+
+```bash
+# API Key（ローカル開発用ダミー値）
+export GENFLUX_API_KEY="dev_test_key_12345"
+
+# 環境指定
+export GENFLUX_ENVIRONMENT="local"
+```
+
+**環境変数の優先順位**:
+1. `GENFLUX_API_BASE_URL` - 明示的なURL指定（最優先）
+2. `GENFLUX_ENVIRONMENT` - 環境名から自動決定（"local", "dev", "prod"）
+3. デフォルト: "prod"（本番環境）
+
+**利用可能な環境**:
+- `local`: ローカル開発環境（http://localhost:9000）
+- `dev`: クラウド開発環境
+- `prod`: 本番環境（デフォルト）
+
+**注意**: 
+- `GENFLUX_API_KEY`: GenFlux Platform の管理画面から取得してください
+- `GENFLUX_ENVIRONMENT`: 省略した場合、**本番環境（prod）がデフォルト**です
+- `GENFLUX_API_BASE_URL`: カスタムURLが必要な特殊な環境でのみ使用
 
 ---
 
@@ -144,8 +181,14 @@ export GENFLUX_API_KEY="dev_test_key_12345"
 ```python
 from genflux import GenFlux
 
-# クライアント初期化（API Key は環境変数から自動取得）
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+# 本番環境（デフォルト）
+client = GenFlux()  # 環境変数 GENFLUX_API_KEY が必要
+
+# 開発環境
+client = GenFlux(environment="dev")
+
+# ローカル開発
+client = GenFlux(environment="local")
 
 # 評価を実行（デフォルトのConfigを使用）
 evaluator = client.evaluation()

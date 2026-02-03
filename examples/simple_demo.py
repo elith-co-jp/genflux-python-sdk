@@ -1,9 +1,28 @@
-"""GenFlux SDK - Simple Demo"""
+"""GenFlux SDK - Simple Demo
+
+環境変数の設定:
+  # 本番環境
+  export GENFLUX_API_KEY="your_api_key_here"
+  export GENFLUX_ENVIRONMENT="prod"  # 省略可（デフォルト）
+  
+  # 開発環境
+  export GENFLUX_API_KEY="your_dev_api_key"
+  export GENFLUX_ENVIRONMENT="dev"
+  
+  # ローカル開発
+  export GENFLUX_API_KEY="dev_test_key"
+  export GENFLUX_ENVIRONMENT="local"
+"""
 
 from genflux import GenFlux
 
-# 初期化 (環境変数 GENFLUX_API_KEY を使用)
-client = GenFlux(base_url="http://localhost:8000/api/v1/external")
+# 初期化 (環境変数から自動取得、デフォルトは本番環境)
+client = GenFlux()
+
+# または、明示的に環境を指定
+# client = GenFlux(environment="prod")   # 本番環境
+# client = GenFlux(environment="dev")    # 開発環境
+# client = GenFlux(environment="local")  # ローカル開発
 
 # Config取得
 configs_response = client.configs.list()

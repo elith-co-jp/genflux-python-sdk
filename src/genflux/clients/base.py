@@ -1,5 +1,6 @@
 """Base HTTP client for GenFlux API."""
 
+import os
 from typing import Any
 from urllib.parse import urljoin
 
@@ -16,20 +17,43 @@ from genflux.exceptions.api import (
 class BaseClient:
     """Base HTTP client for GenFlux API."""
 
+    # Environment-specific URLs
+    _ENV_URLS = {
+        "local": "http://localhost:9000/api/v1/external",
+        "dev": "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external",
+        "prod": "https://api.genflux.ai/api/v1/external",  # TODO: 本番URLに置き換え
+    }
+
     def __init__(
         self,
         api_key: str | None,
-        base_url: str = "http://localhost:9000/api/v1/external",
+        base_url: str | None = None,
         timeout: int = 30,
     ):
         """Initialize base client.
 
         Args:
             api_key: API key for authentication (optional)
-            base_url: Base URL for API endpoints
+            base_url: Base URL for API endpoints (uses GENFLUX_API_BASE_URL env var or environment setting if not provided)
             timeout: Request timeout in seconds
         """
         self.api_key = api_key
+        if base_url is None:
+            # Check env var first
+            base_url = os.getenv("GENFLUX_API_BASE_URL")
+            
+            if base_url is None:
+                # Use environment-specific URL
+                environment = os.getenv("GENFLUX_ENVIRONMENT", "prod")
+                
+                if environment not in self._ENV_URLS:
+                    raise ValueError(
+                        f"Invalid environment: {environment}. "
+                        f"Must be one of: {', '.join(self._ENV_URLS.keys())}"
+                    )
+                
+                base_url = self._ENV_URLS[environment]
+        
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self._client = httpx.Client(timeout=timeout, follow_redirects=True)

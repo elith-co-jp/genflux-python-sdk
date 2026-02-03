@@ -25,10 +25,36 @@
 
 ## 環境準備
 
-### 1. API Key を設定
+### 1. 環境変数を設定
+
+#### 本番環境（Production）
 
 ```bash
+# API Key（GenFlux Platform の管理画面から取得）
+export GENFLUX_API_KEY="genflux_your_api_key_here"
+
+# 環境指定（省略可: デフォルトは "prod"）
+export GENFLUX_ENVIRONMENT="prod"
+```
+
+#### 開発環境（Development）
+
+```bash
+# API Key（開発環境用）
+export GENFLUX_API_KEY="genflux_dev_api_key"
+
+# 環境指定
+export GENFLUX_ENVIRONMENT="dev"
+```
+
+#### ローカル開発環境
+
+```bash
+# API Key（ローカル開発用ダミー値）
 export GENFLUX_API_KEY="dev_test_key_12345"
+
+# 環境指定
+export GENFLUX_ENVIRONMENT="local"
 ```
 
 ### 2. SDK をインポート
@@ -36,8 +62,14 @@ export GENFLUX_API_KEY="dev_test_key_12345"
 ```python
 from genflux import GenFlux
 
-# クライアント初期化
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+# 本番環境（デフォルト）
+client = GenFlux()
+
+# 開発環境
+client = GenFlux(environment="dev")
+
+# ローカル開発
+client = GenFlux(environment="local")
 ```
 
 ---
@@ -49,8 +81,8 @@ client = GenFlux(base_url="http://localhost:9000/api/v1/external")
 ```python
 from genflux import GenFlux
 
-# クライアント初期化
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+# クライアント初期化（環境変数から自動取得）
+client = GenFlux()
 
 # 評価を実行（デフォルトのConfigを使用）
 evaluator = client.evaluation()  # config_idを指定しない場合、デフォルトを使用
@@ -86,7 +118,7 @@ Reason: The answer is based on the provided context.
 from genflux import GenFlux
 from genflux.models.config import ConfigCreate
 
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+client = GenFlux()
 
 # Config を作成
 config = client.configs.create(
@@ -123,7 +155,7 @@ print(f"Score: {result.score}")
 ```python
 from genflux import GenFlux
 
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+client = GenFlux()
 evaluator = client.evaluation()  # デフォルトのConfigを使用
 
 # テストケース
@@ -180,7 +212,7 @@ print("完了!")
 ```python
 from genflux import GenFlux
 
-client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+client = GenFlux()
 evaluator = client.evaluation()  # デフォルトのConfigを使用
 
 # 評価データ

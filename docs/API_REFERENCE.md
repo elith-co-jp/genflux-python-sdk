@@ -146,7 +146,8 @@ if result.score < threshold:
 
 **パラメータ**:
 - `api_key` (str, optional): API Key。省略時は環境変数 `GENFLUX_API_KEY` から取得
-- `base_url` (str, optional): Backend API の Base URL。デフォルト: `http://localhost:8000/api/v1/external`
+- `base_url` (str, optional): Backend API の Base URL。環境変数 `GENFLUX_API_BASE_URL` から取得。省略時は `environment` に応じた URL を使用
+- `environment` (str, optional): 環境名（"local", "dev", "prod"）。環境変数 `GENFLUX_ENVIRONMENT` から取得。デフォルトは "prod"
 - `timeout` (float, optional): リクエストタイムアウト（秒）。デフォルト: 60.0
 
 **属性**:
@@ -170,7 +171,6 @@ client = GenFlux(api_key="genflux_xxx")
 # カスタム Base URL（ローカル開発）
 client = GenFlux(
     api_key="dev_test_key",
-    base_url="http://localhost:9000/api/v1/external",
     timeout=120.0
 )
 ```

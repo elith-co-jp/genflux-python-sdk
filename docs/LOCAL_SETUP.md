@@ -1,6 +1,6 @@
-# GenFlux Python SDK
+# GenFlux Python SDK（ローカル環境）
 
-GenFlux Platform の公式Python SDKです。RAG（Retrieval-Augmented Generation）システムの評価、セキュリティテスト、ポリシーチェックを簡単に実行することできます。
+GenFlux Platform の公式Python SDKです。RAG（Retrieval-Augmented Generation）システムの評価、セキュリティテスト、ポリシーチェックを簡単に実行することができます。
 
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -10,7 +10,7 @@ GenFlux Platform の公式Python SDKです。RAG（Retrieval-Augmented Generatio
 ## 📋 目次
 
 - [特徴](#特徴)
-- [開発環境のセットアップ](#ローカル開発環境のセットアップ)
+- [ローカル環境のセットアップ](#ローカル開発環境のセットアップ)
 - [クイックスタート](#クイックスタート)
 - [ドキュメント](#ドキュメント)
 - [トラブルシューティング](#トラブルシューティング)
@@ -28,9 +28,9 @@ GenFlux Platform の公式Python SDKです。RAG（Retrieval-Augmented Generatio
 
 ---
 
-## 🚀 開発環境のセットアップ
+## 🚀 ローカル環境のセットアップ
 
-このSDKを利用するには以下のセットアップを行なってください。
+このSDKをローカルでテストするには、バックエンドサーバーを起動する必要があります。
 
 ### 前提条件
 
@@ -38,26 +38,74 @@ GenFlux Platform の公式Python SDKです。RAG（Retrieval-Augmented Generatio
 - Docker & Docker Compose
 - Git
 
-### API Key の発行
-GELFLUX SDK で使用する API Key は[GEBFLUX Platform ダッシュボード](https://dev.platform.genflux.jp/login?redirect=%2Fdashboard)から発行してください。
-
 ### 1. リポジトリのクローン
 
 ```bash
 git clone <repository-url>
 ```
 
-### 2. バックエンドの動作確認
+### 2. バックエンドサーバーの起動
+
+GenFlux Platform Backend を起動します。
 
 ```bash
-# ヘルスチェック（開発環境）
-curl curl https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/health
+# バックエンドディレクトリに移動
+cd prd-genflux-platform-backend
+
+# 環境変数ファイルを作成
+cat > .env << 'EOF'
+# Database
+DATABASE_URL=postgresql://genflux:genflux_password@postgres:5432/genflux_external
+
+# Application
+ENVIRONMENT=development
+DEBUG=false
+LOG_LEVEL=INFO
+
+# Supabase (開発用ダミー値)
+SUPABASE_URL=https://dummy.supabase.co
+SUPABASE_JWT_SECRET=dummy-jwt-secret-for-development
+SUPABASE_SERVICE_ROLE_KEY=dummy-service-role-key
+
+# Stripe (開発用ダミー値)
+STRIPE_SECRET_KEY=sk_test_dummy
+STRIPE_WEBHOOK_SECRET=whsec_dummy
+STRIPE_PUBLISHABLE_KEY=pk_test_dummy
+
+# AI Provider
+AI_PROVIDER=openai
+OPENAI_API_KEY=your-openai-api-key-here
+
+# Port Configuration
+POSTGRES_HOST_PORT=15432
+API_PORT=9000
+EOF
+
+# Docker Compose で起動（API + Worker + PostgreSQL）
+docker-compose up -d --build
+
+# ログを確認
+docker-compose logs -f api worker
+```
+
+### 3. マイグレーション実行
+
+```bash
+# データベースマイグレーションを実行
+docker-compose exec api uv run alembic upgrade head
+```
+
+### 4. バックエンドの動作確認
+
+```bash
+# ヘルスチェック
+curl http://localhost:9000/health
 
 # 期待される出力:
 # {"status":"ok"}
 ```
 
-### 3. SDK のインストール
+### 5. SDK のインストール
 
 ```bash
 # SDK ディレクトリに移動
@@ -70,12 +118,12 @@ pip install -e .
 uv pip install -e .
 ```
 
-### 4. 環境変数の設定
+### 6. 環境変数の設定
 
 #### 本番環境（Production）
 
 ```bash
-# API Key（GenFlux Platform のダッシュボード管理画面から取得）
+# API Key（GenFlux Platform の管理画面から取得）
 export GENFLUX_API_KEY="genflux_your_api_key_here"
 
 # 環境指定（省略可: デフォルトは "prod"）
@@ -90,6 +138,16 @@ export GENFLUX_API_KEY="genflux_dev_api_key"
 
 # 環境指定
 export GENFLUX_ENVIRONMENT="dev"
+```
+
+#### ローカル環境
+
+```bash
+# API Key（ローカル開発用ダミー値）
+export GENFLUX_API_KEY="dev_test_key_12345"
+
+# 環境指定
+export GENFLUX_ENVIRONMENT="local"
 ```
 
 **環境変数の優先順位**:
@@ -124,7 +182,7 @@ client = GenFlux()  # 環境変数 GENFLUX_API_KEY が必要
 # 開発環境
 client = GenFlux(environment="dev")
 
-# ローカル開発
+# ローカル環境
 client = GenFlux(environment="local")
 
 # 評価を実行（デフォルトのConfigを使用）
@@ -181,7 +239,24 @@ Reason: The answer is based on the provided context.
 ---
 
 ## 🔧 トラブルシューティング
-### 問題1: `AuthenticationError: Invalid API Key`
+
+### 問題1: `Connection refused` エラー
+
+**原因**: バックエンドサーバーが起動していない
+
+**解決方法**:
+```bash
+# バックエンドの起動状態を確認
+cd prd-genflux-platform-backend
+docker-compose ps
+
+# 起動していない場合
+docker-compose up -d --build
+```
+
+---
+
+### 問題2: `AuthenticationError: Invalid API Key`
 
 **原因**: API Key が設定されていない、または無効
 
@@ -196,7 +271,23 @@ echo $GENFLUX_API_KEY
 
 ---
 
-### 問題2: `ModuleNotFoundError: No module named 'genflux'`
+### 問題3: Job が `queued` のままで進まない
+
+**原因**: Worker が起動していない
+
+**解決方法**:
+```bash
+# Worker の状態を確認
+cd prd-genflux-platform-backend
+docker-compose logs worker
+
+# Worker が起動していない場合
+docker-compose up -d worker
+```
+
+---
+
+### 問題4: `ModuleNotFoundError: No module named 'genflux'`
 
 **原因**: SDK がインストールされていない
 
@@ -206,6 +297,25 @@ echo $GENFLUX_API_KEY
 cd genflux-python-sdk
 pip install -e .
 ```
+
+---
+
+### 問題5: データベース接続エラー
+
+**原因**: PostgreSQL が起動していない、またはマイグレーションが実行されていない
+
+**解決方法**:
+```bash
+cd prd-genflux-platform-backend
+
+# PostgreSQL の状態を確認
+docker-compose ps postgres
+
+# マイグレーション実行
+docker-compose exec api uv run alembic upgrade head
+```
+
+---
 
 ## 📞 サポート
 

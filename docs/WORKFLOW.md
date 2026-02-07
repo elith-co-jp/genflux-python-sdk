@@ -243,7 +243,11 @@ if valid_scores:
 
 ## ポリシーチェック
 
-AI事業者ガイドラインへの準拠をチェックします。ポリシー用 Config を用意し、`execution_type="policy_check"` で Job を投入してレポートを取得します。
+AI事業者ガイドラインへの準拠をチェックします。`execution_type="policy_check"` で Job を投入してレポートを取得します。
+
+### Config を指定する場合
+
+ポリシー用 Config を用意し、`config_id` を指定して実行します。
 
 ```python
 from genflux import GenFlux
@@ -316,12 +320,47 @@ if details.details and details.details.recommendations:
         print(f"- {r}")
 ```
 
+### デフォルト Config を使用する場合
+
+`config_id` を指定せず、アカウントのデフォルト Config で実行します。
+
+```python
+from genflux import GenFlux
+from genflux.progress import ProgressBar
+
+client = GenFlux()
+
+# Job 作成と完了待ち（デフォルト config 使用）
+job = client.jobs.create(execution_type="policy_check")
+bar = ProgressBar(total=100, prefix="PolicyCheck")
+client.jobs.wait(job_id=job.id, timeout=3600, poll_interval=5.0, callback=bar.update_from_job)
+
+# サマリー取得
+summary = client.reports.get(report_id=job.id, view="summary")
+policy = summary.summary.policy
+if policy:
+    print(f"準拠率: {policy.compliance_rate}, チェック数: {policy.total_checks}, 違反: {policy.violations_count}")
+
+# 詳細（違反・推奨事項）
+details = client.reports.get(report_id=job.id, view="details")
+if details.details and details.details.top_violations:
+    for v in details.details.top_violations:
+        print(f"[{v.severity}] {v.rule}: {v.description}")
+if details.details and details.details.recommendations:
+    for r in details.details.recommendations:
+        print(f"- {r}")
+```
+
 ---
 
 ## RedTeam評価
 
-攻撃成功率・リスクレベルを評価する RedTeam（静的/動的）を実行します。評価対象 API 用の Config を用意し、`execution_type="redteam_static"` または `"redteam_dynamic"` で Job を投入してレポートを取得します。
+攻撃成功率・リスクレベルを評価する RedTeam（静的/動的）を実行します。`execution_type="redteam_static"` または `"redteam_dynamic"` で Job を投入してレポートを取得します。
 静的RedTeamとは決められたプロンプトによる攻撃に対する評価、動的RedTeamとは自動で生成されたプロンプトによる攻撃に対する評価を行います。
+
+### Config を指定する場合
+
+評価対象 API 用の Config を用意し、`config_id` を指定して実行します。
 
 ```python
 from genflux import GenFlux
@@ -376,6 +415,46 @@ if not config_id:
 # Job 作成と完了待ち（static または dynamic）
 execution_type = "redteam_static"  # または "redteam_dynamic"
 job = client.jobs.create(execution_type=execution_type, config_id=config_id)
+bar = ProgressBar(total=100, prefix=f"RedTeam ({execution_type})")
+client.jobs.wait(job_id=job.id, timeout=3600, poll_interval=5.0, callback=bar.update_from_job)
+
+# サマリー取得
+summary = client.reports.get(report_id=job.id, view="summary")
+redteam = summary.summary.redteam
+if redteam:
+    print(f"攻撃成功率: {redteam.attack_success_rate}, リスク: {redteam.risk_level}")
+    print(f"総攻撃数: {redteam.total_attacks}, 成功: {redteam.successful_attacks}")
+    if redteam.category_breakdown:
+        for b in redteam.category_breakdown:
+            rate = b.success_rate if b.success_rate is not None else "n/a"
+            print(f"  {b.category}: success_rate={rate}, count={b.count}")
+
+# 詳細（失敗ケース・違反・推奨事項）
+details = client.reports.get(report_id=job.id, view="details")
+if details.details and details.details.failed_cases:
+    for c in details.details.failed_cases:
+        print(f"[{c.severity}] {c.case_id} {c.category}: input={c.input}, actual={c.actual}, reason={c.reason}")
+if details.details and details.details.top_violations:
+    for v in details.details.top_violations:
+        print(f"[{v.severity}] {v.rule}: {v.description}")
+if details.details and details.details.recommendations:
+    for r in details.details.recommendations:
+        print(f"- {r}")
+```
+
+### デフォルト Config を使用する場合
+
+`config_id` を指定せず、アカウントのデフォルト Config で実行します。
+
+```python
+from genflux import GenFlux
+from genflux.progress import ProgressBar
+
+client = GenFlux()
+
+# Job 作成と完了待ち（デフォルト config 使用）
+execution_type = "redteam_static"  # または "redteam_dynamic"
+job = client.jobs.create(execution_type=execution_type)
 bar = ProgressBar(total=100, prefix=f"RedTeam ({execution_type})")
 client.jobs.wait(job_id=job.id, timeout=3600, poll_interval=5.0, callback=bar.update_from_job)
 

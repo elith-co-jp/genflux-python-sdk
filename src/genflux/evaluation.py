@@ -250,7 +250,7 @@ class EvaluationClient:
             ... )
         """
         return self.evaluate(
-            metric="contextual_relevancy",
+            metric="context_relevancy",
             question=question,
             answer=answer,
             contexts=contexts,
@@ -276,7 +276,7 @@ class EvaluationClient:
             MetricResult with contextual precision score
         """
         return self.evaluate(
-            metric="contextual_precision",
+            metric="llm_context_precision",
             question=question,
             answer=answer,
             contexts=contexts,
@@ -304,7 +304,7 @@ class EvaluationClient:
             MetricResult with contextual recall score
         """
         return self.evaluate(
-            metric="contextual_recall",
+            metric="context_recall",
             question=question,
             answer=answer,
             contexts=contexts,

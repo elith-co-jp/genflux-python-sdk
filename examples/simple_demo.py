@@ -4,11 +4,11 @@
   # 本番環境
   export GENFLUX_API_KEY="your_api_key_here"
   export GENFLUX_ENVIRONMENT="prod"  # 省略可（デフォルト）
-  
+
   # 開発環境
   export GENFLUX_API_KEY="your_dev_api_key"
   export GENFLUX_ENVIRONMENT="dev"
-  
+
   # ローカル開発
   export GENFLUX_API_KEY="dev_test_key"
   export GENFLUX_ENVIRONMENT="local"

@@ -140,14 +140,14 @@ if result.score < threshold:
 
 ## GenFlux クライアント
 
-### `GenFlux(api_key=None, base_url=None, timeout=60.0)`
+### `GenFlux(api_key=None, base_url=None, environment=None, timeout=60.0)`
 
 メインクライアントクラス。すべての機能へのアクセスポイント。
 
 **パラメータ**:
 - `api_key` (str, optional): API Key。省略時は環境変数 `GENFLUX_API_KEY` から取得
 - `base_url` (str, optional): Backend API の Base URL。環境変数 `GENFLUX_API_BASE_URL` から取得。省略時は `environment` に応じた URL を使用
-- `environment` (str, optional): 環境名（"local", "dev", "prod"）。環境変数 `GENFLUX_ENVIRONMENT` から取得。デフォルトは "prod"
+- `environment` (str, optional): 環境名（`"local"`, `"dev"`, `"prod"`）。環境変数 `GENFLUX_ENVIRONMENT` から取得。デフォルトは `"prod"`
 - `timeout` (float, optional): リクエストタイムアウト（秒）。デフォルト: 60.0
 
 **属性**:
@@ -156,7 +156,7 @@ if result.score < threshold:
 - `reports`: ReportsClient インスタンス
 
 **メソッド**:
-- `evaluation(config_id)`: EvaluationClient インスタンスを返す
+- `evaluation(config_id=None)`: EvaluationClient インスタンスを返す（config_id 省略時はデフォルト Config を使用）
 
 **例**:
 ```python
@@ -181,41 +181,42 @@ client = GenFlux(
 
 RAG API の設定を管理するクライアント。
 
-### `create(name, api_endpoint, auth_type, auth_credentials, request_format, response_format)`
+### `create(config: ConfigCreate)`
 
 新しい Config を作成します。
 
 **パラメータ**:
-- `name` (str): Config の名前
-- `api_endpoint` (str): RAG API のエンドポイント URL
-- `auth_type` (str): 認証タイプ (`"bearer_token"`, `"api_key"`)
-- `auth_credentials` (str): 認証情報（トークンまたはAPIキー）
-- `request_format` (dict): リクエストフォーマット
-  - `method` (str): HTTP メソッド（`"POST"`, `"GET"`）
-  - `body_template` (dict): リクエストボディのテンプレート
-- `response_format` (dict): レスポンスフォーマット
-  - `response_path` (str): レスポンスの抽出パス
+- `config` (ConfigCreate): Config 作成パラメータ
+  - `name` (str): Config の名前
+  - `api_endpoint` (str): RAG API のエンドポイント URL
+  - `auth_type` (str): 認証タイプ
+  - `auth_token` (str, optional): 認証トークン
+  - `auth_header` (str, optional): 認証ヘッダー名
+  - `request_format` (dict, optional): リクエストフォーマット
+  - `response_format` (dict, optional): レスポンスフォーマット
+  - `evaluation_metrics` (dict, optional): 評価メトリック設定
+  - `total_prompt_count` (int, optional): プロンプト総数
+  - `description` (str, optional): 説明
+  - `locale` (str, optional): ロケール（デフォルト: `"ja"`）
 
 **戻り値**: `Config` オブジェクト
 
 **例**:
 ```python
+from genflux.models.config import ConfigCreate
+
 config = client.configs.create(
-    name="Dify RAG API",
-    api_endpoint="https://api.dify.ai/v1/chat-messages",
-    auth_type="bearer_token",
-    auth_credentials="app-xxxxxxxxxxxx",
-    request_format={
-        "method": "POST",
-        "body_template": {
-            "query": "{{prompt}}",
-            "response_mode": "blocking",
-            "user": "sdk-user"
-        }
-    },
-    response_format={
-        "response_path": "answer"
-    }
+    ConfigCreate(
+        name="My Config",
+        api_endpoint="https://api.example.com/v1/chat/completions",
+        auth_type="bearer_token",
+        auth_token="your_token",
+        evaluation_metrics={
+            "faithfulness": True,
+            "answer_relevancy": True,
+        },
+        total_prompt_count=10,
+    )
 )
 
 print(f"Config ID: {config.id}")
@@ -268,25 +269,33 @@ print(f"Created: {config.created_at}")
 
 ---
 
-### `update(config_id, name=None, auth_credentials=None, request_format=None, response_format=None)`
+### `update(config_id, config_update: ConfigUpdate)`
 
 Config を更新します。
 
 **パラメータ**:
 - `config_id` (str | UUID): Config ID
-- `name` (str, optional): 新しい名前
-- `auth_credentials` (str, optional): 新しい認証情報
-- `request_format` (dict, optional): 新しいリクエストフォーマット
-- `response_format` (dict, optional): 新しいレスポンスフォーマット
+- `config_update` (ConfigUpdate): 更新パラメータ
+  - `name` (str, optional): 新しい名前
+  - `auth_token` (str, optional): 新しい認証トークン
+  - `request_format` (dict, optional): リクエストフォーマット
+  - `response_format` (dict, optional): レスポンスフォーマット
+  - `evaluation_metrics` (dict, optional): 評価メトリック設定
+  - `description` (str, optional): 説明
+  - その他 `ConfigUpdate` で定義されるフィールド
 
 **戻り値**: 更新された `Config` オブジェクト
 
 **例**:
 ```python
+from genflux.models.config import ConfigUpdate
+
 updated_config = client.configs.update(
     config_id="xxx",
-    name="Updated Name",
-    auth_credentials="new_token_xxx"
+    config_update=ConfigUpdate(
+        name="Updated Name",
+        auth_token="new_token_xxx",
+    ),
 )
 ```
 
@@ -299,12 +308,12 @@ Config を削除します。
 **パラメータ**:
 - `config_id` (str | UUID): Config ID
 
-**戻り値**: なし
+**戻り値**: `bool` - 削除成功時は `True`
 
 **例**:
 ```python
-client.configs.delete(config_id="xxx")
-print("Config deleted")
+success = client.configs.delete(config_id="xxx")
+print(f"Config deleted: {success}")
 ```
 
 ---
@@ -313,7 +322,7 @@ print("Config deleted")
 
 評価ジョブを管理するクライアント。
 
-### `create(execution_type, config_id, data=None)`
+### `create(execution_type, config_id=None, data=None)`
 
 新しい Job を作成します。
 
@@ -323,12 +332,13 @@ print("Config deleted")
   - `"redteam_static"`: RedTeam 静的評価
   - `"redteam_dynamic"`: RedTeam 動的評価
   - `"policy_check"`: ポリシーチェック
-- `config_id` (str): Config ID
+- `config_id` (str, optional): Config ID。省略時はデフォルト Config を使用
 - `data` (dict, optional): 評価データ（`quick_evaluate` の場合）
   - `metric_name` (str): メトリック名
   - `question` (str): 質問
   - `answer` (str): 回答
   - `contexts` (list[str]): 文脈
+  - `ground_truth` (str, optional): 正解（`context_recall` で必要）
 
 **戻り値**: `Job` オブジェクト
 
@@ -398,7 +408,7 @@ quick_jobs = client.jobs.list(execution_type="quick_evaluate")
 job = client.jobs.get(job_id="xxx")
 
 print(f"Status: {job.status}")
-print(f"Progress: {job.progress}/{job.total_count}")
+print(f"Progress: {job.progress_count}/{job.total_count}")
 print(f"Results: {job.results}")
 ```
 
@@ -427,7 +437,7 @@ completed_job = client.jobs.wait(job_id="xxx", timeout=300)
 
 # カスタムコールバック
 def on_progress(job):
-    print(f"Status: {job.status}, Progress: {job.progress}")
+    print(f"Status: {job.status}, Progress: {job.progress_count}/{job.total_count}")
 
 completed_job = client.jobs.wait(
     job_id="xxx",
@@ -447,12 +457,12 @@ Job をキャンセルします。
 **パラメータ**:
 - `job_id` (str): Job ID
 
-**戻り値**: キャンセル結果
+**戻り値**: キャンセルされた `Job` オブジェクト
 
 **例**:
 ```python
-response = client.jobs.cancel(job_id="xxx")
-print("Job cancelled")
+job = client.jobs.cancel(job_id="xxx")
+print(f"Job cancelled: {job.status}")
 ```
 
 ---
@@ -506,15 +516,37 @@ for case in detailed_report.details.failed_cases:
 ### 初期化
 
 ```python
+# config_id を指定する場合
 evaluator = client.evaluation(config_id="your-config-id")
+
+# config_id を省略する場合（デフォルト Config を使用）
+evaluator = client.evaluation()
 ```
+
+### `evaluate(metric, question, answer, contexts=None, ground_truth=None, timeout=300, callback=None, show_progress=True)`
+
+汎用的な評価メソッド。任意のメトリックを指定して評価を実行します。
+
+**パラメータ**:
+- `metric` (str): メトリック名（例: `"faithfulness"`, `"answer_relevancy"`）
+- `question` (str): 質問
+- `answer` (str): 回答
+- `contexts` (list[str], optional): 文脈リスト
+- `ground_truth` (str, optional): 正解（`context_recall` 等で必要）
+- `timeout` (int, optional): タイムアウト（秒）。デフォルト: 300
+- `callback` (callable, optional): 進捗コールバック関数
+- `show_progress` (bool, optional): プログレスバー表示。デフォルト: True
+
+**戻り値**: `MetricResult`
+
+---
 
 ### 共通パラメータ
 
-すべての評価メソッドは以下の共通パラメータをサポートします:
+各評価メソッドは以下のパラメータをサポートします:
 
 - `timeout` (int, optional): タイムアウト（秒）。デフォルト: 300
-- `on_progress` (callable, optional): 進捗コールバック関数。`lambda x: None` でプログレスバーを非表示にできます
+- `on_progress` (callable, optional): 進捗コールバック（`faithfulness` メソッドのみサポート）
 
 ---
 
@@ -527,9 +559,9 @@ evaluator = client.evaluation(config_id="your-config-id")
 **パラメータ**:
 - `question` (str): 質問
 - `answer` (str): 回答
-- `contexts` (list[str]): 文脈リスト
+- `contexts` (list[str]): 文脈リスト（必須）
 - `timeout` (int, optional): タイムアウト（秒）
-- `on_progress` (callable, optional): 進捗コールバック
+- `on_progress` (callable, optional): 進捗コールバック（`Job` を受け取る）
 
 **戻り値**: `MetricResult`
 
@@ -565,9 +597,9 @@ print(f"Reason: {result.reason}")
 
 ---
 
-#### `contextual_recall(question, answer, contexts, timeout=300)`
+#### `contextual_recall(question, answer, contexts, ground_truth, timeout=300)`
 
-文脈再現率を評価します。回答の全ての情報が文脈に基づいているかを判定します。
+文脈再現率を評価します。回答の全ての情報が文脈に基づいているかを判定します。`ground_truth`（正解）が必須です。
 
 ---
 
@@ -622,11 +654,14 @@ RAGASの文脈再現率評価。
 **属性**:
 - `id` (UUID): Config ID
 - `tenant_id` (UUID): テナント ID
+- `user_id` (UUID): ユーザー ID
 - `name` (str): Config 名
-- `api_endpoint` (str): RAG API エンドポイント
-- `auth_type` (str): 認証タイプ
-- `request_format` (dict): リクエストフォーマット
-- `response_format` (dict): レスポンスフォーマット
+- `description` (str | None): 説明
+- `locale` (str): ロケール（デフォルト: `"ja"`）
+- `api_settings` (ApiSettings | None): API 設定（エンドポイント、認証、リクエスト/レスポンス形式）
+- `rag_quality_config` (RagQualityConfig | None): RAG 品質評価設定
+- `redteam_config` (RedteamConfig | None): RedTeam 設定
+- `policy_check_config` (PolicyCheckConfig | None): ポリシーチェック設定
 - `created_at` (datetime): 作成日時
 - `updated_at` (datetime): 更新日時
 
@@ -635,15 +670,20 @@ RAGASの文脈再現率評価。
 ### Job
 
 **属性**:
-- `id` (UUID): Job ID
-- `tenant_id` (UUID): テナント ID
+- `id` (str): Job ID
+- `tenant_id` (str): テナント ID
+- `user_id` (str): ユーザー ID
+- `config_id` (str): Config ID
 - `execution_type` (str): 実行タイプ
-- `status` (str): ステータス（`queued`, `running`, `completed`, `failed`, `cancelled`）
-- `progress` (int): 現在の進捗
+- `status` (str): ステータス（`pending`, `running`, `completed`, `failed`, `cancelled`）
+- `current_step` (str | None): 現在のステップ
+- `progress_count` (int): 現在の進捗数
 - `total_count` (int): 総タスク数
-- `current_step` (str): 現在のステップ
+- `progress` (JobProgress | None): 進捗情報（`percentage`, `message`）
 - `results` (dict | None): 評価結果
 - `error_message` (str | None): エラーメッセージ
+- `started_at` (datetime | None): 開始日時
+- `completed_at` (datetime | None): 完了日時
 - `created_at` (datetime): 作成日時
 - `updated_at` (datetime): 更新日時
 
@@ -656,6 +696,26 @@ RAGASの文脈再現率評価。
 - `score` (float): スコア（0.0 ~ 1.0）
 - `reason` (str | None): 評価理由
 - `engine` (str): 評価エンジン（`deepeval`, `ragas`）
+- `execution_time_seconds` (float | None): 実行時間（秒）
+
+---
+
+### Report
+
+**属性**:
+- `report_id` (UUID): Report ID
+- `job_id` (UUID): Job ID
+- `config_id` (UUID | None): Config ID
+- `type` (str): レポートタイプ
+- `status` (str): ステータス（`"completed"`, `"partial"`）
+- `created_at` (datetime): 作成日時
+- `summary` (ReportSummary): サマリー（evaluation / redteam / policy のいずれかが設定される）
+- `details` (ReportDetails | None): 詳細（view=details 時）
+
+**ReportSummary**:
+- `evaluation` (EvaluationSummary | None): 評価サマリー
+- `redteam` (RedTeamSummary | None): RedTeam サマリー
+- `policy` (PolicySummary | None): ポリシーサマリー
 
 ---
 
@@ -704,6 +764,13 @@ API エラーの基底クラス。
 
 タイムアウトエラー。評価処理が指定時間内に完了しなかった。
 
+**属性**:
+- `operation` (str): タイムアウトした操作
+- `timeout` (int): タイムアウト時間（秒）
+- `job_id` (str | None): Job ID（該当する場合）
+- `current_status` (str | None): 現在のステータス（該当する場合）
+- `progress` (str | None): 進捗情報（該当する場合）
+
 ---
 
 ### JobFailedError
@@ -713,6 +780,7 @@ Job 失敗エラー。評価処理が失敗した。
 **属性**:
 - `job_id` (str): Job ID
 - `error_message` (str): エラーメッセージ
+- `error_details` (dict): 詳細情報（結果、ログ等）
 
 ---
 
@@ -722,6 +790,28 @@ Job 失敗エラー。評価処理が失敗した。
 
 **属性**:
 - `retry_after` (int | None): リトライまでの待機時間（秒）
+- `status_code` (int): 429
+- `message` (str): エラーメッセージ
+- `details` (dict): 詳細情報
+
+---
+
+### ConfigNotFoundError
+
+Config が見つからない。
+
+**属性**:
+- `config_id` (str | None): Config ID
+
+---
+
+### ResourceNotFoundError
+
+汎用リソース未検出エラー。
+
+**属性**:
+- `resource_type` (str): リソースタイプ
+- `resource_id` (str): リソース ID
 
 ---
 

@@ -27,13 +27,13 @@ class GenFlux:
 
     Example:
         >>> from genflux import GenFlux
-        >>> 
+        >>>
         >>> # Production (default)
         >>> client = GenFlux(api_key="pk_xxx")
-        >>> 
+        >>>
         >>> # Development
         >>> client = GenFlux(api_key="pk_xxx", environment="dev")
-        >>> 
+        >>>
         >>> # Local development
         >>> client = GenFlux(api_key="dev_test_key", environment="local")
     """
@@ -54,23 +54,23 @@ class GenFlux:
         """Initialize the client with API key and base URL from environment if not provided."""
         if self.api_key is None:
             self.api_key = os.getenv("GENFLUX_API_KEY")
-        
+
         # Determine base_url
         if self.base_url is None:
             # Check env var first
             self.base_url = os.getenv("GENFLUX_API_BASE_URL")
-            
+
             if self.base_url is None:
                 # Use environment-specific URL
                 if self.environment is None:
                     self.environment = os.getenv("GENFLUX_ENVIRONMENT", "prod")
-                
+
                 if self.environment not in self._ENV_URLS:
                     raise ValueError(
                         f"Invalid environment: {self.environment}. "
                         f"Must be one of: {', '.join(self._ENV_URLS.keys())}"
                     )
-                
+
                 self.base_url = self._ENV_URLS[self.environment]
 
         # Initialize HTTP client

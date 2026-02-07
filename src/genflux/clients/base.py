@@ -34,26 +34,26 @@ class BaseClient:
 
         Args:
             api_key: API key for authentication (optional)
-            base_url: Base URL for API endpoints (uses GENFLUX_API_BASE_URL env var or environment setting if not provided)
+            base_url: Base URL for API (GENFLUX_API_BASE_URL env var or environment if not set)
             timeout: Request timeout in seconds
         """
         self.api_key = api_key
         if base_url is None:
             # Check env var first
             base_url = os.getenv("GENFLUX_API_BASE_URL")
-            
+
             if base_url is None:
                 # Use environment-specific URL
                 environment = os.getenv("GENFLUX_ENVIRONMENT", "prod")
-                
+
                 if environment not in self._ENV_URLS:
                     raise ValueError(
                         f"Invalid environment: {environment}. "
                         f"Must be one of: {', '.join(self._ENV_URLS.keys())}"
                     )
-                
+
                 base_url = self._ENV_URLS[environment]
-        
+
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self._client = httpx.Client(timeout=timeout, follow_redirects=True)

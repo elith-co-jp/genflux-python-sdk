@@ -9,17 +9,18 @@
 - [前提条件](#前提条件)
 - [環境準備](#環境準備)
 - [最初の評価](#最初の評価)
-- [Config不要で試す](#config不要で試す)
+- [より詳細な使い方](#より詳細な使い方)
+- [複数のテストケースを評価](#複数のテストケースを評価)
 - [複数のメトリックを試す](#複数のメトリックを試す)
 - [次のステップ](#次のステップ)
+- [トラブルシューティング](#トラブルシューティング)
 
 ---
 
 ## 前提条件
 
 - Python 3.11 以上
-- GenFlux Platform Backend が起動していること（[README.md](../README.md) 参照）
-- API Key（開発環境では `dev_test_key_12345` を使用可能）
+- API Key
 
 ---
 
@@ -47,10 +48,10 @@ export GENFLUX_API_KEY="genflux_dev_api_key"
 export GENFLUX_ENVIRONMENT="dev"
 ```
 
-#### ローカル開発環境
+#### ローカル環境
 
 ```bash
-# API Key（ローカル開発用ダミー値）
+# API Key（ローカル環境用ダミー値）
 export GENFLUX_API_KEY="dev_test_key_12345"
 
 # 環境指定
@@ -62,13 +63,13 @@ export GENFLUX_ENVIRONMENT="local"
 ```python
 from genflux import GenFlux
 
-# 本番環境（デフォルト）
+# 本番環境（デフォルト）の場合
 client = GenFlux()
 
-# 開発環境
+# 開発環境の場合
 client = GenFlux(environment="dev")
 
-# ローカル開発
+# ローカル環境の場合
 client = GenFlux(environment="local")
 ```
 

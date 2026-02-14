@@ -1,0 +1,102 @@
+# GenFlux Python SDK — LLM / AI コーディングガイド
+
+> このファイルは LLM / AI アシスタント向けの入口ドキュメントです。
+> リポジトリ構造・規約・禁止事項を簡潔にまとめています。
+
+## リポジトリの目的
+
+GenFlux Platform の公式 Python SDK。
+RAG（Retrieval-Augmented Generation）システムの **評価・セキュリティテスト・ポリシーチェック** を
+Python から実行するためのクライアントライブラリ。
+
+## 主要パス
+
+```
+src/genflux/
+├── __init__.py          # 公開 API の定義（__all__）
+├── client.py            # GenFlux メインクライアント（エントリーポイント）
+├── clients/
+│   ├── base.py          # BaseClient（HTTP 通信の共通基盤、内部）
+│   ├── config.py        # ConfigClient（Config CRUD）
+│   └── reports.py       # ReportsClient（レポート取得）
+├── evaluation.py        # EvaluationClient（12 種類のメトリック評価）
+├── jobs.py              # JobsClient（ジョブ作成・監視・キャンセル）
+├── models/
+│   ├── config.py        # Config / ConfigCreate / ConfigUpdate
+│   ├── job.py           # Job / MetricResult
+│   └── report.py        # Report / ReportSummary / ReportDetails
+├── exceptions/
+│   └── api.py           # GenFluxError 系例外クラス
+└── progress.py          # ProgressBar / create_progress_callback
+```
+
+## 公開 API の定義場所
+
+- `src/genflux/__init__.py` の `__all__` が公開 API の正（single source of truth）
+- 公開 API に属さないクラス・関数は SDK ユーザーに露出させてはならない
+
+## 自動生成物（手編集禁止）
+
+以下のファイルは `scripts/generate_api_reference.py` から自動生成されるため、
+**直接編集しないこと**。変更が必要な場合はソースコードの docstring を更新し `make docs` を実行。
+
+- `docs/API_REFERENCE.md`           — External（SDK ユーザー向け）
+- `docs/DEVELOPER_API_REFERENCE.md` — Developer（開発者向け、内部メソッド含む）
+
+### 生成手順
+
+```bash
+make docs          # 両方を生成
+make docs-check    # CI 用：差分があれば exit code 1
+```
+
+## 必須検証コマンド
+
+```bash
+# Lint + 型チェック
+ruff check src/ tests/ scripts/
+pyright src/
+
+# テスト
+pytest tests/ -v
+
+# ドキュメント差分チェック
+make docs-check
+```
+
+## 技術スタック・制約
+
+| 項目 | 仕様 |
+|---|---|
+| Python | >= 3.11 |
+| HTTP クライアント | httpx |
+| データモデル | Pydantic v2（BaseModel） / dataclass |
+| スタイル | PEP 8 / Google 形式 docstring |
+| Lint | ruff |
+| 型チェック | pyright |
+| テスト | pytest |
+| ビルド | hatchling |
+| パッケージ管理 | uv |
+
+## コーディング規約（要約）
+
+1. **型ヒント**: 全公開関数に型注釈必須。内蔵ジェネリクス使用（`list[str]`, `dict[str, int]`）。`typing.List`/`typing.Dict` 禁止
+2. **docstring**: Google 形式。公開 API は必須
+3. **Pydantic**: v2 API のみ（`model_dump()` / `model_validate()` / `@field_validator`）。v1 API 禁止
+4. **例外**: 外部境界でアプリ例外にラップ。生ライブラリ例外を漏らさない
+5. **テスト**: 外部 I/O はモック/フェイクで遮断。1 テスト = 1 期待
+
+## 互換性方針
+
+- セマンティックバージョニング（semver）
+- 破壊的変更（`__all__` のエクスポート削除、メソッドシグネチャ変更等）は **メジャーバージョン** でのみ許可
+- 非推奨化は最低 1 マイナーバージョンの deprecation 期間を設ける
+
+## 禁止事項
+
+- `docs/API_REFERENCE.md` / `docs/DEVELOPER_API_REFERENCE.md` の直接編集
+- `typing.List` / `typing.Dict` 等の旧表記の使用
+- Pydantic v1 API（`@validator`, `.dict()`, `.parse_obj()`）の使用
+- グローバル状態への書き込み
+- 機密情報（API Key 等）のコード・ログへの混入
+

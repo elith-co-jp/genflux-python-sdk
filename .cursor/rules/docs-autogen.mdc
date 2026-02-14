@@ -1,0 +1,13 @@
+---
+globs: "docs/API_REFERENCE.md,docs/DEVELOPER_API_REFERENCE.md"
+---
+
+# 自動生成ドキュメント — 編集禁止
+
+⚠️ **このファイルは自動生成物です。直接編集しないでください。**
+
+変更が必要な場合:
+1. ソースコード (`src/genflux/`) の docstring を更新する
+2. `make docs` を実行して再生成する
+
+生成スクリプト: `scripts/generate_api_reference.py`

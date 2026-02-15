@@ -1,4 +1,4 @@
-.PHONY: help docs docs-external docs-developer docs-check lint test format
+.PHONY: help docs docs-external docs-developer docs-check llms-txt llms-check lint test format
 
 help: ## ヘルプを表示
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -22,6 +22,20 @@ docs-developer: ## Developer API Reference のみ生成
 
 docs-check: ## API Reference の差分チェック（CI用）
 	python scripts/generate_api_reference.py --mode all --check
+
+# ---------------------------------------------------------------------------
+# LLM ガイド生成
+# ---------------------------------------------------------------------------
+
+llms-txt: ## llms.txt / llms-full.txt を生成
+	python scripts/generate_llms_txt.py
+	@echo ""
+	@echo "📖 Generated:"
+	@echo "   llms.txt          (LLM向け簡潔版)"
+	@echo "   llms-full.txt     (LLM向け詳細版)"
+
+llms-check: ## llms.txt の差分チェック（CI用）
+	python scripts/generate_llms_txt.py --check
 
 # ---------------------------------------------------------------------------
 # コード品質

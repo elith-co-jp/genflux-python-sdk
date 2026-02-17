@@ -9,7 +9,7 @@ import httpx
 from .clients.config import ConfigClient
 from .clients.reports import ReportsClient
 from .evaluation import EvaluationClient
-from .exceptions import APIError, NotFoundError, RateLimitError, ValidationError
+from .exceptions import APIError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
 from .jobs import JobsClient
 
 
@@ -216,6 +216,7 @@ class GenFlux:
             error: HTTP status error
 
         Raises:
+            AuthenticationError: For 401 errors
             NotFoundError: For 404 errors
             ValidationError: For 400 errors
             RateLimitError: For 429 errors
@@ -228,20 +229,23 @@ class GenFlux:
             response_data = {"detail": error.response.text}
 
         message = response_data.get("detail", f"HTTP {status_code} error")
+        details = response_data if isinstance(response_data, dict) else {}
 
-        if status_code == 404:
-            raise NotFoundError("Resource", "unknown", response_data)
+        if status_code == 401:
+            raise AuthenticationError(message, details)
+        elif status_code == 404:
+            raise NotFoundError("Resource", "unknown", details)
         elif status_code == 400:
-            raise ValidationError(message, response_data)
+            raise ValidationError(message, details)
         elif status_code == 429:
             retry_after = error.response.headers.get("Retry-After")
             raise RateLimitError(
                 message,
                 retry_after=int(retry_after) if retry_after else None,
-                details=response_data,
+                details=details,
             )
         else:
-            raise APIError(status_code, message, response_data)
+            raise APIError(status_code, message, details)
 
     def __del__(self) -> None:
         """Clean up HTTP client."""

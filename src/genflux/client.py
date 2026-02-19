@@ -10,6 +10,7 @@ from .clients.config import ConfigClient
 from .clients.reports import ReportsClient
 from .evaluation import EvaluationClient
 from .exceptions import APIError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
+from .exceptions.api import _parse_not_found_from_response
 from .jobs import JobsClient
 
 
@@ -218,7 +219,7 @@ class GenFlux:
         Raises:
             AuthenticationError: For 401 errors
             NotFoundError: For 404 errors
-            ValidationError: For 400 errors
+            ValidationError: For 400, 422 errors
             RateLimitError: For 429 errors
             APIError: For other errors
         """
@@ -234,8 +235,18 @@ class GenFlux:
         if status_code == 401:
             raise AuthenticationError(message, details)
         elif status_code == 404:
-            raise NotFoundError("Resource", "unknown", details)
-        elif status_code == 400:
+            url_path = getattr(error.response.request, "url", None)
+            path_str = str(url_path.path) if url_path else ""
+            resource, resource_id, detail_msg = _parse_not_found_from_response(
+                path_str, details
+            )
+            msg = (
+                detail_msg
+                if resource_id == "unknown" and detail_msg
+                else None
+            )
+            raise NotFoundError(resource, resource_id, details, message=msg)
+        elif status_code in (400, 422):
             raise ValidationError(message, details)
         elif status_code == 429:
             retry_after = error.response.headers.get("Retry-After")

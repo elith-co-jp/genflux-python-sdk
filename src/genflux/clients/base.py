@@ -10,7 +10,9 @@ from genflux.exceptions.api import (
     APIError,
     AuthenticationError,
     NotFoundError,
+    RateLimitError,
     ValidationError,
+    _parse_not_found_from_response,
 )
 
 
@@ -101,7 +103,8 @@ class BaseClient:
         Raises:
             AuthenticationError: If authentication failed (401)
             NotFoundError: If resource not found (404)
-            ValidationError: If validation failed (422)
+            ValidationError: If validation failed (400, 422)
+            RateLimitError: If rate limit exceeded (429)
             APIError: For other API errors
         """
         try:
@@ -115,9 +118,26 @@ class BaseClient:
         if response.status_code == 401:
             raise AuthenticationError(message, details)
         elif response.status_code == 404:
-            raise NotFoundError("Resource", "unknown", details)
-        elif response.status_code == 422:
+            url_path = getattr(response.request, "url", None)
+            path_str = str(url_path.path) if url_path else ""
+            resource, resource_id, detail_msg = _parse_not_found_from_response(
+                path_str, details
+            )
+            msg = (
+                detail_msg
+                if resource_id == "unknown" and detail_msg
+                else None
+            )
+            raise NotFoundError(resource, resource_id, details, message=msg)
+        elif response.status_code in (400, 422):
             raise ValidationError(message, details)
+        elif response.status_code == 429:
+            retry_after = response.headers.get("Retry-After")
+            raise RateLimitError(
+                message,
+                retry_after=int(retry_after) if retry_after else None,
+                details=details,
+            )
         else:
             raise APIError(response.status_code, message, details)
 

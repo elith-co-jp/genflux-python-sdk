@@ -274,6 +274,7 @@ class JobsClient:
             >>> print(job.status)
             'cancelled'
         """
-        response = self._client._post(f"/jobs/{job_id}/cancel", {})
-        return Job.from_dict(response)
+        self._client._post(f"/jobs/{job_id}/cancel", {})
+        # Cancel endpoint may return a partial response; return full job via get
+        return self.get(job_id)
 

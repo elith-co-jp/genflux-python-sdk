@@ -31,8 +31,8 @@ class Job:
     error_message: str | None
     started_at: datetime | None
     completed_at: datetime | None
-    created_at: datetime
-    updated_at: datetime
+    created_at: datetime | None
+    updated_at: datetime | None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Job":
@@ -52,11 +52,11 @@ class Job:
                 message=data["progress"]["message"],
             )
 
-        # Parse datetime fields
+        # Parse datetime fields (created_at/updated_at may be omitted in some endpoints e.g. cancel)
         started_at = datetime.fromisoformat(data["started_at"]) if data.get("started_at") else None
         completed_at = datetime.fromisoformat(data["completed_at"]) if data.get("completed_at") else None
-        created_at = datetime.fromisoformat(data["created_at"])
-        updated_at = datetime.fromisoformat(data["updated_at"])
+        created_at = datetime.fromisoformat(data["created_at"]) if data.get("created_at") else None
+        updated_at = datetime.fromisoformat(data["updated_at"]) if data.get("updated_at") else None
 
         return cls(
             id=data["id"],
@@ -94,8 +94,8 @@ class Job:
 
     @property
     def is_pending(self) -> bool:
-        """Check if job is pending."""
-        return self.status == "pending"
+        """Check if job is pending (queued or pending)."""
+        return self.status in ("pending", "queued")
 
 
 @dataclass

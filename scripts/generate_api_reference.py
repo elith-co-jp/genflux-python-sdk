@@ -355,7 +355,10 @@ def _extract_class_info(
         elif callable(obj) and (inspect.isfunction(obj) or inspect.ismethod(obj)):
             actual_func = obj
             if is_classmethod:
-                actual_func = obj.__func__
+                # Get the classmethod descriptor to access __func__
+                cm = inspect.getattr_static(cls, name)
+                if isinstance(cm, classmethod):
+                    actual_func = cm.__func__
             mdoc = _parse_google_docstring(inspect.getdoc(obj))
             sig_str = _get_signature_str(actual_func, name)
             methods.append(MethodInfo(

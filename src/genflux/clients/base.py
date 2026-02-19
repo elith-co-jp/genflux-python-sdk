@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 
 import httpx
 
+from genflux.constants import ENV_URLS
 from genflux.exceptions.api import (
     APIError,
     AuthenticationError,
@@ -18,13 +19,6 @@ from genflux.exceptions.api import (
 
 class BaseClient:
     """Base HTTP client for GenFlux API."""
-
-    # Environment-specific URLs
-    _ENV_URLS = {
-        "local": "http://localhost:9000/api/v1/external",
-        "dev": "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external",
-        "prod": "https://api.genflux.ai/api/v1/external",  # TODO: 本番URLに置き換え
-    }
 
     def __init__(
         self,
@@ -48,13 +42,13 @@ class BaseClient:
                 # Use environment-specific URL
                 environment = os.getenv("GENFLUX_ENVIRONMENT", "prod")
 
-                if environment not in self._ENV_URLS:
+                if environment not in ENV_URLS:
                     raise ValueError(
                         f"Invalid environment: {environment}. "
-                        f"Must be one of: {', '.join(self._ENV_URLS.keys())}"
+                        f"Must be one of: {', '.join(ENV_URLS.keys())}"
                     )
 
-                base_url = self._ENV_URLS[environment]
+                base_url = ENV_URLS[environment]
 
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout

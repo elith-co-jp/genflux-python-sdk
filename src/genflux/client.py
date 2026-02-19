@@ -8,6 +8,7 @@ import httpx
 
 from .clients.config import ConfigClient
 from .clients.reports import ReportsClient
+from .constants import ENV_URLS
 from .evaluation import EvaluationClient
 from .exceptions import APIError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
 from .exceptions.api import _parse_not_found_from_response
@@ -44,13 +45,6 @@ class GenFlux:
     environment: str | None = field(default=None)
     timeout: float = 60.0
 
-    # Environment-specific URLs
-    _ENV_URLS = {
-        "local": "http://localhost:9000/api/v1/external",
-        "dev": "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external",
-        "prod": "https://api.genflux.ai/api/v1/external",  # TODO: 本番URLに置き換え
-    }
-
     def __post_init__(self) -> None:
         """Initialize the client with API key and base URL from environment if not provided."""
         if self.api_key is None:
@@ -66,13 +60,13 @@ class GenFlux:
                 if self.environment is None:
                     self.environment = os.getenv("GENFLUX_ENVIRONMENT", "prod")
 
-                if self.environment not in self._ENV_URLS:
+                if self.environment not in ENV_URLS:
                     raise ValueError(
                         f"Invalid environment: {self.environment}. "
-                        f"Must be one of: {', '.join(self._ENV_URLS.keys())}"
+                        f"Must be one of: {', '.join(ENV_URLS.keys())}"
                     )
 
-                self.base_url = self._ENV_URLS[self.environment]
+                self.base_url = ENV_URLS[self.environment]
 
         # Initialize HTTP client
         self._http_client = httpx.Client(

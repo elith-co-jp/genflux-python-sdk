@@ -6,8 +6,20 @@ from typing import TYPE_CHECKING, Any, Callable
 
 import httpx
 
-from .exceptions import JobFailedError, NotFoundError, TimeoutError
+from .exceptions import JobFailedError, NotFoundError, TimeoutError, ValidationError
 from .models import Job
+
+# Valid metric names for quick_evaluate (SDK-side validation for early typo detection)
+VALID_METRICS = frozenset({
+    "faithfulness",
+    "answer_relevancy",
+    "context_relevancy",
+    "llm_context_precision",
+    "context_recall",
+    "hallucination",
+    "toxicity",
+    "bias",
+})
 
 if TYPE_CHECKING:
     from genflux import GenFlux
@@ -69,6 +81,13 @@ class JobsClient:
             payload["config_id"] = config_id
 
         if data:
+            if execution_type == "quick_evaluate":
+                metric_name = data.get("metric_name")
+                if metric_name is not None and metric_name not in VALID_METRICS:
+                    raise ValidationError(
+                        f"Invalid metric: {metric_name!r}. Valid metrics: {sorted(VALID_METRICS)}",
+                        details={"metric": metric_name, "valid_metrics": sorted(VALID_METRICS)},
+                    )
             # Store data directly in checkpoint_data for quick_evaluate
             payload["checkpoint_data"] = data
 
@@ -85,7 +104,7 @@ class JobsClient:
 
         Args:
             status: Filter by status (e.g., 'completed', 'running', 'failed')
-            execution_type: Filter by execution type (e.g., 'quick_evaluate', 'redteam_static')
+            execution_type: Filter by execution type (e.g., 'quick_evaluate', 'redteam_static', 'oss')
             limit: Maximum number of jobs to return (not yet implemented in backend)
 
         Returns:

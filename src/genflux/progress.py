@@ -25,24 +25,37 @@ class ProgressBar:
         """Initialize progress bar state."""
         self._current = 0
 
-    def update(self, current: int, message: str | None = None) -> None:
+    def update(
+        self,
+        current: int,
+        message: str | None = None,
+        *,
+        indeterminate: bool = False,
+    ) -> None:
         """Update progress bar.
 
         Args:
             current: Current progress value (0 to total)
             message: Optional status message
+            indeterminate: When True, show "Processing..." instead of percentage (for single-metric or initial state)
         """
         self._current = current
-        percent = (100 * (current / float(self.total))) if self.total > 0 else 100
-        filled_length = int(self.width * current // self.total) if self.total > 0 else self.width
-        bar = self.fill * filled_length + "-" * (self.width - filled_length)
-
-        display_message = f" | {message}" if message else ""
-        status = f"{self.prefix} |{bar}| {percent:.{self.decimals}f}% {self.suffix}{display_message}"
+        # Non-TTY (log file, CI/CD): skip progress output to avoid flooding with \r overwrites
+        if not self.file.isatty():
+            return
+        if indeterminate:
+            bar = "-" * self.width
+            status = f"{self.prefix} |{bar}| Processing..."
+        else:
+            percent = (100 * (current / float(self.total))) if self.total > 0 else 100
+            filled_length = int(self.width * current // self.total) if self.total > 0 else self.width
+            bar = self.fill * filled_length + "-" * (self.width - filled_length)
+            display_message = f" | {message}" if message else ""
+            status = f"{self.prefix} |{bar}| {percent:.{self.decimals}f}% {self.suffix}{display_message}"
 
         print(f"\r{status}", end=self.print_end, file=self.file)
 
-        if current >= self.total:
+        if current >= self.total and not indeterminate:
             print(file=self.file)  # New line on complete
 
     def update_from_job(self, job: Job) -> None:
@@ -51,16 +64,23 @@ class ProgressBar:
         Args:
             job: Job object with progress information
         """
+        total_count = job.total_count
+        progress_count = job.progress_count
+        # Single-metric (total_count=1) or initial (total_count=0): show "Processing..." instead of 0/0, 0/1
+        indeterminate = total_count == 0 or (total_count == 1 and progress_count == 0)
+
+        if indeterminate:
+            self.update(0, None, indeterminate=True)
+            return
+
         if job.progress:
-            # Use progress.percentage if available
             current = int(job.progress.percentage)
             message = job.progress.message
         else:
-            # Fallback to progress_count/total_count
-            current = int((job.progress_count / job.total_count) * 100) if job.total_count > 0 else 0
-            message = f"{job.current_step or 'Processing'} {job.progress_count}/{job.total_count}"
+            current = int((progress_count / total_count) * 100) if total_count > 0 else 0
+            message = f"{job.current_step or 'Processing'} {progress_count}/{total_count}"
 
-        self.update(current, message)
+        self.update(current, message, indeterminate=False)
 
 
 def create_progress_callback(enable: bool = True) -> Callable[[Job], None]:

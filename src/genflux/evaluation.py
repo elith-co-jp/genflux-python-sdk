@@ -135,6 +135,22 @@ class EvaluationClient:
             )
 
         results = completed_job.results
+
+        # Check results-level status (e.g. "Unknown metric" error when job status is completed)
+        if results.get("status") == "error":
+            error_msg = (
+                results.get("reason")
+                or results.get("error")
+                or results.get("message")
+                or "Evaluation failed (results.status=error)"
+            )
+            logger.error(f"Job {completed_job.id} evaluation error: {error_msg}")
+            raise JobFailedError(
+                job_id=completed_job.id,
+                error_message=str(error_msg),
+                error_details=results,
+            )
+
         score = results.get("score")
         if score is None:
             logger.error(

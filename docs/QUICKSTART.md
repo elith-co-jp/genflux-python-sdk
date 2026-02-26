@@ -7,71 +7,17 @@
 ## 📋 目次
 
 - [前提条件](#前提条件)
-- [環境準備](#環境準備)
 - [最初の評価](#最初の評価)
 - [より詳細な使い方](#より詳細な使い方)
 - [複数のテストケースを評価](#複数のテストケースを評価)
 - [複数のメトリックを試す](#複数のメトリックを試す)
 - [次のステップ](#次のステップ)
-- [トラブルシューティング](#トラブルシューティング)
-
 ---
 
 ## 前提条件
 
 - Python 3.11 以上
-- API Key
-
----
-
-## 環境準備
-
-### 1. 環境変数を設定
-
-#### 本番環境（Production）
-
-```bash
-# API Key（GenFlux Platform の管理画面から取得）
-export GENFLUX_API_KEY="genflux_your_api_key_here"
-
-# 環境指定（省略可: デフォルトは "prod"）
-export GENFLUX_ENVIRONMENT="prod"
-```
-
-#### 開発環境（Development）
-
-```bash
-# API Key（開発環境用）
-export GENFLUX_API_KEY="genflux_dev_api_key"
-
-# 環境指定
-export GENFLUX_ENVIRONMENT="dev"
-```
-
-#### ローカル環境
-
-```bash
-# API Key（ローカル環境用ダミー値）
-export GENFLUX_API_KEY="dev_test_key_12345"
-
-# 環境指定
-export GENFLUX_ENVIRONMENT="local"
-```
-
-### 2. SDK をインポート
-
-```python
-from genflux import GenFlux
-
-# 本番環境（デフォルト）の場合
-client = GenFlux()
-
-# 開発環境の場合
-client = GenFlux(environment="dev")
-
-# ローカル環境の場合
-client = GenFlux(environment="local")
-```
+- GenFlux Platform で発行した API Key（環境変数 `GENFLUX_API_KEY` に設定）
 
 ---
 
@@ -316,29 +262,6 @@ Contextual Relevancy:  0.88
   - CI/CD統合
 
 ---
-
-## トラブルシューティング
-
-### エラー: `Connection refused`
-
-**原因**: バックエンドサーバーが起動していない
-
-**解決方法**:
-```bash
-cd prd-genflux-platform-backend
-docker-compose up -d --build
-```
-
-### エラー: `Job が queued のまま進まない`
-
-**原因**: Worker が起動していない
-
-**解決方法**:
-```bash
-cd prd-genflux-platform-backend
-docker-compose logs worker
-docker-compose up -d worker
-```
 
 ---
 

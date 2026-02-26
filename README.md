@@ -1,7 +1,9 @@
 # GenFlux Python SDK
 
-GenFlux Platform の公式Python SDKです。RAG（Retrieval-Augmented Generation）システムの評価、セキュリティテスト、ポリシーチェックを簡単に実行することできます。
+高品質で安全な RAG（検索拡張生成）システムをつくるための、GenFlux Platform 公式 Python SDK です。  
+Python から数行のコードで、回答品質のスコアリング、RedTeam によるセキュリティテスト、ポリシーチェックを実行できます。
 
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/elith-co-j/genflux-python-sdk/releases/tag/v0.1.0)
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -10,9 +12,10 @@ GenFlux Platform の公式Python SDKです。RAG（Retrieval-Augmented Generatio
 ## 📋 目次
 
 - [特徴](#features)
-- [開発環境のセットアップ](#development-setup)
+- [セットアップ](#setup)
 - [クイックスタート](#quickstart)
 - [ドキュメント](#documentation)
+- [リリース履歴・破壊的変更](#リリース履歴破壊的変更)
 - [トラブルシューティング](#troubleshooting)
 
 ---
@@ -21,95 +24,41 @@ GenFlux Platform の公式Python SDKです。RAG（Retrieval-Augmented Generatio
 
 ## 🎯 特徴
 
-- **12種類の評価メトリック**: Faithfulness、Answer Relevancy、Toxicity、Bias など
-- **RedTeam評価**: 静的・動的・包括的なセキュリティテスト
-- **PolicyCheck**: AI事業者ガイドライン準拠チェック
-- **非同期処理**: Job ベースの非同期評価（SDK は同期的に扱える）
-- **進捗表示**: プログレスバー自動表示
-- **型安全**: Pydantic ベースの型付きレスポンス
+- **豊富な評価指標** — 回答の忠実度・関連性、有害性・バイアスなど 12 種類のメトリックで RAG の品質を数値化できます。
+- **セキュリティテスト（RedTeam）** — 攻撃シナリオに基づく静的・動的テストで、AI の堅牢性を確認できます。
+- **ポリシーチェック** — AI 事業者ガイドラインなどへの準拠を、API から自動チェックできます。
+- **待ち時間を気にしなくてよい設計** — 重い評価はジョブで非同期実行され、SDK 側は結果を待つだけのシンプルなコードで書けます。
+- **進捗が見える** — 実行中はプログレスバーで進捗が表示されます。
+- **型付きで書きやすい** — レスポンスは Pydantic で型付けされているため、補完やミスを防ぎながら開発ができます。
 
 ---
 
-<a id="development-setup"></a>
+<a id="setup"></a>
 
-## 🚀 開発環境のセットアップ
-
-このSDKを利用するには以下のセットアップを行なってください。
+## 🚀 セットアップ
 
 ### 前提条件
 
 - Python 3.11 以上
-- Docker & Docker Compose
-- Git
 
 ### API Key の発行
-GELFLUX SDK で使用する API Key は[GEBFLUX Platform ダッシュボード](https://dev.platform.genflux.jp/login?redirect=%2Fdashboard)から発行してください。
 
-### 1. リポジトリのクローン
+GenFlux SDK で使用する API Key は [GenFlux Platform ダッシュボード](https://dev.platform.genflux.jp/login?redirect=%2Fdashboard) から発行してください。
 
+### インストール
 ```bash
 git clone <repository-url>
-```
-
-### 2. バックエンドの動作確認
-
-```bash
-# ヘルスチェック（開発環境）
-curl curl https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/health
-
-# 期待される出力:
-# {"status":"ok"}
-```
-
-### 3. SDK のインストール
-
-```bash
-# SDK ディレクトリに移動
 cd genflux-python-sdk
-
-# 開発モードでインストール
-pip install -e .
-
-# または uv を使用
-uv pip install -e .
+uv sync
 ```
 
-### 4. 環境変数の設定
+### API Key の設定
 
-#### 本番環境（Production）
+環境変数 `GENFLUX_API_KEY` に API Key を設定してください。
 
 ```bash
-# API Key（GenFlux Platform のダッシュボード管理画面から取得）
-export GENFLUX_API_KEY="genflux_your_api_key_here"
-
-# 環境指定（省略可: デフォルトは "prod"）
-export GENFLUX_ENVIRONMENT="prod"
+export GENFLUX_API_KEY="your_api_key_here"
 ```
-
-#### 開発環境（Development）
-
-```bash
-# API Key（開発環境用）
-export GENFLUX_API_KEY="genflux_dev_api_key"
-
-# 環境指定
-export GENFLUX_ENVIRONMENT="dev"
-```
-
-**環境変数の優先順位**:
-1. `GENFLUX_API_BASE_URL` - 明示的なURL指定（最優先）
-2. `GENFLUX_ENVIRONMENT` - 環境名から自動決定（"local", "dev", "prod"）
-3. デフォルト: "prod"（本番環境）
-
-**利用可能な環境**:
-- `local`: ローカル開発環境（http://localhost:9000）
-- `dev`: クラウド開発環境
-- `prod`: 本番環境（デフォルト）
-
-**注意**: 
-- `GENFLUX_API_KEY`: GenFlux Platform の管理画面から取得してください
-- `GENFLUX_ENVIRONMENT`: 省略した場合、**本番環境（prod）がデフォルト**です
-- `GENFLUX_API_BASE_URL`: カスタムURLが必要な特殊な環境でのみ使用
 
 ---
 
@@ -124,16 +73,10 @@ export GENFLUX_ENVIRONMENT="dev"
 ```python
 from genflux import GenFlux
 
-# 本番環境（デフォルト）
-client = GenFlux()  # 環境変数 GENFLUX_API_KEY が必要
+# クライアント初期化（環境変数 GENFLUX_API_KEY を使用）
+client = GenFlux()
 
-# 開発環境
-client = GenFlux(environment="dev")
-
-# ローカル開発
-client = GenFlux(environment="local")
-
-# 評価を実行（デフォルトのConfigを使用）
+# 評価を実行（デフォルトの Config を使用）
 evaluator = client.evaluation()
 result = evaluator.faithfulness(
     question="What is Python?",
@@ -188,34 +131,33 @@ Reason: The answer is based on the provided context.
 
 ---
 
+<a id="リリース履歴破壊的変更"></a>
+
+## 📌 リリース履歴・破壊的変更
+
+- **[CHANGELOG.md](CHANGELOG.md)** … バージョンごとの変更内容。**破壊的変更は各リリースの「Breaking changes」に記載**します。
+- **[docs/MIGRATION.md](docs/MIGRATION.md)** … **破壊的変更がある場合の移行手順**（例: 1.x → 2.0 への移行）。手順はここにまとめ、CHANGELOG の Breaking changes からリンクします。
+
+メジャーアップデート時は上記 2 つを確認してください。
+
+---
+
 <a id="troubleshooting"></a>
 
 ## 🔧 トラブルシューティング
 ### 問題1: `AuthenticationError: Invalid API Key`
 
-**原因**: API Key が設定されていない、または無効
+**原因**: API Key が設定されていない、または無効です。
 
-**解決方法**:
-```bash
-# 開発環境用のAPI Keyを設定
-export GENFLUX_API_KEY="dev_test_key_12345"
-
-# 確認
-echo $GENFLUX_API_KEY
-```
+**解決方法**: 環境変数 `GENFLUX_API_KEY` に有効な API Key を設定してください。GenFlux Platform ダッシュボードから取得できます。
 
 ---
 
 ### 問題2: `ModuleNotFoundError: No module named 'genflux'`
 
-**原因**: SDK がインストールされていない
+**原因**: SDK がインストールされていません。
 
-**解決方法**:
-```bash
-# SDK をインストール
-cd genflux-python-sdk
-pip install -e .
-```
+**解決方法**: [セットアップ](#setup) に沿ってインストールしてください。
 
 ## 📞 サポート
 
@@ -226,9 +168,10 @@ pip install -e .
 - [サンプルコード集](./docs/EXAMPLES.md)
 
 ### お問い合わせ
-- GitHub Issues: [https://github.com/your-org/genflux-python-sdk/issues](https://github.com/your-org/genflux-python-sdk/issues)
-- Slack: `#genflux-support`
-- Email: support@genflux.com
+
+質問・不具合報告・機能要望は **GitHub Issues** に記載してください。
+
+- [GitHub Issues（genflux-python-sdk）](https://github.com/elith-co-jp/genflux-python-sdk/issues)
 
 ---
 
@@ -236,11 +179,6 @@ pip install -e .
 
 MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照してください。
 
----
-
-## 🙏 貢献
-
-コントリビューションを歓迎します！詳細は [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
 
 ---
 

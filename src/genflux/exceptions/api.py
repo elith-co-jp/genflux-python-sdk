@@ -1,6 +1,42 @@
 """Custom exceptions for GenFlux SDK."""
 
 
+def _extract_resource_from_url_path(
+    url_path: str,
+) -> tuple[str | None, str | None]:
+    """Infer resource type and ID from URL path, if possible."""
+    path_lower = url_path.lower()
+    parts = [p for p in url_path.strip("/").split("/") if p]
+
+    # (segment, resource_type, disallowed_next_ids)
+    patterns: list[tuple[str, str, set[str]]] = [
+        ("jobs", "Job", {"cancel"}),
+        ("configs", "Config", set()),
+        ("reports", "Report", set()),
+    ]
+
+    for segment, resource_type, disallowed in patterns:
+        if f"/{segment}/" not in path_lower and not path_lower.endswith(f"/{segment}"):
+            continue
+
+        try:
+            idx = next(i for i, p in enumerate(parts) if p.lower() == segment)
+        except StopIteration:
+            continue
+
+        next_idx = idx + 1
+        if next_idx >= len(parts):
+            continue
+
+        candidate_id = parts[next_idx]
+        if candidate_id.lower() in disallowed:
+            continue
+
+        return resource_type, candidate_id
+
+    return None, None
+
+
 def _parse_not_found_from_response(
     url_path: str, details: dict
 ) -> tuple[str, str, str | None]:
@@ -28,32 +64,10 @@ def _parse_not_found_from_response(
 
     # From URL path if still unknown
     if resource_id == "unknown" and url_path:
-        path_lower = url_path.lower()
-        parts = [p for p in url_path.strip("/").split("/") if p]
-        if "/jobs/" in path_lower or path_lower.endswith("/jobs"):
-            try:
-                idx = next(i for i, p in enumerate(parts) if p.lower() == "jobs")
-                if idx + 1 < len(parts) and parts[idx + 1].lower() not in ("cancel",):
-                    resource = "Job"
-                    resource_id = parts[idx + 1]
-            except StopIteration:
-                pass
-        elif "/configs/" in path_lower or path_lower.endswith("/configs"):
-            try:
-                idx = next(i for i, p in enumerate(parts) if p.lower() == "configs")
-                if idx + 1 < len(parts):
-                    resource = "Config"
-                    resource_id = parts[idx + 1]
-            except StopIteration:
-                pass
-        elif "/reports/" in path_lower or path_lower.endswith("/reports"):
-            try:
-                idx = next(i for i, p in enumerate(parts) if p.lower() == "reports")
-                if idx + 1 < len(parts):
-                    resource = "Report"
-                    resource_id = parts[idx + 1]
-            except StopIteration:
-                pass
+        url_resource, url_resource_id = _extract_resource_from_url_path(url_path)
+        if url_resource_id:
+            resource = url_resource or resource
+            resource_id = url_resource_id
 
     return resource, resource_id, message
 

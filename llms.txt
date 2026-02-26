@@ -41,15 +41,11 @@ Sub-clients are accessed as attributes or factory methods:
 | Method | What it measures | Score |
 |---|---|---|
 | `evaluator.answer_relevancy()` | Answer addresses the question | 0-1 (higher is better) |
-| `evaluator.answer_relevancy_ragas()` | Answer relevancy via RAGAS engine | 0-1 (higher is better) |
 | `evaluator.bias()` | Answer contains biased content | 0-1 (lower is better) |
-| `evaluator.context_precision_ragas()` | Context precision via RAGAS engine | 0-1 (higher is better) |
-| `evaluator.context_recall_ragas()` | Context recall via RAGAS engine | 0-1 (higher is better) |
 | `evaluator.contextual_precision()` | Relevant contexts are ranked higher | 0-1 (higher is better) |
 | `evaluator.contextual_recall()` | Answer info can be attributed to contexts (requires ground_truth) | 0-1 (higher is better) |
 | `evaluator.contextual_relevancy()` | Retrieved contexts are relevant to the question | 0-1 (higher is better) |
 | `evaluator.faithfulness()` | Answer is grounded in provided contexts | 0-1 (higher is better) |
-| `evaluator.faithfulness_ragas()` | Faithfulness via RAGAS engine | 0-1 (higher is better) |
 | `evaluator.hallucination()` | Answer contains info NOT in contexts | 0-1 (lower is better) |
 | `evaluator.toxicity()` | Answer contains toxic content | 0-1 (lower is better) |
 

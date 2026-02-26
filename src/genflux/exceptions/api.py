@@ -1,6 +1,77 @@
 """Custom exceptions for GenFlux SDK."""
 
 
+def _extract_resource_from_url_path(
+    url_path: str,
+) -> tuple[str | None, str | None]:
+    """Infer resource type and ID from URL path, if possible."""
+    path_lower = url_path.lower()
+    parts = [p for p in url_path.strip("/").split("/") if p]
+
+    # (segment, resource_type, disallowed_next_ids)
+    patterns: list[tuple[str, str, set[str]]] = [
+        ("jobs", "Job", {"cancel"}),
+        ("configs", "Config", set()),
+        ("reports", "Report", set()),
+    ]
+
+    for segment, resource_type, disallowed in patterns:
+        if f"/{segment}/" not in path_lower and not path_lower.endswith(f"/{segment}"):
+            continue
+
+        try:
+            idx = next(i for i, p in enumerate(parts) if p.lower() == segment)
+        except StopIteration:
+            continue
+
+        next_idx = idx + 1
+        if next_idx >= len(parts):
+            continue
+
+        candidate_id = parts[next_idx]
+        if candidate_id.lower() in disallowed:
+            continue
+
+        return resource_type, candidate_id
+
+    return None, None
+
+
+def _parse_not_found_from_response(
+    url_path: str, details: dict
+) -> tuple[str, str, str | None]:
+    """Extract resource type, ID, and optional message from 404 response.
+
+    Args:
+        url_path: Request URL path (e.g., /api/v1/external/jobs/job_123/cancel)
+        details: Response body dict (may contain detail, resource_type, resource_id)
+
+    Returns:
+        (resource, resource_id, message_or_none)
+    """
+    resource = "Resource"
+    resource_id = "unknown"
+    message = details.get("detail") if isinstance(details.get("detail"), str) else None
+
+    # From response body
+    if isinstance(details, dict):
+        rt = details.get("resource_type")
+        rid = details.get("resource_id") or details.get("id")
+        if rt:
+            resource = str(rt).lower()
+        if rid:
+            resource_id = str(rid)
+
+    # From URL path if still unknown
+    if resource_id == "unknown" and url_path:
+        url_resource, url_resource_id = _extract_resource_from_url_path(url_path)
+        if url_resource_id:
+            resource = url_resource or resource
+            resource_id = url_resource_id
+
+    return resource, resource_id, message
+
+
 class GenFluxError(Exception):
     """Base exception for GenFlux SDK."""
 
@@ -40,16 +111,24 @@ class AuthenticationError(APIError):
 class NotFoundError(APIError):
     """Resource not found (404)."""
 
-    def __init__(self, resource: str, resource_id: str, details: dict | None = None):
+    def __init__(
+        self,
+        resource: str = "Resource",
+        resource_id: str = "unknown",
+        details: dict | None = None,
+        *,
+        message: str | None = None,
+    ):
         """Initialize not found error.
 
         Args:
             resource: Resource type (e.g., "config", "job")
             resource_id: Resource ID
             details: Additional error details
+            message: Override message (e.g., from API detail); if None, constructed from resource/resource_id
         """
-        message = f"{resource.capitalize()} not found: {resource_id}"
-        super().__init__(404, message, details)
+        msg = message if message else f"{resource.capitalize()} not found: {resource_id}"
+        super().__init__(404, msg, details)
 
 
 class ValidationError(APIError):

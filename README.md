@@ -49,6 +49,8 @@ GenFlux SDK で使用する API Key は [GenFlux Platform ダッシュボード]
 ```bash
 git clone <repository-url>
 cd genflux-python-sdk
+
+# 依存関係をインストール
 uv sync
 ```
 

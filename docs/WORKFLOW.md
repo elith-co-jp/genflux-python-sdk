@@ -162,6 +162,7 @@ config_id = str(configs.configs[0].id)
 question = "What is Python?"
 answer = "Python is a programming language."
 contexts = ["Python is a high-level programming language."]
+ground_truth = "Python is a high-level, interpreted programming language known for its simplicity and readability."
 
 # 評価するメトリック
 metrics = [

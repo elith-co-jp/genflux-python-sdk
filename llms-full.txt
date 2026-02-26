@@ -120,16 +120,12 @@ Created via `client.evaluation(config_id=None)`. Provides synchronous evaluation
 **Methods:**
 
 - `answer_relevancy(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult` — Evaluate answer relevancy (answer addresses the question).
-- `answer_relevancy_ragas(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult` — Evaluate answer relevancy using RAGAS (answer addresses the question).
 - `bias(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult` — Evaluate bias (answer contains biased content).
-- `context_precision_ragas(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — Evaluate context precision using RAGAS (relevant contexts ranked higher).
-- `context_recall_ragas(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — Evaluate context recall using RAGAS (answer can be attributed to contexts).
 - `contextual_precision(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — Evaluate contextual precision (relevant contexts ranked higher).
 - `contextual_recall(question: str, answer: str, contexts: list[str], ground_truth: str, timeout: int = 300) -> MetricResult` — Evaluate contextual recall (answer can be attributed to contexts).
 - `contextual_relevancy(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — Evaluate contextual relevancy (contexts are relevant to question).
 - `evaluate(metric: str, question: str, answer: str, contexts: list[str] | None = None, ground_truth: str | None = None, timeout: int = 300, callback: Union[Callable[Job, None], None] = None, show_progress: bool = True) -> MetricResult` — Evaluate a single question-answer pair.
 - `faithfulness(question: str, answer: str, contexts: list[str], timeout: int = 300, on_progress: Union[Callable[Job, None], None] = None) -> MetricResult` — Evaluate faithfulness (answers based on contexts).
-- `faithfulness_ragas(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — Evaluate faithfulness using RAGAS (answers based on contexts).
 - `hallucination(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — Evaluate hallucination (answer contains information not in contexts).
 - `toxicity(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult` — Evaluate toxicity (answer contains toxic content).
 
@@ -281,8 +277,8 @@ Job (Execution) model.
 | `error_message` | `str | None` |  |
 | `started_at` | `datetime | None` |  |
 | `completed_at` | `datetime | None` |  |
-| `created_at` | `datetime` |  |
-| `updated_at` | `datetime` |  |
+| `created_at` | `datetime | None` |  |
+| `updated_at` | `datetime | None` |  |
 
 ### `JobProgress`
 
@@ -448,15 +444,11 @@ All exceptions:
 | Method | Engine | Requires `contexts` | Requires `ground_truth` | Score interpretation |
 |---|---|---|---|---|
 | `answer_relevancy` | DeepEval | Optional | No | Higher = more relevant |
-| `answer_relevancy_ragas` | RAGAS | Optional | No | Higher = more relevant |
 | `bias` | DeepEval | Optional | No | **Lower = less biased** |
-| `context_precision_ragas` | RAGAS | Yes (order matters) | No | Higher = better ranking |
-| `context_recall_ragas` | RAGAS | Yes | No | Higher = better recall |
 | `contextual_precision` | DeepEval | Yes (order matters) | No | Higher = better ranking |
 | `contextual_recall` | DeepEval | Yes | **Yes** | Higher = better recall |
 | `contextual_relevancy` | DeepEval | Yes | No | Higher = more relevant contexts |
 | `faithfulness` | DeepEval | Yes | No | Higher = more faithful |
-| `faithfulness_ragas` | RAGAS | Yes | No | Higher = more faithful |
 | `hallucination` | DeepEval | Yes | No | **Lower = less hallucination** |
 | `toxicity` | DeepEval | Optional | No | **Lower = less toxic** |
 

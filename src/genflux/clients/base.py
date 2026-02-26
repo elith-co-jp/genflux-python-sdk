@@ -6,23 +6,19 @@ from urllib.parse import urljoin
 
 import httpx
 
+from genflux.constants import ENV_URLS
 from genflux.exceptions.api import (
     APIError,
     AuthenticationError,
     NotFoundError,
+    RateLimitError,
     ValidationError,
+    _parse_not_found_from_response,
 )
 
 
 class BaseClient:
     """Base HTTP client for GenFlux API."""
-
-    # Environment-specific URLs
-    _ENV_URLS = {
-        "local": "http://localhost:9000/api/v1/external",
-        "dev": "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external",
-        "prod": "https://api.genflux.ai/api/v1/external",  # TODO: 本番URLに置き換え
-    }
 
     def __init__(
         self,
@@ -46,13 +42,13 @@ class BaseClient:
                 # Use environment-specific URL
                 environment = os.getenv("GENFLUX_ENVIRONMENT", "prod")
 
-                if environment not in self._ENV_URLS:
+                if environment not in ENV_URLS:
                     raise ValueError(
                         f"Invalid environment: {environment}. "
-                        f"Must be one of: {', '.join(self._ENV_URLS.keys())}"
+                        f"Must be one of: {', '.join(ENV_URLS.keys())}"
                     )
 
-                base_url = self._ENV_URLS[environment]
+                base_url = ENV_URLS[environment]
 
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
@@ -101,7 +97,8 @@ class BaseClient:
         Raises:
             AuthenticationError: If authentication failed (401)
             NotFoundError: If resource not found (404)
-            ValidationError: If validation failed (422)
+            ValidationError: If validation failed (400, 422)
+            RateLimitError: If rate limit exceeded (429)
             APIError: For other API errors
         """
         try:
@@ -115,9 +112,26 @@ class BaseClient:
         if response.status_code == 401:
             raise AuthenticationError(message, details)
         elif response.status_code == 404:
-            raise NotFoundError("Resource", "unknown", details)
-        elif response.status_code == 422:
+            url_path = getattr(response.request, "url", None)
+            path_str = str(url_path.path) if url_path else ""
+            resource, resource_id, detail_msg = _parse_not_found_from_response(
+                path_str, details
+            )
+            msg = (
+                detail_msg
+                if resource_id == "unknown" and detail_msg
+                else None
+            )
+            raise NotFoundError(resource, resource_id, details, message=msg)
+        elif response.status_code in (400, 422):
             raise ValidationError(message, details)
+        elif response.status_code == 429:
+            retry_after = response.headers.get("Retry-After")
+            raise RateLimitError(
+                message,
+                retry_after=int(retry_after) if retry_after else None,
+                details=details,
+            )
         else:
             raise APIError(response.status_code, message, details)
 

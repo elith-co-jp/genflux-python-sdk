@@ -135,6 +135,22 @@ class EvaluationClient:
             )
 
         results = completed_job.results
+
+        # Check results-level status (e.g. "Unknown metric" error when job status is completed)
+        if results.get("status") == "error":
+            error_msg = (
+                results.get("reason")
+                or results.get("error")
+                or results.get("message")
+                or "Evaluation failed (results.status=error)"
+            )
+            logger.error(f"Job {completed_job.id} evaluation error: {error_msg}")
+            raise JobFailedError(
+                job_id=completed_job.id,
+                error_message=str(error_msg),
+                error_details=results,
+            )
+
         score = results.get("score")
         if score is None:
             logger.error(
@@ -389,108 +405,3 @@ class EvaluationClient:
             contexts=contexts,
             timeout=timeout,
         )
-
-    def faithfulness_ragas(
-        self,
-        question: str,
-        answer: str,
-        contexts: list[str],
-        timeout: int = 300,
-    ) -> MetricResult:
-        """Evaluate faithfulness using RAGAS (answers based on contexts).
-
-        Args:
-            question: Question text
-            answer: Answer text
-            contexts: Context/retrieval texts
-            timeout: Maximum wait time in seconds
-
-        Returns:
-            MetricResult with faithfulness score (RAGAS)
-        """
-        return self.evaluate(
-            metric="faithfulness_ragas",
-            question=question,
-            answer=answer,
-            contexts=contexts,
-            timeout=timeout,
-        )
-
-    def answer_relevancy_ragas(
-        self,
-        question: str,
-        answer: str,
-        contexts: list[str] | None = None,
-        timeout: int = 300,
-    ) -> MetricResult:
-        """Evaluate answer relevancy using RAGAS (answer addresses the question).
-
-        Args:
-            question: Question text
-            answer: Answer text
-            contexts: Context/retrieval texts (optional)
-            timeout: Maximum wait time in seconds
-
-        Returns:
-            MetricResult with answer relevancy score (RAGAS)
-        """
-        return self.evaluate(
-            metric="answer_relevancy_ragas",
-            question=question,
-            answer=answer,
-            contexts=contexts,
-            timeout=timeout,
-        )
-
-    def context_precision_ragas(
-        self,
-        question: str,
-        answer: str,
-        contexts: list[str],
-        timeout: int = 300,
-    ) -> MetricResult:
-        """Evaluate context precision using RAGAS (relevant contexts ranked higher).
-
-        Args:
-            question: Question text
-            answer: Answer text
-            contexts: Context/retrieval texts (order matters)
-            timeout: Maximum wait time in seconds
-
-        Returns:
-            MetricResult with context precision score (RAGAS)
-        """
-        return self.evaluate(
-            metric="context_precision_ragas",
-            question=question,
-            answer=answer,
-            contexts=contexts,
-            timeout=timeout,
-        )
-
-    def context_recall_ragas(
-        self,
-        question: str,
-        answer: str,
-        contexts: list[str],
-        timeout: int = 300,
-    ) -> MetricResult:
-        """Evaluate context recall using RAGAS (answer can be attributed to contexts).
-
-        Args:
-            question: Question text
-            answer: Answer text
-            contexts: Context/retrieval texts
-            timeout: Maximum wait time in seconds
-
-        Returns:
-            MetricResult with context recall score (RAGAS)
-        """
-        return self.evaluate(
-            metric="context_recall_ragas",
-            question=question,
-            answer=answer,
-            contexts=contexts,
-            timeout=timeout,
-        )
-

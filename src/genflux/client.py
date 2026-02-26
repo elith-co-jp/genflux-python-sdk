@@ -8,8 +8,10 @@ import httpx
 
 from .clients.config import ConfigClient
 from .clients.reports import ReportsClient
+from .constants import ENV_URLS
 from .evaluation import EvaluationClient
-from .exceptions import APIError, NotFoundError, RateLimitError, ValidationError
+from .exceptions import APIError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
+from .exceptions.api import _parse_not_found_from_response
 from .jobs import JobsClient
 
 
@@ -43,13 +45,6 @@ class GenFlux:
     environment: str | None = field(default=None)
     timeout: float = 60.0
 
-    # Environment-specific URLs
-    _ENV_URLS = {
-        "local": "http://localhost:9000/api/v1/external",
-        "dev": "https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run.app/api/v1/external",
-        "prod": "https://api.genflux.ai/api/v1/external",  # TODO: 本番URLに置き換え
-    }
-
     def __post_init__(self) -> None:
         """Initialize the client with API key and base URL from environment if not provided."""
         if self.api_key is None:
@@ -65,13 +60,13 @@ class GenFlux:
                 if self.environment is None:
                     self.environment = os.getenv("GENFLUX_ENVIRONMENT", "prod")
 
-                if self.environment not in self._ENV_URLS:
+                if self.environment not in ENV_URLS:
                     raise ValueError(
                         f"Invalid environment: {self.environment}. "
-                        f"Must be one of: {', '.join(self._ENV_URLS.keys())}"
+                        f"Must be one of: {', '.join(ENV_URLS.keys())}"
                     )
 
-                self.base_url = self._ENV_URLS[self.environment]
+                self.base_url = ENV_URLS[self.environment]
 
         # Initialize HTTP client
         self._http_client = httpx.Client(
@@ -216,8 +211,9 @@ class GenFlux:
             error: HTTP status error
 
         Raises:
+            AuthenticationError: For 401 errors
             NotFoundError: For 404 errors
-            ValidationError: For 400 errors
+            ValidationError: For 400, 422 errors
             RateLimitError: For 429 errors
             APIError: For other errors
         """
@@ -228,20 +224,33 @@ class GenFlux:
             response_data = {"detail": error.response.text}
 
         message = response_data.get("detail", f"HTTP {status_code} error")
+        details = response_data if isinstance(response_data, dict) else {}
 
-        if status_code == 404:
-            raise NotFoundError("Resource", "unknown", response_data)
-        elif status_code == 400:
-            raise ValidationError(message, response_data)
+        if status_code == 401:
+            raise AuthenticationError(message, details)
+        elif status_code == 404:
+            url_path = getattr(error.response.request, "url", None)
+            path_str = str(url_path.path) if url_path else ""
+            resource, resource_id, detail_msg = _parse_not_found_from_response(
+                path_str, details
+            )
+            msg = (
+                detail_msg
+                if resource_id == "unknown" and detail_msg
+                else None
+            )
+            raise NotFoundError(resource, resource_id, details, message=msg)
+        elif status_code in (400, 422):
+            raise ValidationError(message, details)
         elif status_code == 429:
             retry_after = error.response.headers.get("Retry-After")
             raise RateLimitError(
                 message,
                 retry_after=int(retry_after) if retry_after else None,
-                details=response_data,
+                details=details,
             )
         else:
-            raise APIError(status_code, message, response_data)
+            raise APIError(status_code, message, details)
 
     def __del__(self) -> None:
         """Clean up HTTP client."""

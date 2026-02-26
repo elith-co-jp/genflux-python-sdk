@@ -67,11 +67,8 @@ curl curl https://dev-genflux-platform-backend-1018003634108.asia-northeast1.run
 # SDK ディレクトリに移動
 cd genflux-python-sdk
 
-# 開発モードでインストール
-pip install -e .
-
-# または uv を使用
-uv pip install -e .
+# 依存関係をインストール
+uv sync
 ```
 
 ### 4. 環境変数の設定

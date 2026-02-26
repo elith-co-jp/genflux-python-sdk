@@ -43,7 +43,7 @@ Python から数行のコードで、回答品質のスコアリング、RedTeam
 
 ### API Key の発行
 
-GenFlux SDK で使用する API Key は [GenFlux Platform ダッシュボード](https://dev.platform.genflux.jp/login?redirect=%2Fdashboard) から発行してください。
+GenFlux SDK で使用する API Key は [GenFlux Platform ダッシュボード](https://www.platform.genflux.jp/) から発行してください。
 
 ### インストール
 ```bash

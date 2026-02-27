@@ -1,6 +1,6 @@
 # GenFlux Python SDK
 
-高品質で安全な RAG（検索拡張生成）システムをつくるための、GenFlux Platform 公式 Python SDK です。  
+RAG（検索拡張生成）システムの安全性を評価することを目的とした AI Safety のための GenFlux Platform 公式 Python SDK です。  
 Python から数行のコードで、回答品質のスコアリング、RedTeam によるセキュリティテスト、ポリシーチェックを実行できます。
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/elith-co-j/genflux-python-sdk/releases/tag/v0.1.0)
@@ -172,9 +172,10 @@ Reason: The answer is based on the provided context.
 ### お問い合わせ
 
 質問・不具合報告・機能要望は **GitHub Issues** に記載してください。
+または下記のメールアドレスにお問い合わせください。
 
 - [GitHub Issues（genflux-python-sdk）](https://github.com/elith-co-jp/genflux-python-sdk/issues)
-
+- Email: `genflux-support@elith.jp`
 ---
 
 ## 📄 ライセンス

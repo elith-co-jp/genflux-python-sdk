@@ -15,7 +15,8 @@ dependencies = [
     "pydantic>=2.0.0",
     "tqdm>=4.66.0",
 ]
-authors = [{ name = "GenFlux Team" }]
+authors = [{ name = "GenFlux Team", email = "genflux-support@elith.jp" }]
+keywords = ["rag", "evaluation", "llm", "ai-safety", "redteam", "policy-check", "genflux"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
@@ -23,6 +24,12 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+
+[project.urls]
+Homepage = "https://www.platform.genflux.jp/"
+Repository = "https://github.com/elith-co-jp/genflux-python-sdk"
+Changelog = "https://github.com/elith-co-jp/genflux-python-sdk/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/elith-co-jp/genflux-python-sdk/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/genflux"]

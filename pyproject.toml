@@ -7,6 +7,8 @@ name = "genflux"
 version = "0.1.0"
 description = "Python SDK for GenFlux API - RAG Evaluation Platform"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
     "httpx>=0.27.0",
@@ -18,7 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: Other/Proprietary License",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 
@@ -31,6 +33,8 @@ include = ["src/genflux"]
 [dependency-groups]
 dev = [
     "build>=1.2.0",
+    "pip-audit>=2.7.0",
+    "pip-licenses>=4.4.0",
     "pre-commit>=4.2.0",
     "pyright>=1.1.402",
     "pytest>=8.4.1",

@@ -26,5 +26,5 @@ Released: 2026-03-02
 
 - なし（初回リリースのため）
 
-[Unreleased]: https://github.com/your-org/genflux-python-sdk/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/your-org/genflux-python-sdk/releases/tag/v0.1.0
+[Unreleased]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/elith-co-jp/genflux-python-sdk/releases/tag/v0.1.0

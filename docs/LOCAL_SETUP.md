@@ -326,9 +326,8 @@ docker-compose exec api uv run alembic upgrade head
 - [サンプルコード集](./docs/EXAMPLES.md)
 
 ### お問い合わせ
-- GitHub Issues: [https://github.com/your-org/genflux-python-sdk/issues](https://github.com/your-org/genflux-python-sdk/issues)
-- Slack: `#genflux-support`
-- Email: support@genflux.com
+- GitHub Issues: [https://github.com/elith-co-jp/genflux-python-sdk/issues](https://github.com/elith-co-jp/genflux-python-sdk/issues)
+- Email: `genflux-support@elith.jp`
 
 ---
 

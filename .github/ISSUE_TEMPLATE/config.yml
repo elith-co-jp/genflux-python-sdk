@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 ドキュメント
+    url: https://github.com/elith-co-jp/genflux-python-sdk/blob/main/docs/QUICKSTART.md
+    about: まずはドキュメントを確認してください
+  - name: 💬 質問・相談
+    url: https://github.com/elith-co-jp/genflux-python-sdk/discussions
+    about: 使い方の質問や相談は Discussions へ
+  - name: 📧 サポートメール
+    url: mailto:genflux-support@elith.jp
+    about: その他のお問い合わせ
+

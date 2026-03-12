@@ -439,6 +439,11 @@ def _extract_class_info(
 # Markdown 生成
 # ---------------------------------------------------------------------------
 
+def _escape_pipe_in_table(text: str) -> str:
+    """Markdown テーブルセル内の | をエスケープする."""
+    return text.replace("|", r"\|")
+
+
 def _md_params_table(params: list[DocParam], *, show_required: bool = True) -> str:
     """パラメータをMarkdownテーブルとして出力する."""
     if not params:
@@ -447,13 +452,13 @@ def _md_params_table(params: list[DocParam], *, show_required: bool = True) -> s
     if show_required:
         lines = ["| パラメータ | 型 | 必須 | 説明 |", "|---|---|---|---|"]
         for p in params:
-            type_str = f"`{p.type_hint}`" if p.type_hint else ""
+            type_str = f"`{_escape_pipe_in_table(p.type_hint)}`" if p.type_hint else ""
             req_str = "**Yes**" if p.required else "No"
             lines.append(f"| `{p.name}` | {type_str} | {req_str} | {p.description} |")
     else:
         lines = ["| パラメータ | 型 | 説明 |", "|---|---|---|"]
         for p in params:
-            type_str = f"`{p.type_hint}`" if p.type_hint else ""
+            type_str = f"`{_escape_pipe_in_table(p.type_hint)}`" if p.type_hint else ""
             lines.append(f"| `{p.name}` | {type_str} | {p.description} |")
     return "\n".join(lines)
 
@@ -464,7 +469,7 @@ def _md_fields_table(fields: list[DocParam]) -> str:
         return ""
     lines = ["| 属性 | 型 | 説明 |", "|---|---|---|"]
     for f in fields:
-        type_str = f"`{f.type_hint}`" if f.type_hint else ""
+        type_str = f"`{_escape_pipe_in_table(f.type_hint)}`" if f.type_hint else ""
         lines.append(f"| `{f.name}` | {type_str} | {f.description} |")
     return "\n".join(lines)
 

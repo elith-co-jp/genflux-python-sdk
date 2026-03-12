@@ -1,0 +1,22 @@
+name: Notify Platform Frontend on SDK docs update
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "docs/QUICKSTART.md"
+      - "docs/API_REFERENCE.md"
+      - "docs/WORKFLOW.md"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch sdk-docs-updated event to Platform Frontend
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PLATFORM_REPO_TOKEN }}
+          repository: elith-co-jp/prd-genflux-platform-frontend
+          event-type: sdk-docs-updated
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'

@@ -263,7 +263,5 @@ Contextual Relevancy:  0.88
 
 ---
 
----
-
 **次へ**: [WORKFLOW.md](./WORKFLOW.md) で本格的な使い方を学ぶ
 

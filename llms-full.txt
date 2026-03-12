@@ -1,6 +1,6 @@
-# GenFlux Python SDK — Full Context for LLMs
+# Genflux Python SDK — Full Context for LLMs
 
-> GenFlux Python SDK は RAG（Retrieval-Augmented Generation）システムの**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための公式クライアントライブラリです。このファイルには LLM がコードを生成・修正するために必要な全 API 情報が含まれています。
+> Genflux Python SDK は RAG（Retrieval-Augmented Generation）システムの**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための公式クライアントライブラリです。このファイルには LLM がコードを生成・修正するために必要な全 API 情報が含まれています。
 
 ## Quick Start
 
@@ -85,7 +85,7 @@ Everything exported from `genflux/__init__.py`:
 # Utils:   ProgressBar, create_progress_callback
 ```
 
-## GenFlux Client
+## Genflux Client
 
 ```python
 @dataclass
@@ -458,7 +458,7 @@ All exceptions:
 genflux-python-sdk/
 ├── src/genflux/            # SDK source
 │   ├── __init__.py         # Public API (__all__)
-│   ├── client.py           # GenFlux main client
+│   ├── client.py           # Genflux main client
 │   ├── evaluation.py       # EvaluationClient
 │   ├── jobs.py             # JobsClient
 │   ├── progress.py         # Progress display utilities

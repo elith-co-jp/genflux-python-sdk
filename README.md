@@ -14,6 +14,29 @@ Genflux Platform 公式 Python SDK。RAG システムの回答品質スコアリ
 - [クイックスタート](./docs/QUICKSTART.md) — Config 不要で今すぐ試せるサンプル
 - [ワークフロー](./docs/WORKFLOW.md) — バッチ評価、CI/CD 統合、エラーハンドリング
 
+## Why Genflux
+
+RAG システムを本番運用する際、「回答品質が十分か」「安全性に問題はないか」を継続的に検証する仕組みが不可欠です。
+
+Genflux は **RAG の品質・安全性を数値で可視化** するプラットフォームです。この SDK を使って Python から直接評価を実行できます。
+
+- **8 種類の評価メトリック** — Faithfulness、Hallucination、Toxicity など、RAG に必要な品質指標をワンライナーで計測
+- **CI/CD 統合** — テストパイプラインに組み込み、品質劣化を自動検知（[ワークフロー例](./docs/WORKFLOW.md#cicd統合)）
+- **セキュリティテスト** — Genflux Platform 上で Red Teaming による攻撃シミュレーションを実行し、脆弱性を事前に検出
+- **ポリシーチェック** — Genflux Platform 上で AI 事業者ガイドライン準拠を自動検証
+
+```python
+from genflux import GenFlux
+
+client = GenFlux()
+result = client.evaluation().faithfulness(
+    question="What is RAG?",
+    answer="RAG is Retrieval-Augmented Generation.",
+    contexts=["RAG combines retrieval and generation..."],
+)
+print(f"Faithfulness: {result.score}")  # 0.92
+```
+
 ## インストール
 
 ```bash
@@ -60,14 +83,14 @@ toxicity = evaluator.toxicity(question, answer)
 
 | メトリック | 説明 | `contexts` | `ground_truth` | スコア |
 |---|---|---|---|---|
-| `faithfulness` | 回答が提供された文脈に基づいているか | 必須 | — | 0〜1 (高↑) |
-| `answer_relevancy` | 回答が質問に適切に答えているか | 任意 | — | 0〜1 (高↑) |
-| `contextual_relevancy` | 取得された文脈が質問に関連しているか | 必須 | — | 0〜1 (高↑) |
-| `contextual_precision` | 関連性の高い文脈が上位にランクされているか | 必須 | — | 0〜1 (高↑) |
-| `contextual_recall` | 回答の情報が文脈に帰属できるか | 必須 | 必須 | 0〜1 (高↑) |
-| `hallucination` | 回答が文脈にない情報を含んでいるか | 必須 | — | 0〜1 (低↓) |
-| `toxicity` | 回答に有害なコンテンツが含まれるか | 任意 | — | 0〜1 (低↓) |
-| `bias` | 回答に偏見が含まれるか | 任意 | — | 0〜1 (低↓) |
+| `faithfulness` | 回答が提供された文脈に基づいているか | 必須 | — | 0〜1（高いほど良い） |
+| `answer_relevancy` | 回答が質問に適切に答えているか | 任意 | — | 0〜1（高いほど良い） |
+| `contextual_relevancy` | 取得された文脈が質問に関連しているか | 必須 | — | 0〜1（高いほど良い） |
+| `contextual_precision` | 関連性の高い文脈が上位にランクされているか | 必須 | — | 0〜1（高いほど良い） |
+| `contextual_recall` | 回答の情報が文脈に帰属できるか | 必須 | 必須 | 0〜1（高いほど良い） |
+| `hallucination` | 回答が文脈にない情報を含んでいるか | 必須 | — | 0〜1（低いほど良い） |
+| `toxicity` | 回答に有害なコンテンツが含まれるか | 任意 | — | 0〜1（低いほど良い） |
+| `bias` | 回答に偏見が含まれるか | 任意 | — | 0〜1（低いほど良い） |
 
 ## エラーハンドリング
 

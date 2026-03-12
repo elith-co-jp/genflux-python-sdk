@@ -1,6 +1,6 @@
-# Contributing to GenFlux Python SDK
+# Contributing to Genflux Python SDK
 
-GenFlux Python SDK へのコントリビューションを歓迎します！
+Genflux Python SDK へのコントリビューションを歓迎します！
 バグ報告・機能要望・ドキュメント改善・コードの改善、いずれも大歓迎です。
 
 ---

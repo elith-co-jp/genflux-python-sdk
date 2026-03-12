@@ -500,7 +500,7 @@ def _md_example(examples: list[str]) -> str:
     return "\n\n".join(blocks)
 
 
-def _md_method(method: MethodInfo) -> str:
+def _md_method(method: MethodInfo, *, num_prefix: str = "") -> str:
     """メソッドのMarkdownセクションを生成する."""
     lines: list[str] = []
 
@@ -513,7 +513,8 @@ def _md_method(method: MethodInfo) -> str:
     elif method.is_staticmethod:
         prefix = "*staticmethod* "
 
-    lines.append(f"#### {prefix}`{method.signature}`")
+    num_label = f"{num_prefix} " if num_prefix else ""
+    lines.append(f"#### {num_label}{prefix}`{method.signature}`")
     lines.append("")
 
     if method.doc.summary:
@@ -554,13 +555,14 @@ def _md_method(method: MethodInfo) -> str:
     return "\n".join(lines)
 
 
-def _md_class(info: ClassInfo, *, heading_level: int = 2) -> str:
+def _md_class(info: ClassInfo, *, heading_level: int = 2, num_prefix: str = "") -> str:
     """クラスのMarkdownセクションを生成する."""
     h = "#" * heading_level
     lines: list[str] = []
 
     # クラスヘッダー
-    lines.append(f"{h} `{info.name}`")
+    num_label = f"{num_prefix} " if num_prefix else ""
+    lines.append(f"{h} {num_label}`{info.name}`")
     lines.append("")
 
     if info.bases:
@@ -602,7 +604,8 @@ def _md_class(info: ClassInfo, *, heading_level: int = 2) -> str:
         lines.append(f"{h}# メソッド")
         lines.append("")
         for i, method in enumerate(public_methods):
-            lines.append(_md_method(method))
+            method_num = f"{num_prefix}.{i + 1}" if num_prefix else ""
+            lines.append(_md_method(method, num_prefix=method_num))
             if i < len(public_methods) - 1:
                 lines.append("---")
                 lines.append("")
@@ -681,49 +684,45 @@ Genflux Python SDK の完全な API リファレンスです。
 
 ## 目次
 
-- [概要](#概要)
-- [GenFlux](#genflux-1)
-- [ConfigClient](#configclient)
-- [JobsClient](#jobsclient)
-- [ReportsClient](#reportsclient)
-- [EvaluationClient](#evaluationclient)
-- [モデル](#モデル)
-- [例外](#例外)
-- [ユーティリティ](#ユーティリティ)
+- [1. 概要](#1-概要)
+- [2. クライアント](#2-クライアント)
+  - [2.1 GenFlux](#21-genflux)
+  - [2.2 ConfigClient](#22-configclient)
+  - [2.3 JobsClient](#23-jobsclient)
+  - [2.4 ReportsClient](#24-reportsclient)
+  - [2.5 EvaluationClient](#25-evaluationclient)
+- [3. モデル](#3-モデル)
+- [4. 例外](#4-例外)
+- [5. ユーティリティ](#5-ユーティリティ)
 
 ---""")
 
-    # 機能全体像（静的セクション）
+    # 1. 概要
     sections.append(_OVERVIEW_SECTION)
 
-    # --- Genflux クライアント ---
-    sections.append("## クライアント")
+    # 2. クライアント
+    sections.append("## 2. クライアント")
     sections.append("")
 
-    # External: クラス自身で定義されたメソッドのみ表示（継承元の内部メソッドを除外）
     genflux_info = _extract_class_info(GenFlux, include_inherited=False)
-    sections.append(_md_class(genflux_info, heading_level=3))
+    sections.append(_md_class(genflux_info, heading_level=3, num_prefix="2.1"))
 
-    # --- ConfigClient ---
     config_client_info = _extract_class_info(ConfigClient, include_inherited=False)
-    sections.append(_md_class(config_client_info, heading_level=3))
+    sections.append(_md_class(config_client_info, heading_level=3, num_prefix="2.2"))
 
-    # --- JobsClient ---
     jobs_client_info = _extract_class_info(JobsClient, include_inherited=False)
-    sections.append(_md_class(jobs_client_info, heading_level=3))
+    sections.append(_md_class(jobs_client_info, heading_level=3, num_prefix="2.3"))
 
-    # --- ReportsClient ---
     reports_client_info = _extract_class_info(ReportsClient, include_inherited=False)
-    sections.append(_md_class(reports_client_info, heading_level=3))
+    sections.append(_md_class(reports_client_info, heading_level=3, num_prefix="2.4"))
 
-    # --- EvaluationClient ---
     eval_client_info = _extract_class_info(EvaluationClient, include_inherited=False)
-    sections.append(_md_class(eval_client_info, heading_level=3))
+    sections.append(_md_class(eval_client_info, heading_level=3, num_prefix="2.5"))
 
-    # --- モデル ---
+    # 3. モデル
     sections.append("---")
     sections.append("")
-    sections.append("## モデル")
+    sections.append("## 3. モデル")
     sections.append("")
 
     model_classes = [
@@ -734,28 +733,28 @@ Genflux Python SDK の完全な API リファレンスです。
         EvaluationSummary, RedTeamSummary, PolicySummary,
         CategoryBreakdown, FailedCase, Violation,
     ]
-    for model_cls in model_classes:
+    for i, model_cls in enumerate(model_classes):
         info = _extract_class_info(model_cls, include_inherited=False)
-        sections.append(_md_class(info, heading_level=3))
+        sections.append(_md_class(info, heading_level=3, num_prefix=f"3.{i + 1}"))
 
-    # --- 例外 ---
+    # 4. 例外
     sections.append("---")
     sections.append("")
     sections.append(_EXCEPTIONS_SECTION)
 
-    # --- ユーティリティ ---
+    # 5. ユーティリティ
     sections.append("---")
     sections.append("")
-    sections.append("## ユーティリティ")
+    sections.append("## 5. ユーティリティ")
     sections.append("")
 
     pb_info = _extract_class_info(ProgressBar, include_inherited=False)
-    sections.append(_md_class(pb_info, heading_level=3))
+    sections.append(_md_class(pb_info, heading_level=3, num_prefix="5.1"))
 
     # create_progress_callback (関数)
     cb_doc = _parse_google_docstring(inspect.getdoc(create_progress_callback))
     cb_sig = _get_signature_str(create_progress_callback, "create_progress_callback")
-    sections.append(f"### `{cb_sig}`")
+    sections.append(f"### 5.2 `{cb_sig}`")
     sections.append("")
     if cb_doc.summary:
         sections.append(cb_doc.summary)
@@ -968,7 +967,7 @@ def _generate_developer_reference() -> str:
 # ---------------------------------------------------------------------------
 
 _OVERVIEW_SECTION = """\
-## 概要
+## 1. 概要
 
 ```python
 from genflux import GenFlux
@@ -1022,24 +1021,24 @@ graph TB
 
 | メトリック | メソッド | `contexts` | `ground_truth` | スコア |
 |---|---|---|---|---|
-| Faithfulness | `evaluator.faithfulness()` | 必須 | — | 0〜1 (高↑) |
-| Answer Relevancy | `evaluator.answer_relevancy()` | 任意 | — | 0〜1 (高↑) |
-| Contextual Relevancy | `evaluator.contextual_relevancy()` | 必須 | — | 0〜1 (高↑) |
-| Contextual Precision | `evaluator.contextual_precision()` | 必須 | — | 0〜1 (高↑) |
-| Contextual Recall | `evaluator.contextual_recall()` | 必須 | 必須 | 0〜1 (高↑) |
-| Hallucination | `evaluator.hallucination()` | 必須 | — | 0〜1 (低↓) |
-| Toxicity | `evaluator.toxicity()` | 任意 | — | 0〜1 (低↓) |
-| Bias | `evaluator.bias()` | 任意 | — | 0〜1 (低↓) |
+| Faithfulness | `evaluator.faithfulness()` | 必須 | — | 0〜1（高いほど良い） |
+| Answer Relevancy | `evaluator.answer_relevancy()` | 任意 | — | 0〜1（高いほど良い） |
+| Contextual Relevancy | `evaluator.contextual_relevancy()` | 必須 | — | 0〜1（高いほど良い） |
+| Contextual Precision | `evaluator.contextual_precision()` | 必須 | — | 0〜1（高いほど良い） |
+| Contextual Recall | `evaluator.contextual_recall()` | 必須 | 必須 | 0〜1（高いほど良い） |
+| Hallucination | `evaluator.hallucination()` | 必須 | — | 0〜1（低いほど良い） |
+| Toxicity | `evaluator.toxicity()` | 任意 | — | 0〜1（低いほど良い） |
+| Bias | `evaluator.bias()` | 任意 | — | 0〜1（低いほど良い） |
 
 ---
 """
 
 _EXCEPTIONS_SECTION = """\
-## 例外
+## 4. 例外
 
 すべての例外は `GenFluxError` を基底クラスとしています。
 
-### 例外一覧
+### 4.1 例外一覧
 
 | 例外 | 継承元 | HTTP ステータス | 説明 |
 |---|---|---|---|
@@ -1057,7 +1056,7 @@ _EXCEPTIONS_SECTION = """\
 > **Note:** `APIError` 系は HTTP レスポンスに起因する例外です。`status_code` 属性でステータスコードを取得できます。
 > `TimeoutError` / `JobFailedError` はジョブ実行に起因する例外で、HTTP ステータスコードはありません。
 
-### 例外ハンドリング
+### 4.2 例外ハンドリング
 
 ```python
 from genflux import GenFlux

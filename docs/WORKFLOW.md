@@ -1,4 +1,4 @@
-# GenFlux Python SDK - 本格的なワークフロー
+# Genflux Python SDK - 本格的なワークフロー
 
 実践的なユースケースに基づいた、本格的なワークフロー例を紹介します。
 

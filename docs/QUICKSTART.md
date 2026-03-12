@@ -1,6 +1,6 @@
-# GenFlux Python SDK - クイックスタート
+# Genflux Python SDK - クイックスタート
 
-最も簡単な方法で GenFlux SDK を使い始めましょう。このガイドでは、Config 作成から評価実行まで、最小限のコードで試せます。
+最も簡単な方法で Genflux SDK を使い始めましょう。このガイドでは、Config 作成から評価実行まで、最小限のコードで試せます。
 
 ---
 
@@ -17,7 +17,7 @@
 ## 前提条件
 
 - Python 3.11 以上
-- GenFlux Platform で発行した API Key（環境変数 `GENFLUX_API_KEY` に設定）
+- Genflux Platform で発行した API Key（環境変数 `GENFLUX_API_KEY` に設定）
 
 ---
 

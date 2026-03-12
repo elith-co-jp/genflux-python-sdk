@@ -1,6 +1,6 @@
-# GenFlux Python SDK
+# Genflux Python SDK
 
-> GenFlux Python SDK は RAG（Retrieval-Augmented Generation）システムの**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための公式クライアントライブラリです。同期的な API の裏で非同期 Job をポーリングし、結果を返すアーキテクチャを採用しています。
+> Genflux Python SDK は RAG（Retrieval-Augmented Generation）システムの**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための公式クライアントライブラリです。同期的な API の裏で非同期 Job をポーリングし、結果を返すアーキテクチャを採用しています。
 
 ## Quick Start
 
@@ -73,7 +73,7 @@ Priority: `GENFLUX_API_BASE_URL` > `GENFLUX_ENVIRONMENT` > default (`"prod"`).
 ```
 src/genflux/
 ├── __init__.py          # Public API (__all__) — single source of truth
-├── client.py            # GenFlux main client (entry point)
+├── client.py            # Genflux main client (entry point)
 ├── evaluation.py        # EvaluationClient (12 metric methods)
 ├── jobs.py              # JobsClient (create / wait / cancel jobs)
 ├── progress.py          # ProgressBar / create_progress_callback
@@ -133,6 +133,6 @@ make llms-check    # Verify llms.txt is up-to-date
 
 ## Optional
 
-- [Backend API Reference](docs/BACKEND_API_REFERENCE.md): REST API endpoints of the GenFlux Platform backend
+- [Backend API Reference](docs/BACKEND_API_REFERENCE.md): REST API endpoints of the Genflux Platform backend
 - [Test Evaluation Sheet](docs/TEST_EVALUATION_SHEET.md): Test cases and evaluation criteria
 - [Local Setup](docs/LOCAL_SETUP.md): Local development environment setup with Docker

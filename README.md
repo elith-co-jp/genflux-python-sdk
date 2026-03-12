@@ -1,6 +1,6 @@
-# GenFlux Python SDK
+# Genflux Python SDK
 
-GenFlux Platform 公式 Python SDK。RAG システムの回答品質スコアリング、セキュリティテスト、ポリシーチェックを Python から実行できます。
+Genflux Platform 公式 Python SDK。RAG システムの回答品質スコアリング、セキュリティテスト、ポリシーチェックを Python から実行できます。
 
 [![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](https://github.com/elith-co-jp/genflux-python-sdk/releases/tag/v0.1.2)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
@@ -113,7 +113,7 @@ except JobFailedError as e:
 | `GENFLUX_ENVIRONMENT` | `"local"` / `"dev"` / `"prod"` | `"prod"` |
 | `GENFLUX_API_BASE_URL` | ベース URL の上書き（最優先） | — |
 
-API Key は [GenFlux Platform](https://www.platform.genflux.jp/) から発行してください。
+API Key は [Genflux Platform](https://www.platform.genflux.jp/) から発行してください。
 
 ## サポート
 

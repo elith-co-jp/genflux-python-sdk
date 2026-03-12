@@ -1,4 +1,4 @@
-# GenFlux Python SDK - サンプルコード集
+# Genflux Python SDK - サンプルコード集
 
 実際のユースケースごとのサンプルコードを紹介します。
 
@@ -548,7 +548,7 @@ result = evaluator.faithfulness(
 
 ## まとめ
 
-これらのサンプルコードを参考に、GenFlux Python SDKを活用してください。
+これらのサンプルコードを参考に、Genflux Python SDKを活用してください。
 
 さらに詳しい情報は以下を参照:
 - [README.md](../README.md) - 基本的な使い方
@@ -556,5 +556,5 @@ result = evaluator.faithfulness(
 
 ---
 
-**GenFlux Python SDK - サンプルコード集**
+**Genflux Python SDK - サンプルコード集**
 

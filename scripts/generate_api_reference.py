@@ -21,7 +21,10 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import inspect
+import json
+import os
 import re
 import sys
 import textwrap
@@ -973,6 +976,30 @@ result = evaluator.faithfulness(
 print(f"Score: {result.score}")  # 0.0 ~ 1.0
 ```
 
+### アーキテクチャ
+
+```mermaid
+graph TB
+    User["Your Code"] --> GF["GenFlux Client"]
+
+    GF --> CC["client.configs<br/><small>ConfigClient</small>"]
+    GF --> JC["client.jobs<br/><small>JobsClient</small>"]
+    GF --> RC["client.reports<br/><small>ReportsClient</small>"]
+    GF --> EC["client.evaluation()<br/><small>EvaluationClient</small>"]
+
+    CC --> API["GenFlux Backend API"]
+    JC --> API
+    RC --> API
+    EC --> API
+
+    API --> Queue["Job Queue"]
+    Queue --> Result["MetricResult<br/><small>score / reason</small>"]
+
+    style GF fill:#4A90D9,color:#fff
+    style EC fill:#7B68EE,color:#fff
+    style API fill:#2E8B57,color:#fff
+```
+
 ### クライアント構成
 
 | クライアント | アクセス方法 | 説明 |
@@ -1059,6 +1086,373 @@ except JobFailedError as e:
 
 
 # ---------------------------------------------------------------------------
+# LLM Enrichment Pipeline (3-pass)
+# ---------------------------------------------------------------------------
+
+_CACHE_DIR = _SDK_ROOT / ".cache" / "docs"
+
+
+def _load_openai_client() -> Any:
+    """OpenAI クライアントを初期化する (.env 対応)."""
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv(_SDK_ROOT / ".env")
+    except ImportError:
+        pass
+
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        print("  ⚠ OPENAI_API_KEY が設定されていません。--enrich をスキップします。")
+        return None
+
+    try:
+        from openai import OpenAI
+
+        return OpenAI(api_key=api_key, timeout=300.0, max_retries=2)
+    except ImportError:
+        print("  ⚠ openai パッケージが見つかりません。`uv sync --group dev` を実行してください。")
+        return None
+
+
+def _extract_source_summary() -> str:
+    """ソースコードから関数シグネチャ・docstring を抽出し、ground truth を作成する."""
+    from genflux.client import GenFlux
+    from genflux.clients.config import ConfigClient
+    from genflux.clients.reports import ReportsClient
+    from genflux.evaluation import EvaluationClient
+    from genflux.jobs import JobsClient
+    from genflux.models.config import Config, ConfigCreate, ConfigUpdate
+    from genflux.models.job import Job, JobProgress, MetricResult
+
+    summary_parts: list[str] = []
+
+    classes = [
+        GenFlux, ConfigClient, JobsClient, ReportsClient, EvaluationClient,
+        Config, ConfigCreate, ConfigUpdate, Job, JobProgress, MetricResult,
+    ]
+
+    for cls in classes:
+        summary_parts.append(f"### {cls.__name__}")
+        doc = inspect.getdoc(cls) or ""
+        if doc:
+            summary_parts.append(f"Docstring: {doc[:500]}")
+
+        # Public methods
+        for name, obj in inspect.getmembers(cls):
+            if name.startswith("_") or not callable(obj):
+                continue
+            try:
+                sig = inspect.signature(obj)
+                mdoc = inspect.getdoc(obj) or ""
+                summary_parts.append(f"  {name}{sig}")
+                if mdoc:
+                    summary_parts.append(f"    -> {mdoc[:200]}")
+            except (ValueError, TypeError):
+                pass
+
+        # Pydantic fields
+        if hasattr(cls, "model_fields"):
+            for fname, finfo in cls.model_fields.items():
+                type_str = _type_to_str(finfo.annotation) if finfo.annotation else "?"
+                summary_parts.append(f"  field {fname}: {type_str}")
+
+        summary_parts.append("")
+
+    return "\n".join(summary_parts)
+
+
+def _call_openai(
+    client: Any,
+    system_prompt: str,
+    user_prompt: str,
+    *,
+    model: str = "gpt-4o",
+    temperature: float = 0.3,
+    max_retries: int = 3,
+) -> str:
+    """OpenAI API を呼び出す（リトライ付き）."""
+    import time
+
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                temperature=temperature,
+                timeout=300,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+            )
+            return response.choices[0].message.content or ""
+        except Exception as e:
+            if attempt < max_retries - 1:
+                wait = (attempt + 1) * 10
+                print(f"    ⚠ API エラー: {e.__class__.__name__}. {wait}秒後にリトライ... ({attempt + 2}/{max_retries})")
+                time.sleep(wait)
+            else:
+                print(f"    ❌ API エラー（リトライ上限）: {e}")
+                raise
+
+
+def _clean_llm_output(text: str) -> str:
+    """LLM 出力から余分なタグ・コードフェンスを除去する."""
+    result = text.strip()
+    # コードフェンス除去
+    if result.startswith("```markdown"):
+        result = result[len("```markdown"):].strip()
+    elif result.startswith("```md"):
+        result = result[len("```md"):].strip()
+    elif result.startswith("```") and not result.startswith("```python") and not result.startswith("```mermaid"):
+        result = result[3:].strip()
+    if result.endswith("```"):
+        result = result[:-3].rstrip()
+    # <markdown> タグ除去
+    result = re.sub(r"</?markdown>", "", result)
+    return result.strip()
+
+
+def _split_md_sections(md: str) -> list[tuple[str, str]]:
+    """Markdown をh2セクション単位で分割する.
+
+    Returns:
+        [(section_name, section_content), ...]
+    """
+    sections: list[tuple[str, str]] = []
+    current_name = "_header"
+    current_lines: list[str] = []
+
+    for line in md.split("\n"):
+        if line.startswith("## ") and not line.startswith("### "):
+            if current_lines:
+                sections.append((current_name, "\n".join(current_lines)))
+            current_name = line.strip("# ").strip()
+            current_lines = [line]
+        else:
+            current_lines.append(line)
+
+    if current_lines:
+        sections.append((current_name, "\n".join(current_lines)))
+
+    return sections
+
+
+def _rejoin_sections(sections: list[tuple[str, str]]) -> str:
+    """分割されたセクションを結合する."""
+    return "\n".join(content for _, content in sections)
+
+
+def _pass1_enrich(client: Any, raw_md: str, source_summary: str) -> str:
+    """Pass 1: ドキュメントの説明文をセクション単位で改善する."""
+    print("  [Pass 1/3] ドキュメント説明文の改善...")
+
+    system_prompt = """\
+あなたはテクニカルライターです。Python SDK の API リファレンスの一部セクション (Markdown) を改善してください。
+
+ルール:
+- パラメータ説明が空欄("") や不十分な場合、ソースコード情報をもとに簡潔で分かりやすい日本語の説明を追加する
+- 既に十分な説明がある箇所はそのまま残す
+- クラスやメソッドの summary が不十分な場合、1-2文で改善する
+- Markdown のテーブル構造、見出し、コードブロックは絶対に壊さない
+- mermaid ブロックは一切変更しない
+- メソッドシグネチャ（`method_name(param: type)` 形式）は一切変更しない
+- 型名、パラメータ名、クラス名は絶対に変更しない
+- 存在しない機能やパラメータを追加しない（ソースにないものは書かない）
+- 新しい見出し（## や ### ）を追加しない。既存の見出し構造をそのまま維持する
+- 出力は改善後の Markdown セクションをそのまま返すこと（説明や前置きは不要）"""
+
+    sections = _split_md_sections(raw_md)
+    enriched_sections: list[tuple[str, str]] = []
+
+    for name, content in sections:
+        # ヘッダー・目次・関連ドキュメント・短いセクションはそのまま
+        if name in ("_header", "目次", "関連ドキュメント") or len(content) < 100:
+            enriched_sections.append((name, content))
+            continue
+
+        print(f"    セクション: {name}")
+        user_prompt = f"""\
+ソースコード情報 (ground truth):
+
+<source_summary>
+{source_summary}
+</source_summary>
+
+以下のセクションを改善してください:
+
+<markdown>
+{content}
+</markdown>"""
+
+        result = _call_openai(client, system_prompt, user_prompt)
+        result = _clean_llm_output(result)
+        enriched_sections.append((name, result))
+
+    return _rejoin_sections(enriched_sections)
+
+
+def _pass2_hallucination_check(client: Any, enriched_md: str, source_summary: str) -> str:
+    """Pass 2: ハルシネーションをセクション単位でチェックし修正する."""
+    print("  [Pass 2/3] ハルシネーションチェック...")
+
+    system_prompt = """\
+あなたは品質保証エンジニアです。API リファレンスの一部セクション (Markdown) にハルシネーション（事実と異なる記述）がないかチェックしてください。
+
+チェック項目:
+1. ソースに存在しないメソッド名・パラメータ名・型名が記載されていないか
+2. パラメータの型がソースと一致するか
+3. 必須/任意の記載がソースのデフォルト値と一致するか
+4. メソッドの戻り値の型がソースと一致するか
+5. 説明文がソースの実際の動作と矛盾していないか
+6. 存在しない例外クラスや属性が記載されていないか
+
+修正ルール:
+- ハルシネーションを発見したら、ソースの情報に基づいて修正する
+- 修正できない場合は該当の説明文を削除する（嘘を残すよりは空欄が良い）
+- Markdown 構造は絶対に壊さない
+- mermaid ブロック、コードブロック、テーブル構造はそのまま維持
+- 問題なければそのまま返す
+- 新しい見出し（## や ### ）を追加しない。既存の見出し構造をそのまま維持する
+- 出力は修正後の Markdown セクションをそのまま返すこと（説明や前置きは不要）"""
+
+    sections = _split_md_sections(enriched_md)
+    checked_sections: list[tuple[str, str]] = []
+
+    for name, content in sections:
+        if name in ("_header", "目次", "関連ドキュメント") or len(content) < 100:
+            checked_sections.append((name, content))
+            continue
+
+        print(f"    セクション: {name}")
+        user_prompt = f"""\
+ソースコード情報 (ground truth):
+
+<source_summary>
+{source_summary}
+</source_summary>
+
+以下のセクションをチェックして、ハルシネーションがあれば修正してください:
+
+<markdown>
+{content}
+</markdown>"""
+
+        result = _call_openai(client, system_prompt, user_prompt)
+        result = result.strip()
+        if result.startswith("```"):
+            first_newline = result.index("\n") if "\n" in result else 3
+            result = result[first_newline + 1:]
+        if result.endswith("```"):
+            result = result[:-3].rstrip()
+        checked_sections.append((name, result))
+
+    return _rejoin_sections(checked_sections)
+
+
+def _pass3_ux_review(client: Any, md: str) -> str:
+    """Pass 3: UX レビュー（読みやすさ・一貫性）をセクション単位で実行."""
+    print("  [Pass 3/3] UX レビュー...")
+
+    system_prompt = """\
+あなたは SDK ドキュメントの UX スペシャリストです。API リファレンスの一部セクション (Markdown) の読みやすさとユーザー体験をレビューしてください。
+
+チェック項目:
+1. 見出しの階層が正しいか（h2 > h3 > h4 の順序）
+2. テーブルの列が揃っているか、壊れていないか
+3. コードブロックが正しく閉じているか
+4. 内部リンク（アンカー）が正しい形式か
+5. 日本語の文体が統一されているか（です/ます調で統一）
+6. 説明文が冗長すぎないか（1パラメータ1-2文以内）
+7. mermaid ブロックの構文が正しいか
+8. 空行が適切に入っているか（セクション間に空行）
+
+修正ルール:
+- UX を損なう問題を発見したら修正する
+- メソッドシグネチャ、型名、パラメータ名は絶対に変更しない
+- 内容の意味を変えない
+- Markdown の基本構造（見出しレベル、テーブル、コードブロック）を壊さない
+- 新しい見出し（## や ### ）を追加しない。既存の見出し構造をそのまま維持する
+- 出力は修正後の Markdown セクションをそのまま返すこと（説明や前置きは不要）"""
+
+    sections = _split_md_sections(md)
+    reviewed_sections: list[tuple[str, str]] = []
+
+    for name, content in sections:
+        if name in ("_header", "目次", "関連ドキュメント") or len(content) < 100:
+            reviewed_sections.append((name, content))
+            continue
+
+        print(f"    セクション: {name}")
+        user_prompt = f"""\
+以下のセクションを UX 観点でレビューし、問題があれば修正してください:
+
+<markdown>
+{content}
+</markdown>"""
+
+        result = _call_openai(client, system_prompt, user_prompt)
+        result = result.strip()
+        if result.startswith("```"):
+            first_newline = result.index("\n") if "\n" in result else 3
+            result = result[first_newline + 1:]
+        if result.endswith("```"):
+            result = result[:-3].rstrip()
+        reviewed_sections.append((name, result))
+
+    return _rejoin_sections(reviewed_sections)
+
+
+def _get_cache_path(raw_md: str, mode: str) -> Path:
+    """キャッシュファイルのパスを取得する."""
+    content_hash = hashlib.sha256(raw_md.encode()).hexdigest()[:16]
+    return _CACHE_DIR / f"{mode}_{content_hash}.md"
+
+
+def _enrich_with_llm(raw_md: str, *, mode: str = "external", use_cache: bool = True) -> str:
+    """3-pass LLM パイプラインでドキュメントを改善する.
+
+    Args:
+        raw_md: ソースから自動生成した Markdown
+        mode: external or developer
+        use_cache: キャッシュを使用するか
+
+    Returns:
+        改善後の Markdown
+    """
+    # キャッシュチェック
+    cache_path = _get_cache_path(raw_md, mode)
+    if use_cache and cache_path.exists():
+        print(f"  キャッシュを使用: {cache_path.name}")
+        return cache_path.read_text(encoding="utf-8")
+
+    # OpenAI クライアント初期化
+    openai_client = _load_openai_client()
+    if openai_client is None:
+        return raw_md
+
+    # Ground truth 抽出
+    print("  ソースコードから ground truth を抽出中...")
+    source_summary = _extract_source_summary()
+
+    # 3-pass pipeline
+    result = raw_md
+    result = _pass1_enrich(openai_client, result, source_summary)
+    result = _pass2_hallucination_check(openai_client, result, source_summary)
+    result = _pass3_ux_review(openai_client, result)
+
+    # LLM が付与する余分なタグ・フェンスを除去
+    result = _clean_llm_output(result)
+
+    # キャッシュ保存
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(result, encoding="utf-8")
+    print(f"  キャッシュ保存: {cache_path.name}")
+
+    return result
+
+
+# ---------------------------------------------------------------------------
 # メイン
 # ---------------------------------------------------------------------------
 
@@ -1084,6 +1478,16 @@ def main() -> int:
         action="store_true",
         help="生成結果と既存ファイルの差分をチェック（CI用）。差分があれば exit code 1",
     )
+    parser.add_argument(
+        "--enrich",
+        action="store_true",
+        help="LLM (OpenAI) による3パスの改善パイプラインを実行する",
+    )
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="LLM キャッシュを使用せず、常に再生成する",
+    )
     args = parser.parse_args()
 
     output_dir: Path = args.output_dir
@@ -1092,6 +1496,11 @@ def main() -> int:
 
     if args.mode in ("external", "all"):
         external_md = _generate_external_reference()
+        if args.enrich:
+            print("\n🤖 External API Reference を LLM で改善中...")
+            external_md = _enrich_with_llm(
+                external_md, mode="external", use_cache=not args.no_cache,
+            )
         external_path = output_dir / "API_REFERENCE.md"
         if args.check:
             if _check_diff(external_path, external_md):
@@ -1102,6 +1511,11 @@ def main() -> int:
 
     if args.mode in ("developer", "all"):
         developer_md = _generate_developer_reference()
+        if args.enrich:
+            print("\n🤖 Developer API Reference を LLM で改善中...")
+            developer_md = _enrich_with_llm(
+                developer_md, mode="developer", use_cache=not args.no_cache,
+            )
         developer_path = output_dir / "DEVELOPER_API_REFERENCE.md"
         if args.check:
             if _check_diff(developer_path, developer_md):

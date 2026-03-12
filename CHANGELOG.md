@@ -12,6 +12,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/),
 
 ---
 
+## 0.1.2
+Released: 2026-03-02
+
+### Fixed
+
+- `__init__.py` の `__version__` が `0.1.0` のまま更新されていなかったのを修正（`0.1.2` に変更）
+
+### Breaking changes
+
+- なし
+
+---
+
+## 0.1.1
+Released: 2026-03-02
+
+### Fixed
+
+- PyPI 公開パッケージの内容を最新コードに更新（`0.1.0` は旧コードがアップロードされていたため再リリース）
+
+### Changed
+
+- `pyproject.toml`: `keywords`、`[project.urls]`（Homepage / Repository / Changelog / Bug Tracker）、著者メールアドレスを追加
+- `tqdm` 依存バージョンを `>=4.66.0` → `>=4.67.0` に更新
+- `README.md`: バージョンバッジ URL の typo 修正（`elith-co-j` → `elith-co-jp`）
+- `CHANGELOG.md`: placeholder URL を `your-org` → `elith-co-jp` に修正
+- `docs/LOCAL_SETUP.md`: 内部 Slack チャンネル参照の削除、サポート Email を `genflux-support@elith.jp` に更新
+
+### Added
+
+- `CONTRIBUTING.md` を追加
+- `.github/ISSUE_TEMPLATE/` に bug_report・feature_request テンプレートを追加
+- `.github/workflows/publish.yml`: PyPI 自動公開 GitHub Actions ワークフローを追加
+
+### Breaking changes
+
+- なし
+
+---
+
 ## 0.1.0
 Released: 2026-03-02
 
@@ -26,5 +66,7 @@ Released: 2026-03-02
 
 - なし（初回リリースのため）
 
-[Unreleased]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/elith-co-jp/genflux-python-sdk/releases/tag/v0.1.0

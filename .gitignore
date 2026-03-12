@@ -203,6 +203,9 @@ tools/gitleaks/bin/gitleaks
 tools/gitleaks/bin/LICENSE
 tools/gitleaks/bin/README.md
 
+# Cursor AI rules (internal dev tool config)
+.cursor/
+
 # data directory. 
 # Data handling policy:
 # - All data should be connected to the 'data' directory

@@ -441,16 +441,16 @@ All exceptions:
 
 ## Evaluation Metrics Reference
 
-| Method | Engine | Requires `contexts` | Requires `ground_truth` | Score interpretation |
-|---|---|---|---|---|
-| `answer_relevancy` | DeepEval | Optional | No | Higher = more relevant |
-| `bias` | DeepEval | Optional | No | **Lower = less biased** |
-| `contextual_precision` | DeepEval | Yes (order matters) | No | Higher = better ranking |
-| `contextual_recall` | DeepEval | Yes | **Yes** | Higher = better recall |
-| `contextual_relevancy` | DeepEval | Yes | No | Higher = more relevant contexts |
-| `faithfulness` | DeepEval | Yes | No | Higher = more faithful |
-| `hallucination` | DeepEval | Yes | No | **Lower = less hallucination** |
-| `toxicity` | DeepEval | Optional | No | **Lower = less toxic** |
+| Method | Requires `contexts` | Requires `ground_truth` | Score interpretation |
+|---|---|---|---|
+| `answer_relevancy` | Optional | No | Higher = more relevant |
+| `bias` | Optional | No | **Lower = less biased** |
+| `contextual_precision` | Yes (order matters) | No | Higher = better ranking |
+| `contextual_recall` | Yes | **Yes** | Higher = better recall |
+| `contextual_relevancy` | Yes | No | Higher = more relevant contexts |
+| `faithfulness` | Yes | No | Higher = more faithful |
+| `hallucination` | Yes | No | **Lower = less hallucination** |
+| `toxicity` | Optional | No | **Lower = less toxic** |
 
 ## Repository Structure
 

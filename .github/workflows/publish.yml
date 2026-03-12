@@ -1,0 +1,93 @@
+name: Publish to PyPI
+
+# GitHub Release を作成すると自動で実行される
+on:
+  release:
+    types: [published]
+
+jobs:
+  # -----------------------------------------------------------------------
+  # 1. ビルドと検証
+  # -----------------------------------------------------------------------
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Build packages (sdist + wheel)
+        run: uv build
+
+      - name: Verify with twine check
+        run: uv run twine check dist/*
+
+      - name: Upload dist as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # -----------------------------------------------------------------------
+  # 2. TestPyPI へのアップロード（pre-release タグのみ）
+  # -----------------------------------------------------------------------
+  publish-testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    runs-on: ubuntu-latest
+    # pre-release のリリースのみ TestPyPI に公開
+    if: github.event.release.prerelease == true
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/genflux/
+
+    permissions:
+      id-token: write  # OIDC による認証（トークン不要）
+
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  # -----------------------------------------------------------------------
+  # 3. 本番 PyPI へのアップロード（正式リリースのみ）
+  # -----------------------------------------------------------------------
+  publish-pypi:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    # pre-release ではない（正式リリース）のみ本番 PyPI に公開
+    if: github.event.release.prerelease == false
+    environment:
+      name: pypi
+      url: https://pypi.org/project/genflux/
+
+    permissions:
+      id-token: write  # OIDC による認証（トークン不要）
+
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+

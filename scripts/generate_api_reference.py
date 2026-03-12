@@ -2,17 +2,21 @@
 """API Reference ドキュメント自動生成スクリプト.
 
 SDK のソースコードから docstring・型ヒントを解析し、
-Markdown 形式の API Reference を生成する。
+3-pass LLM パイプライン（改善→ハルシネーションチェック→UXレビュー）で
+高品質な Markdown 形式の API Reference を生成する。
 
 Usage:
-    # External（SDKユーザー向け）API Reference を生成
+    # 両方を生成（LLM 3-pass 改善付き）
+    python scripts/generate_api_reference.py --mode all
+
+    # キャッシュなしで再生成
+    python scripts/generate_api_reference.py --mode all --no-cache
+
+    # External（SDKユーザー向け）のみ
     python scripts/generate_api_reference.py --mode external
 
-    # Developer（開発者向け）API Reference を生成
+    # Developer（開発者向け）のみ
     python scripts/generate_api_reference.py --mode developer
-
-    # 両方を生成
-    python scripts/generate_api_reference.py --mode all
 
     # 差分チェック（CIで使用）
     python scripts/generate_api_reference.py --mode all --check
@@ -23,7 +27,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import inspect
-import json
 import os
 import re
 import sys
@@ -1103,7 +1106,7 @@ def _load_openai_client() -> Any:
 
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
-        print("  ⚠ OPENAI_API_KEY が設定されていません。--enrich をスキップします。")
+        print("  ⚠ OPENAI_API_KEY が設定されていません。LLM 改善をスキップします。")
         return None
 
     try:
@@ -1339,12 +1342,7 @@ def _pass2_hallucination_check(client: Any, enriched_md: str, source_summary: st
 </markdown>"""
 
         result = _call_openai(client, system_prompt, user_prompt)
-        result = result.strip()
-        if result.startswith("```"):
-            first_newline = result.index("\n") if "\n" in result else 3
-            result = result[first_newline + 1:]
-        if result.endswith("```"):
-            result = result[:-3].rstrip()
+        result = _clean_llm_output(result)
         checked_sections.append((name, result))
 
     return _rejoin_sections(checked_sections)
@@ -1392,12 +1390,7 @@ def _pass3_ux_review(client: Any, md: str) -> str:
 </markdown>"""
 
         result = _call_openai(client, system_prompt, user_prompt)
-        result = result.strip()
-        if result.startswith("```"):
-            first_newline = result.index("\n") if "\n" in result else 3
-            result = result[first_newline + 1:]
-        if result.endswith("```"):
-            result = result[:-3].rstrip()
+        result = _clean_llm_output(result)
         reviewed_sections.append((name, result))
 
     return _rejoin_sections(reviewed_sections)
@@ -1479,11 +1472,6 @@ def main() -> int:
         help="生成結果と既存ファイルの差分をチェック（CI用）。差分があれば exit code 1",
     )
     parser.add_argument(
-        "--enrich",
-        action="store_true",
-        help="LLM (OpenAI) による3パスの改善パイプラインを実行する",
-    )
-    parser.add_argument(
         "--no-cache",
         action="store_true",
         help="LLM キャッシュを使用せず、常に再生成する",
@@ -1496,11 +1484,10 @@ def main() -> int:
 
     if args.mode in ("external", "all"):
         external_md = _generate_external_reference()
-        if args.enrich:
-            print("\n🤖 External API Reference を LLM で改善中...")
-            external_md = _enrich_with_llm(
-                external_md, mode="external", use_cache=not args.no_cache,
-            )
+        print("\n🤖 External API Reference を LLM で改善中...")
+        external_md = _enrich_with_llm(
+            external_md, mode="external", use_cache=not args.no_cache,
+        )
         external_path = output_dir / "API_REFERENCE.md"
         if args.check:
             if _check_diff(external_path, external_md):
@@ -1511,11 +1498,10 @@ def main() -> int:
 
     if args.mode in ("developer", "all"):
         developer_md = _generate_developer_reference()
-        if args.enrich:
-            print("\n🤖 Developer API Reference を LLM で改善中...")
-            developer_md = _enrich_with_llm(
-                developer_md, mode="developer", use_cache=not args.no_cache,
-            )
+        print("\n🤖 Developer API Reference を LLM で改善中...")
+        developer_md = _enrich_with_llm(
+            developer_md, mode="developer", use_cache=not args.no_cache,
+        )
         developer_path = output_dir / "DEVELOPER_API_REFERENCE.md"
         if args.check:
             if _check_diff(developer_path, developer_md):

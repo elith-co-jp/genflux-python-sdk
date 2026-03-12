@@ -1,6 +1,11 @@
-# Genflux Python SDK
+<p align="center">
+  <img src="assets/GENFLUX_logotype.png" alt="Genflux" width="400">
+</p>
 
-Genflux Platform 公式 Python SDK。RAG システムの回答品質スコアリング、セキュリティテスト、ポリシーチェックを Python から実行できます。
+<p align="center">
+  <strong>Genflux Python SDK</strong><br>
+  Genflux Platform 公式 Python SDK。RAG システムの回答品質スコアリング、セキュリティテスト、ポリシーチェックを Python から実行できます。
+</p>
 
 [![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](https://github.com/elith-co-jp/genflux-python-sdk/releases/tag/v0.1.2)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
@@ -36,6 +41,38 @@ result = client.evaluation().faithfulness(
 )
 print(f"Faithfulness: {result.score}")  # 0.92
 ```
+
+## アーキテクチャ
+
+```mermaid
+graph TB
+    User["Your Code"] --> GF["Genflux Client"]
+
+    GF --> CC["client.configs<br/><small>ConfigClient</small>"]
+    GF --> JC["client.jobs<br/><small>JobsClient</small>"]
+    GF --> RC["client.reports<br/><small>ReportsClient</small>"]
+    GF --> EC["client.evaluation()<br/><small>EvaluationClient</small>"]
+
+    CC --> API["Genflux Backend API"]
+    JC --> API
+    RC --> API
+    EC --> API
+
+    API --> Queue["Job Queue"]
+    Queue --> Result["MetricResult<br/><small>score / reason</small>"]
+
+    style GF fill:#4A90D9,color:#fff
+    style EC fill:#7B68EE,color:#fff
+    style API fill:#2E8B57,color:#fff
+```
+
+| クライアント | アクセス方法 | 説明 |
+|---|---|---|
+| `GenFlux` | `GenFlux()` | メインクライアント（認証・サブクライアント管理） |
+| `EvaluationClient` | `client.evaluation()` | 8 種類のメトリックによる評価実行 |
+| `ConfigClient` | `client.configs` | RAG API 設定の CRUD |
+| `JobsClient` | `client.jobs` | 非同期ジョブの作成・監視・キャンセル |
+| `ReportsClient` | `client.reports` | 評価レポートの取得（サマリー/詳細） |
 
 ## インストール
 

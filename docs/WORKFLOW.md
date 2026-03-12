@@ -195,15 +195,14 @@ for metric_key, metric_name in metrics:
             )
         else:
             result = method(
-            question=question,
-            answer=answer,
-            contexts=contexts,
-        )
+                question=question,
+                answer=answer,
+                contexts=contexts,
+            )
         
         results[metric_name] = {
             "score": result.score,
             "reason": result.reason,
-            "engine": result.engine
         }
         
         print(f"  ✅ Score: {result.score:.2f}")
@@ -286,16 +285,6 @@ if not config_id:
             }
         },
         response_format={"response_path": "answer"},
-        evaluation_metrics=None,
-        total_prompt_count=None,
-        prompt_category_ratios=None,
-        manual_prompts=None,
-        evaluation_success_rate_threshold=None,
-        redteam_objectives=None,
-        redteam_max_turns=None,
-        redteam_defense_rate_threshold=None,
-        compliance_frameworks=None,
-        policy_compliance_rate_threshold=None,
     )
     config = client.configs.create(config_data)
     config_id = str(config.id)
@@ -399,16 +388,6 @@ if not config_id:
             }
         },
         response_format={"response_path": "answer"},
-        evaluation_metrics=None,
-        total_prompt_count=None,
-        prompt_category_ratios=None,
-        manual_prompts=None,
-        evaluation_success_rate_threshold=None,
-        redteam_objectives=None,
-        redteam_max_turns=None,
-        redteam_defense_rate_threshold=None,
-        compliance_frameworks=None,
-        policy_compliance_rate_threshold=None,
     )
     config = client.configs.create(config_data)
     config_id = str(config.id)

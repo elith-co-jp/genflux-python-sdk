@@ -46,6 +46,7 @@ class DocParam:
     name: str
     type_hint: str
     description: str
+    required: bool = True
 
 
 @dataclass
@@ -168,6 +169,49 @@ def _parse_example_section(content: str) -> list[str]:
         examples.append("\n".join(doctest_lines))
 
     return examples
+
+
+def _enrich_params_from_signature(
+    doc_params: list[DocParam],
+    func: Any,
+) -> list[DocParam]:
+    """Docstring パラメータに関数シグネチャの型・デフォルト情報を補完する."""
+    try:
+        sig = inspect.signature(func)
+    except (ValueError, TypeError):
+        return doc_params
+
+    sig_map: dict[str, inspect.Parameter] = {
+        name: param
+        for name, param in sig.parameters.items()
+        if name != "self"
+    }
+
+    doc_map = {p.name: p for p in doc_params}
+    result: list[DocParam] = []
+
+    # シグネチャ順で出力（docstring にないパラメータも拾う）
+    for param_name, param in sig_map.items():
+        type_str = _type_to_str(param.annotation)
+        is_required = param.default is inspect.Parameter.empty
+
+        if param_name in doc_map:
+            dp = doc_map[param_name]
+            result.append(DocParam(
+                name=dp.name,
+                type_hint=dp.type_hint or type_str,
+                description=dp.description,
+                required=is_required,
+            ))
+        else:
+            result.append(DocParam(
+                name=param_name,
+                type_hint=type_str,
+                description="",
+                required=is_required,
+            ))
+
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -305,6 +349,10 @@ def _extract_class_info(
     methods: list[MethodInfo] = []
     fields: list[DocParam] = []
 
+    # コンストラクタパラメータを __init__ シグネチャから enrichment
+    if doc.params and hasattr(cls, "__init__"):
+        doc.params = _enrich_params_from_signature(doc.params, cls.__init__)
+
     # このクラス自身で定義されたメソッド名の集合
     own_members = set(cls.__dict__.keys()) if not include_inherited else None
 
@@ -360,6 +408,8 @@ def _extract_class_info(
                 if isinstance(cm, classmethod):
                     actual_func = cm.__func__
             mdoc = _parse_google_docstring(inspect.getdoc(obj))
+            # シグネチャから型・Required 情報を補完
+            mdoc.params = _enrich_params_from_signature(mdoc.params, actual_func)
             sig_str = _get_signature_str(actual_func, name)
             methods.append(MethodInfo(
                 name=name,
@@ -383,14 +433,22 @@ def _extract_class_info(
 # Markdown 生成
 # ---------------------------------------------------------------------------
 
-def _md_params_table(params: list[DocParam]) -> str:
+def _md_params_table(params: list[DocParam], *, show_required: bool = True) -> str:
     """パラメータをMarkdownテーブルとして出力する."""
     if not params:
         return ""
-    lines = ["| パラメータ | 型 | 説明 |", "|---|---|---|"]
-    for p in params:
-        type_str = f"`{p.type_hint}`" if p.type_hint else ""
-        lines.append(f"| `{p.name}` | {type_str} | {p.description} |")
+
+    if show_required:
+        lines = ["| パラメータ | 型 | 必須 | 説明 |", "|---|---|---|---|"]
+        for p in params:
+            type_str = f"`{p.type_hint}`" if p.type_hint else ""
+            req_str = "**Yes**" if p.required else "No"
+            lines.append(f"| `{p.name}` | {type_str} | {req_str} | {p.description} |")
+    else:
+        lines = ["| パラメータ | 型 | 説明 |", "|---|---|---|"]
+        for p in params:
+            type_str = f"`{p.type_hint}`" if p.type_hint else ""
+            lines.append(f"| `{p.name}` | {type_str} | {p.description} |")
     return "\n".join(lines)
 
 
@@ -532,10 +590,11 @@ def _md_class(info: ClassInfo, *, heading_level: int = 2) -> str:
     if public_methods:
         lines.append(f"{h}# メソッド")
         lines.append("")
-        for method in public_methods:
+        for i, method in enumerate(public_methods):
             lines.append(_md_method(method))
-            lines.append("---")
-            lines.append("")
+            if i < len(public_methods) - 1:
+                lines.append("---")
+                lines.append("")
 
     return "\n".join(lines)
 
@@ -609,10 +668,10 @@ GenFlux Python SDK の完全な API リファレンスです。
 
 ---
 
-## 📋 目次
+## 目次
 
-- [機能全体像](#機能全体像)
-- [GenFlux クライアント](#genflux-1)
+- [概要](#概要)
+- [GenFlux](#genflux-1)
 - [ConfigClient](#configclient)
 - [JobsClient](#jobsclient)
 - [ReportsClient](#reportsclient)
@@ -671,17 +730,7 @@ GenFlux Python SDK の完全な API リファレンスです。
     # --- 例外 ---
     sections.append("---")
     sections.append("")
-    sections.append("## 例外")
-    sections.append("")
-
-    exception_classes = [
-        GenFluxError, APIError, AuthenticationError, NotFoundError,
-        ValidationError, TimeoutError, JobFailedError, RateLimitError,
-        ConfigNotFoundError, ResourceNotFoundError,
-    ]
-    for exc_cls in exception_classes:
-        info = _extract_class_info(exc_cls, include_inherited=False)
-        sections.append(_md_class(info, heading_level=3))
+    sections.append(_EXCEPTIONS_SECTION)
 
     # --- ユーティリティ ---
     sections.append("---")
@@ -908,86 +957,104 @@ def _generate_developer_reference() -> str:
 # ---------------------------------------------------------------------------
 
 _OVERVIEW_SECTION = """\
-## 機能全体像
-
-GenFlux SDK は、RAG システムの評価を簡単に実行するための包括的な機能を提供します。
-
-### アーキテクチャ概要
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      GenFlux Client                         │
-│  (メインエントリーポイント)                                    │
-└────────────────┬────────────────────────────────────────────┘
-                 │
-      ┌──────────┼──────────┬──────────┬──────────┐
-      │          │          │          │          │
-      ▼          ▼          ▼          ▼          ▼
-┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐
-│ Config   ││  Jobs    ││ Reports  ││Evaluation││ Progress │
-│ Client   ││ Client   ││ Client   ││ Client   ││ Display  │
-└──────────┘└──────────┘└──────────┘└──────────┘└──────────┘
-     │           │           │           │           │
-     └───────────┴───────────┴───────────┴───────────┘
-                         │
-                         ▼
-              ┌──────────────────┐
-              │  Backend API     │
-              │  (Job Queue)     │
-              └──────────────────┘
-```
-
-### 主要コンポーネント
-
-| コンポーネント | 説明 |
-|---|---|
-| **GenFlux Client** | メインエントリーポイント。認証管理・サブクライアント初期化 |
-| **ConfigClient** | RAG API 設定の CRUD 管理 |
-| **JobsClient** | 非同期ジョブの作成・監視・キャンセル |
-| **EvaluationClient** | 12 種類のメトリックによる評価実行 |
-| **ReportsClient** | 評価レポートの取得（サマリー/詳細） |
-
-### サポートされる評価メトリック
-
-| メトリック | 説明 | スコア範囲 |
-|---|---|---|
-| **Faithfulness** | 回答が提供された文脈に基づいているか | 0.0 ~ 1.0 (高↑) |
-| **Answer Relevancy** | 回答が質問に対して適切に答えているか | 0.0 ~ 1.0 (高↑) |
-| **Contextual Relevancy** | 取得された文脈が質問に関連しているか | 0.0 ~ 1.0 (高↑) |
-| **Contextual Precision** | 関連性の高い文脈が上位にランクされているか | 0.0 ~ 1.0 (高↑) |
-| **Contextual Recall** | 回答の情報が文脈に帰属できるか | 0.0 ~ 1.0 (高↑) |
-| **Hallucination** | 回答が文脈にない情報を含んでいるか | 0.0 ~ 1.0 (低↓) |
-| **Toxicity** | 回答に有害なコンテンツが含まれるか | 0.0 ~ 1.0 (低↓) |
-| **Bias** | 回答に偏見が含まれるか | 0.0 ~ 1.0 (低↓) |
-
-### 典型的な使用パターン
+## 概要
 
 ```python
 from genflux import GenFlux
 
-# 1. クライアント初期化
-client = GenFlux(api_key="pk_xxx")
+client = GenFlux()  # GENFLUX_API_KEY 環境変数を使用
+evaluator = client.evaluation()
 
-# 2. 評価実行（シンプル）
-evaluator = client.evaluation(config_id="config_123")
 result = evaluator.faithfulness(
     question="What is Python?",
     answer="Python is a programming language.",
     contexts=["Python is a high-level programming language..."],
 )
 print(f"Score: {result.score}")  # 0.0 ~ 1.0
-
-# 3. 複数メトリック
-faith = evaluator.faithfulness(question, answer, contexts)
-relevancy = evaluator.answer_relevancy(question, answer)
-toxicity = evaluator.toxicity(question, answer)
-
-# 4. CI/CD 統合
-if result.score < 0.8:
-    sys.exit(1)  # テスト失敗
 ```
 
+### クライアント構成
+
+| クライアント | アクセス方法 | 説明 |
+|---|---|---|
+| [`GenFlux`](#genflux-1) | `GenFlux()` | メインクライアント（認証・サブクライアント管理） |
+| [`EvaluationClient`](#evaluationclient) | `client.evaluation()` | 8 種類のメトリックによる評価実行 |
+| [`ConfigClient`](#configclient) | `client.configs` | RAG API 設定の CRUD |
+| [`JobsClient`](#jobsclient) | `client.jobs` | 非同期ジョブの作成・監視・キャンセル |
+| [`ReportsClient`](#reportsclient) | `client.reports` | 評価レポートの取得（サマリー/詳細） |
+
+### 評価メトリック
+
+| メトリック | メソッド | `contexts` | `ground_truth` | スコア |
+|---|---|---|---|---|
+| Faithfulness | `evaluator.faithfulness()` | 必須 | — | 0〜1 (高↑) |
+| Answer Relevancy | `evaluator.answer_relevancy()` | 任意 | — | 0〜1 (高↑) |
+| Contextual Relevancy | `evaluator.contextual_relevancy()` | 必須 | — | 0〜1 (高↑) |
+| Contextual Precision | `evaluator.contextual_precision()` | 必須 | — | 0〜1 (高↑) |
+| Contextual Recall | `evaluator.contextual_recall()` | 必須 | 必須 | 0〜1 (高↑) |
+| Hallucination | `evaluator.hallucination()` | 必須 | — | 0〜1 (低↓) |
+| Toxicity | `evaluator.toxicity()` | 任意 | — | 0〜1 (低↓) |
+| Bias | `evaluator.bias()` | 任意 | — | 0〜1 (低↓) |
+
 ---
+"""
+
+_EXCEPTIONS_SECTION = """\
+## 例外
+
+すべての例外は `GenFluxError` を基底クラスとしています。
+
+### 例外一覧
+
+| 例外 | 継承元 | HTTP ステータス | 説明 |
+|---|---|---|---|
+| `GenFluxError` | `Exception` | — | 基底例外クラス |
+| `APIError` | `GenFluxError` | — | API リクエスト失敗（基底） |
+| `AuthenticationError` | `APIError` | 401 | API Key が無効または未設定 |
+| `NotFoundError` | `APIError` | 404 | リソースが見つからない |
+| `ValidationError` | `APIError` | 422 | リクエストパラメータが不正 |
+| `RateLimitError` | `APIError` | 429 | レート制限超過 |
+| `TimeoutError` | `GenFluxError` | — | ジョブのタイムアウト |
+| `JobFailedError` | `GenFluxError` | — | ジョブ実行の失敗 |
+| `ConfigNotFoundError` | `GenFluxError` | — | 指定した Config が存在しない |
+| `ResourceNotFoundError` | `GenFluxError` | — | リソースが見つからない |
+
+> **Note:** `APIError` 系は HTTP レスポンスに起因する例外です。`status_code` 属性でステータスコードを取得できます。
+> `TimeoutError` / `JobFailedError` はジョブ実行に起因する例外で、HTTP ステータスコードはありません。
+
+### 例外ハンドリング
+
+```python
+from genflux import GenFlux
+from genflux.exceptions import (
+    AuthenticationError,
+    RateLimitError,
+    TimeoutError,
+    JobFailedError,
+)
+
+client = GenFlux()
+evaluator = client.evaluation()
+
+try:
+    result = evaluator.faithfulness(
+        question="What is Python?",
+        answer="Python is a programming language.",
+        contexts=["Python is a high-level programming language."],
+    )
+except AuthenticationError:
+    # API Key が無効または未設定
+    pass
+except RateLimitError as e:
+    # レート制限。e.retry_after 秒後にリトライ
+    pass
+except TimeoutError:
+    # ジョブがタイムアウト
+    pass
+except JobFailedError as e:
+    # ジョブ実行失敗。e.error_message で詳細を確認
+    pass
+```
 """
 
 

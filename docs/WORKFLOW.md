@@ -203,7 +203,6 @@ for metric_key, metric_name in metrics:
         results[metric_name] = {
             "score": result.score,
             "reason": result.reason,
-            "engine": result.engine
         }
         
         print(f"  ✅ Score: {result.score:.2f}")

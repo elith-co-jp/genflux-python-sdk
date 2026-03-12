@@ -40,7 +40,6 @@ result = evaluator.faithfulness(
 
 print(f"スコア: {result.score}")
 print(f"理由: {result.reason}")
-print(f"エンジン: {result.engine}")
 
 # 結果判定
 if result.score >= 0.8:

@@ -1369,7 +1369,6 @@ Single metric evaluation result.
 | `metric` | `str` |  |
 | `score` | `float` |  |
 | `reason` | `str | None` |  |
-| `engine` | `str` |  |
 | `execution_time_seconds` | `float | None` | (default: None) |
 
 ### `Report`

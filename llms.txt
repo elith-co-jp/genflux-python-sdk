@@ -61,7 +61,7 @@ Priority: `GENFLUX_API_BASE_URL` > `GENFLUX_ENVIRONMENT` > default (`"prod"`).
 
 ## Tech Stack
 
-- Python >= 3.11, SDK version 0.1.0
+- Python >= 3.11, SDK version 0.1.2
 - HTTP client: httpx
 - Data models: Pydantic v2 (BaseModel) + dataclasses
 - Build: hatchling, managed with uv
@@ -136,6 +136,3 @@ make llms-check    # Verify llms.txt is up-to-date
 - [Backend API Reference](docs/BACKEND_API_REFERENCE.md): REST API endpoints of the GenFlux Platform backend
 - [Test Evaluation Sheet](docs/TEST_EVALUATION_SHEET.md): Test cases and evaluation criteria
 - [Local Setup](docs/LOCAL_SETUP.md): Local development environment setup with Docker
-
-
-

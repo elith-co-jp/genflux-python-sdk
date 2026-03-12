@@ -401,10 +401,10 @@ def _generate_llms_txt(info: SDKInfo) -> str:
         "hallucination": ("Answer contains info NOT in contexts", "0-1 (lower is better)"),
         "toxicity": ("Answer contains toxic content", "0-1 (lower is better)"),
         "bias": ("Answer contains biased content", "0-1 (lower is better)"),
-        "faithfulness_ragas": ("Faithfulness via RAGAS engine", "0-1 (higher is better)"),
-        "answer_relevancy_ragas": ("Answer relevancy via RAGAS engine", "0-1 (higher is better)"),
-        "context_precision_ragas": ("Context precision via RAGAS engine", "0-1 (higher is better)"),
-        "context_recall_ragas": ("Context recall via RAGAS engine", "0-1 (higher is better)"),
+        "faithfulness_ragas": ("Faithfulness (alternative engine)", "0-1 (higher is better)"),
+        "answer_relevancy_ragas": ("Answer relevancy (alternative engine)", "0-1 (higher is better)"),
+        "context_precision_ragas": ("Context precision (alternative engine)", "0-1 (higher is better)"),
+        "context_recall_ragas": ("Context recall (alternative engine)", "0-1 (higher is better)"),
     }
     for m in info.metric_names:
         desc, score = _metric_descriptions.get(m, ("—", "0-1"))
@@ -812,26 +812,26 @@ def _generate_llms_full_txt(info: SDKInfo) -> str:
     # ── Evaluation Metrics Table ──
     lines.append("## Evaluation Metrics Reference")
     lines.append("")
-    lines.append("| Method | Engine | Requires `contexts` | Requires `ground_truth` | Score interpretation |")
-    lines.append("|---|---|---|---|---|")
+    lines.append("| Method | Requires `contexts` | Requires `ground_truth` | Score interpretation |")
+    lines.append("|---|---|---|---|")
     _metric_details = {
-        "faithfulness": ("DeepEval", "Yes", "No", "Higher = more faithful"),
-        "answer_relevancy": ("DeepEval", "Optional", "No", "Higher = more relevant"),
-        "contextual_relevancy": ("DeepEval", "Yes", "No", "Higher = more relevant contexts"),
-        "contextual_precision": ("DeepEval", "Yes (order matters)", "No", "Higher = better ranking"),
-        "contextual_recall": ("DeepEval", "Yes", "**Yes**", "Higher = better recall"),
-        "hallucination": ("DeepEval", "Yes", "No", "**Lower = less hallucination**"),
-        "toxicity": ("DeepEval", "Optional", "No", "**Lower = less toxic**"),
-        "bias": ("DeepEval", "Optional", "No", "**Lower = less biased**"),
-        "faithfulness_ragas": ("RAGAS", "Yes", "No", "Higher = more faithful"),
-        "answer_relevancy_ragas": ("RAGAS", "Optional", "No", "Higher = more relevant"),
-        "context_precision_ragas": ("RAGAS", "Yes (order matters)", "No", "Higher = better ranking"),
-        "context_recall_ragas": ("RAGAS", "Yes", "No", "Higher = better recall"),
+        "faithfulness": ("Yes", "No", "Higher = more faithful"),
+        "answer_relevancy": ("Optional", "No", "Higher = more relevant"),
+        "contextual_relevancy": ("Yes", "No", "Higher = more relevant contexts"),
+        "contextual_precision": ("Yes (order matters)", "No", "Higher = better ranking"),
+        "contextual_recall": ("Yes", "**Yes**", "Higher = better recall"),
+        "hallucination": ("Yes", "No", "**Lower = less hallucination**"),
+        "toxicity": ("Optional", "No", "**Lower = less toxic**"),
+        "bias": ("Optional", "No", "**Lower = less biased**"),
+        "faithfulness_ragas": ("Yes", "No", "Higher = more faithful"),
+        "answer_relevancy_ragas": ("Optional", "No", "Higher = more relevant"),
+        "context_precision_ragas": ("Yes (order matters)", "No", "Higher = better ranking"),
+        "context_recall_ragas": ("Yes", "No", "Higher = better recall"),
     }
     for m in info.metric_names:
         if m in _metric_details:
-            eng, ctx, gt, score_interp = _metric_details[m]
-            lines.append(f"| `{m}` | {eng} | {ctx} | {gt} | {score_interp} |")
+            ctx, gt, score_interp = _metric_details[m]
+            lines.append(f"| `{m}` | {ctx} | {gt} | {score_interp} |")
     lines.append("")
 
     # ── Repository Structure ──

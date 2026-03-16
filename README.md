@@ -42,6 +42,92 @@ result = client.evaluation().faithfulness(
 print(f"Faithfulness: {result.score}")  # 0.92
 ```
 
+## できること
+
+### RAG 回答品質の評価
+
+8 種類のメトリックで RAG システムの回答品質をスコアリングできます。
+
+```python
+evaluator = client.evaluation()
+
+# 回答が文脈に基づいているか（忠実性）
+result = evaluator.faithfulness(question, answer, contexts)
+print(result.score)   # 0.92
+print(result.reason)  # スコアの根拠
+
+# 幻覚（ハルシネーション）検出
+result = evaluator.hallucination(question, answer, contexts)
+
+# 有害性・偏見チェック
+result = evaluator.toxicity(question, answer)
+result = evaluator.bias(question, answer)
+```
+
+### 評価設定の管理
+
+RAG API の接続情報・評価条件を Config として保存し、繰り返し利用できます。
+
+```python
+from genflux.models import ConfigCreate
+
+config = client.configs.create(ConfigCreate(
+    name="本番 RAG API",
+    api_endpoint="https://your-rag-api.example.com/chat",
+    auth_type="bearer",
+    auth_token="your-token",
+))
+
+# 一覧取得・更新・削除
+configs = client.configs.list()
+client.configs.update(config.id, ConfigUpdate(name="新しい名前"))
+client.configs.delete(config.id)
+```
+
+### 非同期ジョブの実行・監視
+
+大規模な評価やセキュリティテストは非同期ジョブとして実行し、進捗をリアルタイムで追跡できます。
+
+```python
+job = client.jobs.create(
+    execution_type="evaluation",
+    config_id=config.id,
+)
+
+# 完了まで待機（プログレスバー付き）
+completed = client.jobs.wait(job.id, timeout=600)
+print(completed.results)
+
+# ジョブの一覧・キャンセル
+running = client.jobs.list(status="running")
+client.jobs.cancel(job.id)
+```
+
+### 評価レポートの取得
+
+ジョブ完了後、サマリーと詳細の 2 段階でレポートを取得できます。
+
+```python
+# サマリー: CI/CD ゲーティング向け
+report = client.reports.get(report_id, view="summary")
+print(report.summary.evaluation.success_rate)  # 0.95
+
+# 詳細: 失敗ケースの分析・改善提案
+report = client.reports.get(report_id, view="details")
+for case in report.details.failed_cases:
+    print(f"{case.category}: {case.reason}")
+```
+
+### CI/CD パイプライン統合
+
+品質スコアに閾値を設定し、パイプラインの pass/fail を自動判定できます。
+
+```python
+result = evaluator.faithfulness(question, answer, contexts)
+if result.score < 0.8:
+    raise SystemExit(f"品質基準未達: faithfulness={result.score}")
+```
+
 ## アーキテクチャ
 
 ```mermaid

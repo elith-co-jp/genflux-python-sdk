@@ -1488,29 +1488,32 @@ def main() -> int:
 
     if args.mode in ("external", "all"):
         external_md = _generate_external_reference()
-        print("\n🤖 External API Reference を LLM で改善中...")
-        external_md = _enrich_with_llm(
-            external_md, mode="external", use_cache=not args.no_cache,
-        )
         external_path = output_dir / "API_REFERENCE.md"
         if args.check:
-            if _check_diff(external_path, external_md):
+            # --check モードではソース由来の構造変更のみ検出する。
+            # LLM enrichment はローカル実行（make docs）で行うため、
+            # CI では素の生成結果同士で比較すれば十分。
+            if _check_diff(external_path, external_md, ignore_llm_sections=True):
                 has_diff = True
         else:
+            print("\n🤖 External API Reference を LLM で改善中...")
+            external_md = _enrich_with_llm(
+                external_md, mode="external", use_cache=not args.no_cache,
+            )
             external_path.write_text(external_md, encoding="utf-8")
             print(f"✅ External API Reference: {external_path}")
 
     if args.mode in ("developer", "all"):
         developer_md = _generate_developer_reference()
-        print("\n🤖 Developer API Reference を LLM で改善中...")
-        developer_md = _enrich_with_llm(
-            developer_md, mode="developer", use_cache=not args.no_cache,
-        )
         developer_path = output_dir / "DEVELOPER_API_REFERENCE.md"
         if args.check:
-            if _check_diff(developer_path, developer_md):
+            if _check_diff(developer_path, developer_md, ignore_llm_sections=True):
                 has_diff = True
         else:
+            print("\n🤖 Developer API Reference を LLM で改善中...")
+            developer_md = _enrich_with_llm(
+                developer_md, mode="developer", use_cache=not args.no_cache,
+            )
             developer_path.write_text(developer_md, encoding="utf-8")
             print(f"✅ Developer API Reference: {developer_path}")
 
@@ -1525,14 +1528,39 @@ def main() -> int:
     return 0
 
 
-def _check_diff(path: Path, new_content: str) -> bool:
-    """既存ファイルと生成内容の差分をチェックする.
+def _extract_headings_and_signatures(md: str) -> str:
+    """Markdown から見出し・メソッドシグネチャ・テーブルヘッダを抽出する.
 
-    タイムスタンプ行は無視して比較する。
+    LLM が改善するのは説明文の文体・補足・Tipsなど。
+    ソースコードの変更で変わるのは見出し構造・シグネチャ・パラメータ表。
+    後者だけを比較すればソース変更の検出に十分。
+    """
+    structural_lines: list[str] = []
+    for line in md.splitlines():
+        stripped = line.strip()
+        # 見出し行
+        if stripped.startswith("#"):
+            structural_lines.append(stripped)
+        # メソッドシグネチャ（バッククォート付き）
+        elif "`" in stripped and ("(" in stripped or "." in stripped):
+            structural_lines.append(stripped)
+        # テーブル行（パラメータ表・フィールド表）
+        elif stripped.startswith("|"):
+            structural_lines.append(stripped)
+    return "\n".join(structural_lines)
+
+
+def _check_diff(
+    path: Path, new_content: str, *, ignore_llm_sections: bool = False,
+) -> bool:
+    """既存ファイルと生成内容の差分をチェックする.
 
     Args:
         path: 既存ファイルのパス
         new_content: 新しく生成された内容
+        ignore_llm_sections: True の場合、LLM が改善する説明文を無視し、
+            見出し・シグネチャ・テーブルなど構造部分のみで比較する。
+            CI 環境（OPENAI_API_KEY なし）で使用。
 
     Returns:
         差分がある場合 True
@@ -1543,10 +1571,14 @@ def _check_diff(path: Path, new_content: str) -> bool:
 
     existing = path.read_text(encoding="utf-8")
 
-    # タイムスタンプ行を除去して比較
+    # タイムスタンプ行を除去
     ts_pattern = re.compile(r"<!-- Generated at:.*?-->|^\*Auto-generated at.*$", re.MULTILINE)
     existing_clean = ts_pattern.sub("", existing).strip()
     new_clean = ts_pattern.sub("", new_content).strip()
+
+    if ignore_llm_sections:
+        existing_clean = _extract_headings_and_signatures(existing_clean)
+        new_clean = _extract_headings_and_signatures(new_clean)
 
     if existing_clean != new_clean:
         print(f"  ⚠ {path} に差分があります")

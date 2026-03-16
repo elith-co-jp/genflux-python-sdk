@@ -1400,6 +1400,39 @@ def _pass3_ux_review(client: Any, md: str) -> str:
     return _rejoin_sections(reviewed_sections)
 
 
+def _compute_source_hash() -> str:
+    """SDK ソースファイル群 + 生成スクリプトのハッシュを計算する.
+
+    ソースコードが変われば必ずハッシュが変わるため、
+    ドキュメントに埋め込んで CI で「make docs し忘れ」を検出できる。
+    """
+    hasher = hashlib.sha256()
+    src_dir = _SDK_ROOT / "src" / "genflux"
+    targets = sorted(src_dir.rglob("*.py")) + [Path(__file__).resolve()]
+    for path in targets:
+        hasher.update(path.read_bytes())
+    return hasher.hexdigest()[:16]
+
+
+_SOURCE_HASH_PATTERN = re.compile(r"<!-- source-hash: [0-9a-f]+ -->")
+
+
+def _embed_source_hash(md: str, source_hash: str) -> str:
+    """ドキュメント末尾にソースハッシュを埋め込む（既存があれば置換）."""
+    tag = f"<!-- source-hash: {source_hash} -->"
+    if _SOURCE_HASH_PATTERN.search(md):
+        return _SOURCE_HASH_PATTERN.sub(tag, md)
+    return md.rstrip() + "\n\n" + tag + "\n"
+
+
+def _extract_source_hash(md: str) -> str | None:
+    """ドキュメントからソースハッシュを抽出する."""
+    m = _SOURCE_HASH_PATTERN.search(md)
+    if m:
+        return m.group().split(": ")[1].rstrip(" ->")
+    return None
+
+
 def _get_cache_path(raw_md: str, mode: str) -> Path:
     """キャッシュファイルのパスを取得する."""
     content_hash = hashlib.sha256(raw_md.encode()).hexdigest()[:16]
@@ -1484,68 +1517,40 @@ def main() -> int:
 
     output_dir: Path = args.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
-    has_diff = False
 
-    # --check モードでは LLM enrichment 済みの出力同士を比較する必要がある。
-    # OPENAI_API_KEY がない CI 環境では正確な比較が不可能なため、
-    # キーなしの場合はファイルの存在確認のみ行う。
+    # --check モード: ソースハッシュの一致を確認する。
+    # LLM 出力は非決定的なので内容比較は不可能。代わりに
+    # make docs 時に埋め込んだソースハッシュと現在のソースハッシュを比較し、
+    # 「ソースを変えたのに make docs していない」を検出する。
     if args.check:
-        has_api_key = bool(os.environ.get("OPENAI_API_KEY"))
-        if not has_api_key:
-            # .env からも試行
-            try:
-                from dotenv import load_dotenv
-                load_dotenv(_SDK_ROOT / ".env")
-                has_api_key = bool(os.environ.get("OPENAI_API_KEY"))
-            except ImportError:
-                pass
+        current_hash = _compute_source_hash()
+        print(f"ソースハッシュ (現在): {current_hash}")
+        has_diff = False
 
-        if not has_api_key:
-            print("ℹ OPENAI_API_KEY が未設定のため、完全な差分チェックをスキップします。")
-            print("  ファイルの存在確認のみ実行します。")
-            missing = False
-            for name in ("API_REFERENCE.md", "DEVELOPER_API_REFERENCE.md"):
-                path = output_dir / name
-                if not path.exists():
-                    print(f"  ⚠ {path} が存在しません")
-                    missing = True
-                else:
-                    print(f"  ✅ {path} exists")
-            if missing:
-                print("❌ API Reference ファイルが見つかりません。`make docs` を実行してください。")
-                return 1
-            print("✅ API Reference ファイルは存在します（内容チェックにはOPENAI_API_KEYが必要です）。")
-            return 0
+        doc_files = []
+        if args.mode in ("external", "all"):
+            doc_files.append(("API_REFERENCE.md", "External"))
+        if args.mode in ("developer", "all"):
+            doc_files.append(("DEVELOPER_API_REFERENCE.md", "Developer"))
 
-    if args.mode in ("external", "all"):
-        external_md = _generate_external_reference()
-        print("\n🤖 External API Reference を LLM で改善中...")
-        external_md = _enrich_with_llm(
-            external_md, mode="external", use_cache=not args.no_cache,
-        )
-        external_path = output_dir / "API_REFERENCE.md"
-        if args.check:
-            if _check_diff(external_path, external_md):
+        for filename, label in doc_files:
+            path = output_dir / filename
+            if not path.exists():
+                print(f"  ⚠ {path} が存在しません")
                 has_diff = True
-        else:
-            external_path.write_text(external_md, encoding="utf-8")
-            print(f"✅ External API Reference: {external_path}")
+                continue
 
-    if args.mode in ("developer", "all"):
-        developer_md = _generate_developer_reference()
-        print("\n🤖 Developer API Reference を LLM で改善中...")
-        developer_md = _enrich_with_llm(
-            developer_md, mode="developer", use_cache=not args.no_cache,
-        )
-        developer_path = output_dir / "DEVELOPER_API_REFERENCE.md"
-        if args.check:
-            if _check_diff(developer_path, developer_md):
+            existing = path.read_text(encoding="utf-8")
+            embedded_hash = _extract_source_hash(existing)
+            if embedded_hash is None:
+                print(f"  ⚠ {label}: source-hash が埋め込まれていません（make docs を実行してください）")
                 has_diff = True
-        else:
-            developer_path.write_text(developer_md, encoding="utf-8")
-            print(f"✅ Developer API Reference: {developer_path}")
+            elif embedded_hash != current_hash:
+                print(f"  ⚠ {label}: source-hash 不一致 (埋め込み: {embedded_hash}, 現在: {current_hash})")
+                has_diff = True
+            else:
+                print(f"  ✅ {label}: source-hash 一致 ({current_hash})")
 
-    if args.check:
         if has_diff:
             print("❌ API Reference が最新ではありません。以下を実行してください:")
             print("   make docs")
@@ -1553,37 +1558,32 @@ def main() -> int:
         print("✅ API Reference は最新です。")
         return 0
 
+    # 通常モード: ドキュメント生成 + LLM enrichment + ソースハッシュ埋め込み
+    source_hash = _compute_source_hash()
+
+    if args.mode in ("external", "all"):
+        external_md = _generate_external_reference()
+        print("\n🤖 External API Reference を LLM で改善中...")
+        external_md = _enrich_with_llm(
+            external_md, mode="external", use_cache=not args.no_cache,
+        )
+        external_md = _embed_source_hash(external_md, source_hash)
+        external_path = output_dir / "API_REFERENCE.md"
+        external_path.write_text(external_md, encoding="utf-8")
+        print(f"✅ External API Reference: {external_path}")
+
+    if args.mode in ("developer", "all"):
+        developer_md = _generate_developer_reference()
+        print("\n🤖 Developer API Reference を LLM で改善中...")
+        developer_md = _enrich_with_llm(
+            developer_md, mode="developer", use_cache=not args.no_cache,
+        )
+        developer_md = _embed_source_hash(developer_md, source_hash)
+        developer_path = output_dir / "DEVELOPER_API_REFERENCE.md"
+        developer_path.write_text(developer_md, encoding="utf-8")
+        print(f"✅ Developer API Reference: {developer_path}")
+
     return 0
-
-
-def _check_diff(path: Path, new_content: str) -> bool:
-    """既存ファイルと生成内容の差分をチェックする.
-
-    タイムスタンプ行は無視して比較する。
-
-    Args:
-        path: 既存ファイルのパス
-        new_content: 新しく生成された内容
-
-    Returns:
-        差分がある場合 True
-    """
-    if not path.exists():
-        print(f"  ⚠ {path} が存在しません")
-        return True
-
-    existing = path.read_text(encoding="utf-8")
-
-    # タイムスタンプ行を除去して比較
-    ts_pattern = re.compile(r"<!-- Generated at:.*?-->|^\*Auto-generated at.*$", re.MULTILINE)
-    existing_clean = ts_pattern.sub("", existing).strip()
-    new_clean = ts_pattern.sub("", new_content).strip()
-
-    if existing_clean != new_clean:
-        print(f"  ⚠ {path} に差分があります")
-        return True
-
-    return False
 
 
 if __name__ == "__main__":

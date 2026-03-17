@@ -1,5 +1,11 @@
 <p align="center">
-  <img src="assets/GENFLUX_logotype.png" alt="Genflux" width="400">
+  <a href="#genflux-python-sdk">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/GENFLUX_logomark.png" width="100">
+      <source media="(prefers-color-scheme: light)" srcset="assets/GENFLUX_logotype.png" width="400">
+      <img src="assets/GENFLUX_logotype.png" alt="Genflux" width="400">
+    </picture>
+  </a>
 </p>
 
 <p align="center">

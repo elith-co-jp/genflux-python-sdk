@@ -132,7 +132,7 @@ client = GenFlux(api_key="dev_test_key", environment="local")
 
 #### メソッド
 
-#### 2.1.1 `evaluation(config_id: str | None = None) -> EvaluationClient`
+####`evaluation(config_id: str | None = None) -> EvaluationClient`
 
 Create an evaluation client for the given config.
 
@@ -173,7 +173,7 @@ Client for managing evaluation configs.
 
 #### メソッド
 
-#### 2.2.1 `create(config: ConfigCreate) -> Config`
+#### `create(config: ConfigCreate) -> Config`
 
 Create a new config.
 
@@ -215,7 +215,7 @@ print(f"Created config: {config.id}")
 
 ---
 
-#### 2.2.2 `delete(config_id: str | UUID) -> bool`
+#### `delete(config_id: str | UUID) -> bool`
 
 Delete config.
 
@@ -241,7 +241,7 @@ print(f"Deleted: {success}")
 
 ---
 
-#### 2.2.3 `get(config_id: str | UUID) -> Config`
+#### `get(config_id: str | UUID) -> Config`
 
 Get config by ID.
 
@@ -267,7 +267,7 @@ print(f"Config name: {config.name}")
 
 ---
 
-#### 2.2.4 `list(limit: int = 100, offset: int = 0) -> ConfigListResponse`
+#### `list(limit: int = 100, offset: int = 0) -> ConfigListResponse`
 
 List all configs.
 
@@ -294,7 +294,7 @@ for config in configs.configs:
 
 ---
 
-#### 2.2.5 `update(config_id: str | UUID, config_update: ConfigUpdate) -> Config`
+#### `update(config_id: str | UUID, config_update: ConfigUpdate) -> Config`
 
 Update config.
 
@@ -334,7 +334,7 @@ Client for Job (Execution) management.
 
 #### メソッド
 
-#### 2.3.1 `cancel(job_id: str) -> Job`
+#### `cancel(job_id: str) -> Job`
 
 Cancel a running job.
 
@@ -362,7 +362,7 @@ print(job.status)
 
 ---
 
-#### 2.3.2 `create(execution_type: str, config_id: str | None = None, data: dict[str, Any] | None = None) -> Job`
+#### `create(execution_type: str, config_id: str | None = None, data: dict[str, Any] | None = None) -> Job`
 
 Create a new job.
 
@@ -400,7 +400,7 @@ job = client.jobs.create(
 
 ---
 
-#### 2.3.3 `get(job_id: str) -> Job`
+#### `get(job_id: str) -> Job`
 
 Get job by ID.
 
@@ -427,7 +427,7 @@ print(job.status)
 
 ---
 
-#### 2.3.4 `list(status: str | None = None, execution_type: str | None = None, limit: int = 100) -> list[Job]`
+#### `list(status: str | None = None, execution_type: str | None = None, limit: int = 100) -> list[Job]`
 
 List jobs.
 
@@ -460,7 +460,7 @@ redteam_jobs = client.jobs.list(execution_type="redteam_static")
 
 ---
 
-#### 2.3.5 `wait(job_id: str, timeout: int = 600, poll_interval: float = 5.0, callback: Optional[Callable[[Job], None]] = None) -> Job`
+#### `wait(job_id: str, timeout: int = 600, poll_interval: float = 5.0, callback: Optional[Callable[[Job], None]] = None) -> Job`
 
 Wait for job completion.
 
@@ -502,7 +502,7 @@ Client for Reports API.
 
 #### メソッド
 
-#### 2.4.1 `get(report_id: str | UUID, view: Literal['summary', 'details'] = 'summary') -> Report`
+#### `get(report_id: str | UUID, view: Literal['summary', 'details'] = 'summary') -> Report`
 
 Get a report by ID.
 
@@ -551,7 +551,7 @@ internally using Job-based async execution.
 
 #### メソッド
 
-#### 2.5.1 `answer_relevancy(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult`
+#### `answer_relevancy(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult`
 
 Evaluate answer relevancy (answer addresses the question).
 
@@ -577,7 +577,7 @@ result = evaluator.answer_relevancy(
 
 ---
 
-#### 2.5.2 `bias(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult`
+#### `bias(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult`
 
 Evaluate bias (answer contains biased content).
 
@@ -594,7 +594,7 @@ Evaluate bias (answer contains biased content).
 
 ---
 
-#### 2.5.3 `contextual_precision(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult`
+#### `contextual_precision(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult`
 
 Evaluate contextual precision (relevant contexts ranked higher).
 
@@ -611,7 +611,7 @@ Evaluate contextual precision (relevant contexts ranked higher).
 
 ---
 
-#### 2.5.4 `contextual_recall(question: str, answer: str, contexts: list[str], ground_truth: str, timeout: int = 300) -> MetricResult`
+#### `contextual_recall(question: str, answer: str, contexts: list[str], ground_truth: str, timeout: int = 300) -> MetricResult`
 
 Evaluate contextual recall (answer can be attributed to contexts).
 
@@ -629,7 +629,7 @@ Evaluate contextual recall (answer can be attributed to contexts).
 
 ---
 
-#### 2.5.5 `contextual_relevancy(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult`
+#### `contextual_relevancy(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult`
 
 Evaluate contextual relevancy (contexts are relevant to question).
 
@@ -656,7 +656,7 @@ result = evaluator.contextual_relevancy(
 
 ---
 
-#### 2.5.6 `evaluate(metric: str, question: str, answer: str, contexts: list[str] | None = None, ground_truth: str | None = None, timeout: int = 300, callback: Optional[Callable[[Job], None]] = None, show_progress: bool = True) -> MetricResult`
+#### `evaluate(metric: str, question: str, answer: str, contexts: list[str] | None = None, ground_truth: str | None = None, timeout: int = 300, callback: Optional[Callable[[Job], None]] = None, show_progress: bool = True) -> MetricResult`
 
 Evaluate a single question-answer pair.
 
@@ -701,7 +701,7 @@ print(f"Score: {result.score}, Reason: {result.reason}")
 
 ---
 
-#### 2.5.7 `faithfulness(question: str, answer: str, contexts: list[str], timeout: int = 300, on_progress: Optional[Callable[[Job], None]] = None) -> MetricResult`
+#### `faithfulness(question: str, answer: str, contexts: list[str], timeout: int = 300, on_progress: Optional[Callable[[Job], None]] = None) -> MetricResult`
 
 Evaluate faithfulness (answers based on contexts).
 
@@ -729,7 +729,7 @@ result = evaluator.faithfulness(
 
 ---
 
-#### 2.5.8 `hallucination(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult`
+#### `hallucination(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult`
 
 Evaluate hallucination (answer contains information not in contexts).
 
@@ -746,7 +746,7 @@ Evaluate hallucination (answer contains information not in contexts).
 
 ---
 
-#### 2.5.9 `toxicity(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult`
+#### `toxicity(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult`
 
 Evaluate toxicity (answer contains toxic content).
 
@@ -945,7 +945,7 @@ Job (Execution) model.
 
 #### メソッド
 
-#### 3.9.1 *classmethod* `from_dict(cls, data: dict[str, Any]) -> Job`
+#### *classmethod* `from_dict(cls, data: dict[str, Any]) -> Job`
 
 Create Job from API response dict.
 
@@ -960,25 +960,25 @@ Create Job from API response dict.
 
 ---
 
-#### 3.9.2 *property* `is_completed`
+#### *property* `is_completed`
 
 Check if job is completed.
 
 ---
 
-#### 3.9.3 *property* `is_failed`
+#### *property* `is_failed`
 
 Check if job failed.
 
 ---
 
-#### 3.9.4 *property* `is_pending`
+#### *property* `is_pending`
 
 Check if job is pending (queued or pending).
 
 ---
 
-#### 3.9.5 *property* `is_running`
+#### *property* `is_running`
 
 Check if job is running.
 
@@ -1227,7 +1227,7 @@ Simple progress bar for terminal output.
 
 #### メソッド
 
-#### 5.1.1 `update(current: int, message: str | None = None, indeterminate: bool = False) -> None`
+#### `update(current: int, message: str | None = None, indeterminate: bool = False) -> None`
 
 プログレスバーを更新します。
 
@@ -1241,7 +1241,7 @@ Simple progress bar for terminal output.
 
 ---
 
-#### 5.1.2 `update_from_job(job: Job) -> None`
+#### `update_from_job(job: Job) -> None`
 
 Jobオブジェクトからプログレスバーを更新します。
 

@@ -604,8 +604,7 @@ def _md_class(info: ClassInfo, *, heading_level: int = 2, num_prefix: str = "") 
         lines.append(f"{h}# メソッド")
         lines.append("")
         for i, method in enumerate(public_methods):
-            method_num = f"{num_prefix}.{i + 1}" if num_prefix else ""
-            lines.append(_md_method(method, num_prefix=method_num))
+            lines.append(_md_method(method))
             if i < len(public_methods) - 1:
                 lines.append("---")
                 lines.append("")
@@ -1267,6 +1266,7 @@ def _pass1_enrich(client: Any, raw_md: str, source_summary: str) -> str:
 - 型名、パラメータ名、クラス名は絶対に変更しない
 - 存在しない機能やパラメータを追加しない（ソースにないものは書かない）
 - 新しい見出し（## や ### ）を追加しない。既存の見出し構造をそのまま維持する
+- 見出しの通し番号は大分類（## 2. クライアント）とクラス（### 2.1 GenFlux）の2階層まで。メソッドの見出し（####）には番号を付けない
 - 出力は改善後の Markdown セクションをそのまま返すこと（説明や前置きは不要）"""
 
     sections = _split_md_sections(raw_md)
@@ -1368,6 +1368,7 @@ def _pass3_ux_review(client: Any, md: str) -> str:
 6. 説明文が冗長すぎないか（1パラメータ1-2文以内）
 7. mermaid ブロックの構文が正しいか
 8. 空行が適切に入っているか（セクション間に空行）
+9. 見出し番号が2階層（2.1, 3.1 等）までに収まっているか（メソッドの #### 見出しに 2.2.1 のような3階層番号があれば削除する）
 
 修正ルール:
 - UX を損なう問題を発見したら修正する

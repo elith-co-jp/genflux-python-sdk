@@ -1,13 +1,14 @@
 <p align="center">
+  <img src="assets/GENFLUX_logomark.png" alt="" width="50" height="50">
+  &nbsp;
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/GENFLUX_logotype_w.png" width="400">
-    <source media="(prefers-color-scheme: light)" srcset="assets/GENFLUX_logotype.png" width="400">
-    <img src="assets/GENFLUX_logotype.png" alt="Genflux" width="400">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/GENFLUX_logotype_w.png" width="320">
+    <source media="(prefers-color-scheme: light)" srcset="assets/GENFLUX_logotype.png" width="320">
+    <img src="assets/GENFLUX_logotype.png" alt="Genflux" width="320">
   </picture>
 </p>
 
 <p align="center">
-  <img src="assets/favicon.png" alt="" width="20" height="20">
   <strong>Genflux Python SDK</strong><br>
   Genflux Platform 公式 Python SDK。RAG システムの回答品質スコアリング、セキュリティテスト、ポリシーチェックを Python から実行できます。
 </p>

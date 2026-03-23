@@ -58,7 +58,7 @@ Released: 2026-03-02
 ### Added
 
 - 初回リリース
-- GenFlux 評価・レポート・設定 API 用の公式 Python SDK（`GenFlux`, `ConfigClient`, `ReportsClient` 等）
+- GENFLUX 評価・レポート・設定 API 用の公式 Python SDK（`Genflux`, `ConfigClient`, `ReportsClient` 等）
 - Pydantic v2 ベースの型付きレスポンス、httpx による HTTP クライアント
 - 開発・品質: pre-commit（ruff, pyright）, pip-audit, gitleaks, ライセンスコンプライアンスチェック
 

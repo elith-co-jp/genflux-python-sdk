@@ -1,6 +1,6 @@
-# GenFlux Python SDK
+# GENFLUX Python SDK
 
-GenFlux Platform 公式 Python SDK。RAG システムの回答品質スコアリング、セキュリティテスト、ポリシーチェックを Python から実行できます。
+GENFLUX Platform 公式 Python SDK。RAG システムの回答品質スコアリング、セキュリティテスト、ポリシーチェックを Python から実行できます。
 
 [![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](https://github.com/elith-co-jp/genflux-python-sdk/releases/tag/v0.1.2)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
@@ -23,9 +23,9 @@ pip install genflux
 ## クイックスタート
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()  # 環境変数 GENFLUX_API_KEY を使用
+client = Genflux()  # 環境変数 GENFLUX_API_KEY を使用
 
 evaluator = client.evaluation()
 result = evaluator.faithfulness(
@@ -41,7 +41,7 @@ print(result.reason)  # "The answer is based on the provided context."
 API Key は明示的に渡すこともできます。
 
 ```python
-client = GenFlux(api_key="pk_xxx")
+client = Genflux(api_key="pk_xxx")
 ```
 
 ## 評価メトリック
@@ -113,7 +113,7 @@ except JobFailedError as e:
 | `GENFLUX_ENVIRONMENT` | `"local"` / `"dev"` / `"prod"` | `"prod"` |
 | `GENFLUX_API_BASE_URL` | ベース URL の上書き（最優先） | — |
 
-API Key は [GenFlux Platform](https://www.platform.genflux.jp/) から発行してください。
+API Key は [GENFLUX Platform](https://www.platform.genflux.jp/) から発行してください。
 
 ## サポート
 

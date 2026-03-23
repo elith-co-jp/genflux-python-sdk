@@ -1045,7 +1045,7 @@ _EXCEPTIONS_SECTION = """\
 | `APIError` | `GenFluxError` | — | API リクエスト失敗（基底） |
 | `AuthenticationError` | `APIError` | 401 | API Key が無効または未設定 |
 | `NotFoundError` | `APIError` | 404 | リソースが見つからない |
-| `ValidationError` | `APIError` | 422 | リクエストパラメータが不正 |
+| `ValidationError` | `APIError` | 400, 422 | リクエストパラメータが不正 |
 | `RateLimitError` | `APIError` | 429 | レート制限超過 |
 | `TimeoutError` | `GenFluxError` | — | ジョブのタイムアウト |
 | `JobFailedError` | `GenFluxError` | — | ジョブ実行の失敗 |

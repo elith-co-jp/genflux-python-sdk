@@ -1,4 +1,4 @@
-"""Report models for GenFlux SDK."""
+"""Report models for GENFLUX SDK."""
 
 from datetime import datetime
 from typing import Literal

@@ -1,4 +1,4 @@
-"""Config data models for GenFlux SDK."""
+"""Config data models for GENFLUX SDK."""
 
 from datetime import datetime
 from typing import Any

@@ -795,7 +795,7 @@ def _generate_llms_full_txt(info: SDKInfo) -> str:
     lines.append("    ├── APIError (status_code, message, details)")
     lines.append("    │   ├── AuthenticationError (401)")
     lines.append("    │   ├── NotFoundError (404)")
-    lines.append("    │   ├── ValidationError (422)")
+    lines.append("    │   ├── ValidationError (400, 422)")
     lines.append("    │   └── RateLimitError (429, retry_after)")
     lines.append("    ├── TimeoutError (operation, timeout, job_id)")
     lines.append("    ├── JobFailedError (job_id, error_message)")

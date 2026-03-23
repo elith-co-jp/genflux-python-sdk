@@ -418,7 +418,7 @@ Exception
     ├── APIError (status_code, message, details)
     │   ├── AuthenticationError (401)
     │   ├── NotFoundError (404)
-    │   ├── ValidationError (422)
+    │   ├── ValidationError (400, 422)
     │   └── RateLimitError (429, retry_after)
     ├── TimeoutError (operation, timeout, job_id)
     ├── JobFailedError (job_id, error_message)

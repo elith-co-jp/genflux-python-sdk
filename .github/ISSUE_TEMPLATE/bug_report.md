@@ -15,9 +15,9 @@ assignees: []
 <!-- 問題を再現できる最小限のコードを記載してください -->
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 # 再現コード...
 ```
 

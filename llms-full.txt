@@ -92,7 +92,7 @@ Everything exported from `genflux/__init__.py`:
 class GenFlux(api_key: str | None = None, base_url: str | None = None, environment: str | None = None, timeout: float = 60.0) -> None
 ```
 
-GenFlux API Client.
+GenFlux APIクライアント。
 
 **Constructor Parameters:**
 
@@ -111,7 +111,7 @@ GenFlux API Client.
 
 **Methods:**
 
-- `evaluation(config_id: str | None = None) -> EvaluationClient` — Create an evaluation client for the given config.
+- `evaluation(config_id: str | None = None) -> EvaluationClient` — 指定された設定で評価クライアントを作成します。
 
 ## EvaluationClient
 
@@ -119,15 +119,15 @@ Created via `client.evaluation(config_id=None)`. Provides synchronous evaluation
 
 **Methods:**
 
-- `answer_relevancy(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult` — Evaluate answer relevancy (answer addresses the question).
-- `bias(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult` — Evaluate bias (answer contains biased content).
-- `contextual_precision(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — Evaluate contextual precision (relevant contexts ranked higher).
-- `contextual_recall(question: str, answer: str, contexts: list[str], ground_truth: str, timeout: int = 300) -> MetricResult` — Evaluate contextual recall (answer can be attributed to contexts).
-- `contextual_relevancy(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — Evaluate contextual relevancy (contexts are relevant to question).
-- `evaluate(metric: str, question: str, answer: str, contexts: list[str] | None = None, ground_truth: str | None = None, timeout: int = 300, callback: Union[Callable[Job, None], None] = None, show_progress: bool = True) -> MetricResult` — Evaluate a single question-answer pair.
-- `faithfulness(question: str, answer: str, contexts: list[str], timeout: int = 300, on_progress: Union[Callable[Job, None], None] = None) -> MetricResult` — Evaluate faithfulness (answers based on contexts).
-- `hallucination(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — Evaluate hallucination (answer contains information not in contexts).
-- `toxicity(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult` — Evaluate toxicity (answer contains toxic content).
+- `answer_relevancy(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult` — 回答の関連性を評価します（回答が質問に対応しているか）。
+- `bias(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult` — バイアスを評価します（回答に偏りのあるコンテンツが含まれているか）。
+- `contextual_precision(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — コンテキストの精度を評価します（関連するコンテキストが上位にランクされているか）。
+- `contextual_recall(question: str, answer: str, contexts: list[str], ground_truth: str, timeout: int = 300) -> MetricResult` — コンテキストの再現率を評価します（回答がコンテキストに帰属できるか）。
+- `contextual_relevancy(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — コンテキストの関連性を評価します（コンテキストが質問に関連しているか）。
+- `evaluate(metric: str, question: str, answer: str, contexts: list[str] | None = None, ground_truth: str | None = None, timeout: int = 300, callback: Union[Callable[Job, None], None] = None, show_progress: bool = True) -> MetricResult` — 単一の質問-回答ペアを評価します。
+- `faithfulness(question: str, answer: str, contexts: list[str], timeout: int = 300, on_progress: Union[Callable[Job, None], None] = None) -> MetricResult` — 忠実性を評価します（回答がコンテキストに基づいているか）。
+- `hallucination(question: str, answer: str, contexts: list[str], timeout: int = 300) -> MetricResult` — ハルシネーションを評価します（回答にコンテキストにない情報が含まれているか）。
+- `toxicity(question: str, answer: str, contexts: list[str] | None = None, timeout: int = 300) -> MetricResult` — 有害性を評価します（回答に有害なコンテンツが含まれているか）。
 
 All metric methods share a common pattern:
 
@@ -149,11 +149,11 @@ Accessed via `client.configs`. CRUD operations for evaluation configurations.
 
 **Methods:**
 
-- `create(config: ConfigCreate) -> Config` — Create a new config.
-- `delete(config_id: str | UUID) -> bool` — Delete config.
-- `get(config_id: str | UUID) -> Config` — Get config by ID.
-- `list(limit: int = 100, offset: int = 0) -> ConfigListResponse` — List all configs.
-- `update(config_id: str | UUID, config_update: ConfigUpdate) -> Config` — Update config.
+- `create(config: ConfigCreate) -> Config` — 新しい設定を作成します。
+- `delete(config_id: str | UUID) -> bool` — 設定を削除します。
+- `get(config_id: str | UUID) -> Config` — IDで設定を取得します。
+- `list(limit: int = 100, offset: int = 0) -> ConfigListResponse` — すべての設定を一覧取得します。
+- `update(config_id: str | UUID, config_update: ConfigUpdate) -> Config` — 設定を更新します。
 
 ## JobsClient
 
@@ -161,11 +161,11 @@ Accessed via `client.jobs`. Manages asynchronous evaluation jobs.
 
 **Methods:**
 
-- `cancel(job_id: str) -> Job` — Cancel a running job.
-- `create(execution_type: str, config_id: str | None = None, data: dict[str, Any] | None = None) -> Job` — Create a new job.
-- `get(job_id: str) -> Job` — Get job by ID.
-- `list(status: str | None = None, execution_type: str | None = None, limit: int = 100) -> list[Job]` — List jobs.
-- `wait(job_id: str, timeout: int = 600, poll_interval: float = 5.0, callback: Union[Callable[Job, None], None] = None) -> Job` — Wait for job completion.
+- `cancel(job_id: str) -> Job` — 実行中のジョブをキャンセルします。
+- `create(execution_type: str, config_id: str | None = None, data: dict[str, Any] | None = None) -> Job` — 新しいジョブを作成します。
+- `get(job_id: str) -> Job` — IDでジョブを取得します。
+- `list(status: str | None = None, execution_type: str | None = None, limit: int = 100) -> list[Job]` — ジョブ一覧を取得します。
+- `wait(job_id: str, timeout: int = 600, poll_interval: float = 5.0, callback: Union[Callable[Job, None], None] = None) -> Job` — ジョブの完了を待機します。
 
 ## ReportsClient
 
@@ -173,13 +173,13 @@ Accessed via `client.reports`. Fetch evaluation reports.
 
 **Methods:**
 
-- `get(report_id: str | UUID, view: Literal[summary, details] = "summary") -> Report` — Get a report by ID.
+- `get(report_id: str | UUID, view: Literal[summary, details] = "summary") -> Report` — IDでレポートを取得します。
 
 ## Data Models
 
 ### `Config`
 
-Complete config object.
+完全な設定オブジェクト。
 
 | Field | Type | Description |
 |---|---|---|
@@ -198,7 +198,7 @@ Complete config object.
 
 ### `ConfigCreate`
 
-Request model for creating a config.
+設定作成用のリクエストモデル。
 
 | Field | Type | Description |
 |---|---|---|
@@ -224,7 +224,7 @@ Request model for creating a config.
 
 ### `ConfigUpdate`
 
-Request model for updating a config.
+設定更新用のリクエストモデル。
 
 | Field | Type | Description |
 |---|---|---|
@@ -250,7 +250,7 @@ Request model for updating a config.
 
 ### `ConfigListResponse`
 
-Response model for listing configs.
+設定一覧取得用のレスポンスモデル。
 
 | Field | Type | Description |
 |---|---|---|
@@ -259,7 +259,7 @@ Response model for listing configs.
 
 ### `Job`
 
-Job (Execution) model.
+ジョブ（実行）モデル。
 
 | Field | Type | Description |
 |---|---|---|
@@ -282,7 +282,7 @@ Job (Execution) model.
 
 ### `JobProgress`
 
-Job progress information.
+ジョブの進捗情報。
 
 | Field | Type | Description |
 |---|---|---|
@@ -291,7 +291,7 @@ Job progress information.
 
 ### `MetricResult`
 
-Single metric evaluation result.
+単一メトリックの評価結果。
 
 | Field | Type | Description |
 |---|---|---|
@@ -303,7 +303,7 @@ Single metric evaluation result.
 
 ### `Report`
 
-Report model.
+レポートモデル。
 
 | Field | Type | Description |
 |---|---|---|
@@ -428,16 +428,16 @@ Exception
 
 All exceptions:
 
-- `GenFluxError`: Base exception for GenFlux SDK.
-- `APIError`: API request failed.
-- `AuthenticationError`: Authentication failed (401).
-- `NotFoundError`: Resource not found (404).
-- `ValidationError`: Validation error (422).
-- `TimeoutError`: Operation timed out.
-- `JobFailedError`: Job execution failed.
-- `RateLimitError`: Rate limit exceeded (429).
-- `ConfigNotFoundError`: Config not found.
-- `ResourceNotFoundError`: Generic resource not found error.
+- `GenFluxError`: GenFlux SDKの基底例外クラス。
+- `APIError`: APIリクエストが失敗しました。
+- `AuthenticationError`: 認証に失敗しました（401）。
+- `NotFoundError`: リソースが見つかりません（404）。
+- `ValidationError`: バリデーションエラー（400, 422）。
+- `TimeoutError`: 操作がタイムアウトしました。
+- `JobFailedError`: ジョブの実行に失敗しました。
+- `RateLimitError`: レート制限を超過しました（429）。
+- `ConfigNotFoundError`: 設定が見つかりません。
+- `ResourceNotFoundError`: 汎用リソースが見つからないエラー。
 
 ## Evaluation Metrics Reference
 

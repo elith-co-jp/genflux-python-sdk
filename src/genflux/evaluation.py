@@ -1,4 +1,4 @@
-"""Evaluation Client for GenFlux SDK."""
+"""Evaluation Client for GENFLUX SDK."""
 
 import logging
 from typing import Callable
@@ -63,7 +63,7 @@ class EvaluationClient:
             ValidationError: If request validation fails
 
         Example:
-            >>> client = GenFlux(api_key="pk_xxx")
+            >>> client = Genflux(api_key="pk_xxx")
             >>> evaluator = client.evaluation(config_id="config_123")
             >>>
             >>> result = evaluator.evaluate(

@@ -1,4 +1,4 @@
-"""Base HTTP client for GenFlux API."""
+"""Base HTTP client for GENFLUX API."""
 
 import os
 from typing import Any
@@ -18,7 +18,7 @@ from genflux.exceptions.api import (
 
 
 class BaseClient:
-    """Base HTTP client for GenFlux API."""
+    """Base HTTP client for GENFLUX API."""
 
     def __init__(
         self,

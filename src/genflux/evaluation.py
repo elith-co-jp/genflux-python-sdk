@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class EvaluationClient:
-    """Client for evaluation operations.
+    """評価操作用クライアント。
 
-    Provides a synchronous-style interface for evaluations,
-    internally using Job-based async execution.
+    同期スタイルのインターフェースを提供し、
+    内部的にJobベースの非同期実行を使用します。
     """
 
     def __init__(self, jobs_client: JobsClient, config_id: str | None):
@@ -39,13 +39,20 @@ class EvaluationClient:
         callback: Callable[[Job], None] | None = None,
         show_progress: bool = True,
     ) -> MetricResult:
-        """Evaluate a single question-answer pair.
+        """単一の質問-回答ペアを評価します。
 
-        This method provides a synchronous-style API that internally
-        creates a job, waits for completion, and returns the result.
+        このメソッドは内部的にジョブを作成し、完了を待機して結果を返す
+        同期スタイルのAPIを提供します。
 
         Args:
-            metric: Metric name (e.g., 'faithfulness', 'answer_relevancy')
+            metric: Metric name to evaluate. Valid values -
+                'faithfulness', 'answer_relevancy', 'context_relevancy',
+                'llm_context_precision', 'context_recall',
+                'hallucination', 'toxicity', 'bias'.
+                （メソッド名と内部メトリック名の対応:
+                contextual_relevancy() → 'context_relevancy',
+                contextual_precision() → 'llm_context_precision',
+                contextual_recall() → 'context_recall'）
             question: Question text
             answer: Answer text
             contexts: Context/retrieval texts (optional)
@@ -179,7 +186,7 @@ class EvaluationClient:
         timeout: int = 300,
         on_progress: Callable[[Job], None] | None = None,
     ) -> MetricResult:
-        """Evaluate faithfulness (answers based on contexts).
+        """忠実性を評価します（回答がコンテキストに基づいているか）。
 
         Args:
             question: Question text
@@ -215,7 +222,7 @@ class EvaluationClient:
         contexts: list[str] | None = None,
         timeout: int = 300,
     ) -> MetricResult:
-        """Evaluate answer relevancy (answer addresses the question).
+        """回答の関連性を評価します（回答が質問に対応しているか）。
 
         Args:
             question: Question text
@@ -247,7 +254,7 @@ class EvaluationClient:
         contexts: list[str],
         timeout: int = 300,
     ) -> MetricResult:
-        """Evaluate contextual relevancy (contexts are relevant to question).
+        """コンテキストの関連性を評価します（コンテキストが質問に関連しているか）。
 
         Args:
             question: Question text
@@ -280,7 +287,7 @@ class EvaluationClient:
         contexts: list[str],
         timeout: int = 300,
     ) -> MetricResult:
-        """Evaluate contextual precision (relevant contexts ranked higher).
+        """コンテキストの精度を評価します（関連するコンテキストが上位にランクされているか）。
 
         Args:
             question: Question text
@@ -307,7 +314,7 @@ class EvaluationClient:
         ground_truth: str,
         timeout: int = 300,
     ) -> MetricResult:
-        """Evaluate contextual recall (answer can be attributed to contexts).
+        """コンテキストの再現率を評価します（回答がコンテキストに帰属できるか）。
 
         Args:
             question: Question text
@@ -335,7 +342,7 @@ class EvaluationClient:
         contexts: list[str],
         timeout: int = 300,
     ) -> MetricResult:
-        """Evaluate hallucination (answer contains information not in contexts).
+        """ハルシネーションを評価します（回答にコンテキストにない情報が含まれているか）。
 
         Args:
             question: Question text
@@ -361,7 +368,7 @@ class EvaluationClient:
         contexts: list[str] | None = None,
         timeout: int = 300,
     ) -> MetricResult:
-        """Evaluate toxicity (answer contains toxic content).
+        """有害性を評価します（回答に有害なコンテンツが含まれているか）。
 
         Args:
             question: Question text
@@ -387,7 +394,7 @@ class EvaluationClient:
         contexts: list[str] | None = None,
         timeout: int = 300,
     ) -> MetricResult:
-        """Evaluate bias (answer contains biased content).
+        """バイアスを評価します（回答に偏りのあるコンテンツが含まれているか）。
 
         Args:
             question: Question text

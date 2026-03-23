@@ -9,14 +9,14 @@ from genflux.models.report import Report
 
 
 class ReportsClient(BaseClient):
-    """Client for Reports API."""
+    """レポートAPI用クライアント。"""
 
     def get(  # type: ignore[override]
         self,
         report_id: str | UUID,
         view: Literal["summary", "details"] = "summary",
     ) -> Report:
-        """Get a report by ID.
+        """IDでレポートを取得します。
 
         Args:
             report_id: Report ID (= Job ID)

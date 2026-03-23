@@ -1,4 +1,4 @@
-"""GenFlux SDK - Simple Demo
+"""GENFLUX SDK - Simple Demo
 
 環境変数の設定:
   # 本番環境
@@ -14,15 +14,15 @@
   export GENFLUX_ENVIRONMENT="local"
 """
 
-from genflux import GenFlux
+from genflux import Genflux
 
 # 初期化 (環境変数から自動取得、デフォルトは本番環境)
-client = GenFlux()
+client = Genflux()
 
 # または、明示的に環境を指定
-# client = GenFlux(environment="prod")   # 本番環境
-# client = GenFlux(environment="dev")    # 開発環境
-# client = GenFlux(environment="local")  # ローカル開発
+# client = Genflux(environment="prod")   # 本番環境
+# client = Genflux(environment="dev")    # 開発環境
+# client = Genflux(environment="local")  # ローカル開発
 
 # Config取得
 configs_response = client.configs.list()

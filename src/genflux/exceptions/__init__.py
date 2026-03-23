@@ -1,10 +1,10 @@
-"""Custom exceptions for GenFlux SDK."""
+"""Custom exceptions for GENFLUX SDK."""
 
 from genflux.exceptions.api import (
     APIError,
     AuthenticationError,
     ConfigNotFoundError,
-    GenFluxError,
+    GenfluxError,
     JobFailedError,
     NotFoundError,
     RateLimitError,
@@ -14,7 +14,7 @@ from genflux.exceptions.api import (
 )
 
 __all__ = [
-    "GenFluxError",
+    "GenfluxError",
     "APIError",
     "AuthenticationError",
     "NotFoundError",

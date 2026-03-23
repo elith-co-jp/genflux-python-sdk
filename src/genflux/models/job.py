@@ -7,7 +7,7 @@ from typing import Any
 
 @dataclass
 class JobProgress:
-    """Job progress information."""
+    """ジョブの進捗情報。"""
 
     percentage: float
     message: str
@@ -15,7 +15,7 @@ class JobProgress:
 
 @dataclass
 class Job:
-    """Job (Execution) model."""
+    """ジョブ（実行）モデル。"""
 
     id: str
     tenant_id: str
@@ -36,7 +36,7 @@ class Job:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Job":
-        """Create Job from API response dict.
+        """APIレスポンスの辞書からJobを作成します。
 
         Args:
             data: API response dictionary
@@ -79,28 +79,28 @@ class Job:
 
     @property
     def is_completed(self) -> bool:
-        """Check if job is completed."""
+        """ジョブが完了したかどうかを確認します。"""
         return self.status == "completed"
 
     @property
     def is_failed(self) -> bool:
-        """Check if job failed."""
+        """ジョブが失敗したかどうかを確認します。"""
         return self.status == "failed"
 
     @property
     def is_running(self) -> bool:
-        """Check if job is running."""
+        """ジョブが実行中かどうかを確認します。"""
         return self.status == "running"
 
     @property
     def is_pending(self) -> bool:
-        """Check if job is pending (queued or pending)."""
+        """ジョブが待機中（キュー待ちまたはペンディング）かどうかを確認します。"""
         return self.status in ("pending", "queued")
 
 
 @dataclass
 class MetricResult:
-    """Single metric evaluation result."""
+    """単一メトリックの評価結果。"""
 
     metric: str
     score: float

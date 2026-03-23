@@ -73,13 +73,13 @@ def _parse_not_found_from_response(
 
 
 class GenFluxError(Exception):
-    """Base exception for GenFlux SDK."""
+    """GenFlux SDKの基底例外クラス。"""
 
     pass
 
 
 class APIError(GenFluxError):
-    """API request failed."""
+    """APIリクエストが失敗しました。"""
 
     def __init__(self, status_code: int, message: str, details: dict | None = None):
         """Initialize API error.
@@ -96,7 +96,7 @@ class APIError(GenFluxError):
 
 
 class AuthenticationError(APIError):
-    """Authentication failed (401)."""
+    """認証に失敗しました（401）。"""
 
     def __init__(self, message: str = "Invalid API Key", details: dict | None = None):
         """Initialize authentication error.
@@ -109,7 +109,7 @@ class AuthenticationError(APIError):
 
 
 class NotFoundError(APIError):
-    """Resource not found (404)."""
+    """リソースが見つかりません（404）。"""
 
     def __init__(
         self,
@@ -132,7 +132,7 @@ class NotFoundError(APIError):
 
 
 class ValidationError(APIError):
-    """Validation error (422)."""
+    """バリデーションエラー（400, 422）。"""
 
     def __init__(self, message: str, details: dict | None = None):
         """Initialize validation error.
@@ -145,7 +145,7 @@ class ValidationError(APIError):
 
 
 class TimeoutError(GenFluxError):
-    """Operation timed out."""
+    """操作がタイムアウトしました。"""
 
     def __init__(
         self,
@@ -183,7 +183,7 @@ class TimeoutError(GenFluxError):
 
 
 class JobFailedError(GenFluxError):
-    """Job execution failed."""
+    """ジョブの実行に失敗しました。"""
 
     def __init__(
         self,
@@ -205,7 +205,7 @@ class JobFailedError(GenFluxError):
 
 
 class RateLimitError(APIError):
-    """Rate limit exceeded (429)."""
+    """レート制限を超過しました（429）。"""
 
     def __init__(
         self,
@@ -225,7 +225,7 @@ class RateLimitError(APIError):
 
 
 class ConfigNotFoundError(GenFluxError):
-    """Config not found."""
+    """設定が見つかりません。"""
 
     def __init__(self, config_id: str | None = None):
         """Initialize config not found error.
@@ -243,7 +243,7 @@ class ConfigNotFoundError(GenFluxError):
 
 
 class ResourceNotFoundError(GenFluxError):
-    """Generic resource not found error."""
+    """汎用リソースが見つからないエラー。"""
 
     def __init__(self, resource_type: str, resource_id: str):
         """Initialize resource not found error.

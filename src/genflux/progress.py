@@ -10,7 +10,7 @@ from .models import Job
 
 @dataclass
 class ProgressBar:
-    """Simple progress bar for terminal output."""
+    """ターミナル出力用のシンプルなプログレスバー。"""
 
     total: int = 100
     width: int = 50
@@ -32,7 +32,7 @@ class ProgressBar:
         *,
         indeterminate: bool = False,
     ) -> None:
-        """Update progress bar.
+        """プログレスバーを更新します。
 
         Args:
             current: Current progress value (0 to total)
@@ -59,7 +59,7 @@ class ProgressBar:
             print(file=self.file)  # New line on complete
 
     def update_from_job(self, job: Job) -> None:
-        """Update progress bar from Job object.
+        """Jobオブジェクトからプログレスバーを更新します。
 
         Args:
             job: Job object with progress information
@@ -84,7 +84,7 @@ class ProgressBar:
 
 
 def create_progress_callback(enable: bool = True) -> Callable[[Job], None]:
-    """Create a progress callback for job.wait().
+    """job.wait()用のプログレスコールバックを作成します。
 
     Args:
         enable: Whether to enable progress display (default: True)

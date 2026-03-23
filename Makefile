@@ -1,4 +1,4 @@
-.PHONY: help docs docs-external docs-developer docs-check llms-txt llms-check lint test format
+.PHONY: help docs docs-fresh docs-external docs-developer docs-check llms-txt llms-check lint test format
 
 help: ## ヘルプを表示
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -7,12 +7,15 @@ help: ## ヘルプを表示
 # ドキュメント生成
 # ---------------------------------------------------------------------------
 
-docs: ## API Reference を全て生成（external + developer）
+docs: ## API Reference を全て生成（3-pass LLM改善: 改善→ハルシネーションチェック→UXレビュー）
 	python scripts/generate_api_reference.py --mode all
 	@echo ""
-	@echo "📖 Generated:"
+	@echo "📖 Generated (LLM-enriched):"
 	@echo "   docs/API_REFERENCE.md           (External / SDKユーザー向け)"
 	@echo "   docs/DEVELOPER_API_REFERENCE.md (Developer / 開発者向け)"
+
+docs-fresh: ## API Reference を生成（キャッシュなし）
+	python scripts/generate_api_reference.py --mode all --no-cache
 
 docs-external: ## External API Reference のみ生成
 	python scripts/generate_api_reference.py --mode external

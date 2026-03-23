@@ -1,4 +1,4 @@
-# GenFlux Python SDK - サンプルコード集
+# Genflux Python SDK - サンプルコード集
 
 実際のユースケースごとのサンプルコードを紹介します。
 
@@ -40,7 +40,6 @@ result = evaluator.faithfulness(
 
 print(f"スコア: {result.score}")
 print(f"理由: {result.reason}")
-print(f"エンジン: {result.engine}")
 
 # 結果判定
 if result.score >= 0.8:
@@ -174,22 +173,26 @@ client = GenFlux()
 
 # 1. Config作成
 print("1. Config作成中...")
+from genflux.models.config import ConfigCreate
+
 config = client.configs.create(
-    name="Test RAG API",
-    api_endpoint="https://api.dify.ai/v1/chat-messages",
-    auth_type="bearer_token",
-    auth_credentials="app-xxxxxxxxxxxx",
-    request_format={
-        "method": "POST",
-        "body_template": {
-            "query": "{{prompt}}",
-            "response_mode": "blocking",
-            "user": "test-user"
+    ConfigCreate(
+        name="Test RAG API",
+        api_endpoint="https://api.example.com/chat",
+        auth_type="bearer_token",
+        auth_token="your_token_here",
+        request_format={
+            "method": "POST",
+            "body_template": {
+                "query": "{{prompt}}",
+                "response_mode": "blocking",
+                "user": "test-user"
+            }
+        },
+        response_format={
+            "response_path": "answer"
         }
-    },
-    response_format={
-        "response_path": "answer"
-    }
+    )
 )
 print(f"   ✅ Config作成完了: {config.id}")
 
@@ -255,7 +258,7 @@ while time.time() - start_time < max_wait:
     job_status = client.jobs.get(job.id)
     
     elapsed = int(time.time() - start_time)
-    print(f"[{elapsed}s] Status: {job_status.status}, Progress: {job_status.progress}/{job_status.total_count}")
+    print(f"[{elapsed}s] Status: {job_status.status}, Progress: {job_status.progress_count}/{job_status.total_count}")
     
     if job_status.status in ["completed", "failed", "cancelled"]:
         print(f"\nJob終了: {job_status.status}")
@@ -508,15 +511,15 @@ def custom_callback(job):
     }
     
     emoji = status_emoji.get(job.status, "❓")
-    progress_pct = (job.progress / job.total_count * 100) if job.total_count > 0 else 0
-    
-    print(f"{emoji} Status: {job.status} | Progress: {job.progress}/{job.total_count} ({progress_pct:.1f}%)")
+    progress_pct = (job.progress_count / job.total_count * 100) if job.total_count > 0 else 0
+
+    print(f"{emoji} Status: {job.status} | Progress: {job.progress_count}/{job.total_count} ({progress_pct:.1f}%)")
 
 result = evaluator.faithfulness(
     question="What is Python?",
     answer="Python is a programming language.",
     contexts=["Python is a high-level programming language."],
-    callback=custom_callback
+    on_progress=custom_callback
 )
 
 # 3. ログファイルへの進捗記録
@@ -525,7 +528,7 @@ import datetime
 def logging_callback(job):
     """ログファイルに進捗を記録"""
     timestamp = datetime.datetime.now().isoformat()
-    log_entry = f"[{timestamp}] Job {job.id}: {job.status} - {job.progress}/{job.total_count}\n"
+    log_entry = f"[{timestamp}] Job {job.id}: {job.status} - {job.progress_count}/{job.total_count}\n"
     
     with open("evaluation_progress.log", "a") as f:
         f.write(log_entry)
@@ -537,7 +540,7 @@ result = evaluator.faithfulness(
     question="What is Python?",
     answer="Python is a programming language.",
     contexts=["Python is a high-level programming language."],
-    callback=logging_callback
+    on_progress=logging_callback
 )
 ```
 
@@ -545,7 +548,7 @@ result = evaluator.faithfulness(
 
 ## まとめ
 
-これらのサンプルコードを参考に、GenFlux Python SDKを活用してください。
+これらのサンプルコードを参考に、Genflux Python SDKを活用してください。
 
 さらに詳しい情報は以下を参照:
 - [README.md](../README.md) - 基本的な使い方
@@ -553,5 +556,5 @@ result = evaluator.faithfulness(
 
 ---
 
-**GenFlux Python SDK - サンプルコード集**
+**Genflux Python SDK - サンプルコード集**
 

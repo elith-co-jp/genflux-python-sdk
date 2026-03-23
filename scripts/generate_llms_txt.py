@@ -209,7 +209,7 @@ def _collect_sdk_info() -> SDKInfo:
     # --- Public API ---
     public_api = list(gf.__all__)
 
-    # --- GenFlux Client ---
+    # --- Genflux Client ---
     def _client_methods(cls: type) -> list[tuple[str, str, str]]:
         methods = []
         for name, obj in _get_public_methods(cls):
@@ -334,12 +334,12 @@ def _generate_llms_txt(info: SDKInfo) -> str:
     lines: list[str] = []
 
     # ── H1 (required) ──
-    lines.append("# GenFlux Python SDK")
+    lines.append("# Genflux Python SDK")
     lines.append("")
 
     # ── Blockquote (summary) ──
     lines.append(
-        "> GenFlux Python SDK は RAG（Retrieval-Augmented Generation）システムの"
+        "> Genflux Python SDK は RAG（Retrieval-Augmented Generation）システムの"
         "**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための"
         "公式クライアントライブラリです。"
         "同期的な API の裏で非同期 Job をポーリングし、結果を返すアーキテクチャを採用しています。"
@@ -440,7 +440,7 @@ def _generate_llms_txt(info: SDKInfo) -> str:
     lines.append("```")
     lines.append("src/genflux/")
     lines.append("├── __init__.py          # Public API (__all__) — single source of truth")
-    lines.append("├── client.py            # GenFlux main client (entry point)")
+    lines.append("├── client.py            # Genflux main client (entry point)")
     lines.append("├── evaluation.py        # EvaluationClient (12 metric methods)")
     lines.append("├── jobs.py              # JobsClient (create / wait / cancel jobs)")
     lines.append("├── progress.py          # ProgressBar / create_progress_callback")
@@ -527,7 +527,7 @@ def _generate_llms_txt(info: SDKInfo) -> str:
     lines.append("")
     lines.append(
         "- [Backend API Reference](docs/BACKEND_API_REFERENCE.md):"
-        " REST API endpoints of the GenFlux Platform backend"
+        " REST API endpoints of the Genflux Platform backend"
     )
     lines.append(
         "- [Test Evaluation Sheet](docs/TEST_EVALUATION_SHEET.md):"
@@ -551,12 +551,12 @@ def _generate_llms_full_txt(info: SDKInfo) -> str:
     lines: list[str] = []
 
     # ── H1 ──
-    lines.append("# GenFlux Python SDK — Full Context for LLMs")
+    lines.append("# Genflux Python SDK — Full Context for LLMs")
     lines.append("")
 
     # ── Blockquote ──
     lines.append(
-        "> GenFlux Python SDK は RAG（Retrieval-Augmented Generation）システムの"
+        "> Genflux Python SDK は RAG（Retrieval-Augmented Generation）システムの"
         "**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための"
         "公式クライアントライブラリです。"
         "このファイルには LLM がコードを生成・修正するために必要な全 API 情報が含まれています。"
@@ -671,8 +671,8 @@ def _generate_llms_full_txt(info: SDKInfo) -> str:
     lines.append("```")
     lines.append("")
 
-    # ── GenFlux Client ──
-    lines.append("## GenFlux Client")
+    # ── Genflux Client ──
+    lines.append("## Genflux Client")
     lines.append("")
     lines.append("```python")
     lines.append("@dataclass")
@@ -795,7 +795,7 @@ def _generate_llms_full_txt(info: SDKInfo) -> str:
     lines.append("    ├── APIError (status_code, message, details)")
     lines.append("    │   ├── AuthenticationError (401)")
     lines.append("    │   ├── NotFoundError (404)")
-    lines.append("    │   ├── ValidationError (422)")
+    lines.append("    │   ├── ValidationError (400, 422)")
     lines.append("    │   └── RateLimitError (429, retry_after)")
     lines.append("    ├── TimeoutError (operation, timeout, job_id)")
     lines.append("    ├── JobFailedError (job_id, error_message)")
@@ -841,7 +841,7 @@ def _generate_llms_full_txt(info: SDKInfo) -> str:
     lines.append("genflux-python-sdk/")
     lines.append("├── src/genflux/            # SDK source")
     lines.append("│   ├── __init__.py         # Public API (__all__)")
-    lines.append("│   ├── client.py           # GenFlux main client")
+    lines.append("│   ├── client.py           # Genflux main client")
     lines.append("│   ├── evaluation.py       # EvaluationClient")
     lines.append("│   ├── jobs.py             # JobsClient")
     lines.append("│   ├── progress.py         # Progress display utilities")
@@ -931,7 +931,7 @@ def _check_diff(path: Path, new_content: str) -> bool:
 def main() -> int:
     """メインエントリーポイント."""
     parser = argparse.ArgumentParser(
-        description="Generate llms.txt and llms-full.txt for the GenFlux Python SDK",
+        description="Generate llms.txt and llms-full.txt for the Genflux Python SDK",
     )
     parser.add_argument(
         "--check",

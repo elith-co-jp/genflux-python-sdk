@@ -85,7 +85,7 @@ class ReportDetails(BaseModel):
 
 
 class Report(BaseModel):
-    """Report model."""
+    """レポートモデル。"""
 
     model_config = {"from_attributes": True}
 

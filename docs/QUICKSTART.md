@@ -1,6 +1,6 @@
-# GenFlux Python SDK - クイックスタート
+# GENFLUX Python SDK - クイックスタート
 
-最も簡単な方法で GenFlux SDK を使い始めましょう。このガイドでは、Config 作成から評価実行まで、最小限のコードで試せます。
+最も簡単な方法で GENFLUX SDK を使い始めましょう。このガイドでは、Config 作成から評価実行まで、最小限のコードで試せます。
 
 ---
 
@@ -17,7 +17,7 @@
 ## 前提条件
 
 - Python 3.11 以上
-- GenFlux Platform で発行した API Key（環境変数 `GENFLUX_API_KEY` に設定）
+- GENFLUX Platform で発行した API Key（環境変数 `GENFLUX_API_KEY` に設定）
 
 ---
 
@@ -26,10 +26,10 @@
 最もシンプルな方法で評価を実行してみましょう。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
 # クライアント初期化（環境変数から自動取得）
-client = GenFlux()
+client = Genflux()
 
 # 評価を実行（デフォルトのConfigを使用）
 evaluator = client.evaluation()  # config_idを指定しない場合、デフォルトを使用
@@ -62,10 +62,10 @@ Reason: The answer is based on the provided context.
 特定のRAG APIを評価したい場合は、Configを作成して指定できます。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 from genflux.models.config import ConfigCreate
 
-client = GenFlux()
+client = Genflux()
 
 # Config を作成
 config = client.configs.create(
@@ -100,9 +100,9 @@ print(f"Score: {result.score}")
 複数の質問を一度に評価してみましょう。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 evaluator = client.evaluation()  # デフォルトのConfigを使用
 
 # テストケース
@@ -157,9 +157,9 @@ print("完了!")
 同じデータで複数のメトリックを評価してみましょう。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 evaluator = client.evaluation()  # デフォルトのConfigを使用
 
 # 評価データ

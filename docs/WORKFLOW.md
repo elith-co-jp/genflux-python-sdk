@@ -1,4 +1,4 @@
-# GenFlux Python SDK - 本格的なワークフロー
+# GENFLUX Python SDK - 本格的なワークフロー
 
 実践的なユースケースに基づいた、本格的なワークフロー例を紹介します。
 
@@ -25,10 +25,10 @@
 ### 基本的なバッチ評価
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
 # クライアント初期化
-client = GenFlux()
+client = Genflux()
 
 # Config取得
 configs = client.configs.list()
@@ -152,9 +152,9 @@ if failed_tests:
 同じデータで複数のメトリックを評価し、総合的に判定します。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 configs = client.configs.list()
 config_id = str(configs.configs[0].id)
 
@@ -250,11 +250,11 @@ AI事業者ガイドラインへの準拠をチェックします。`execution_t
 ポリシー用 Config を用意し、`config_id` を指定して実行します。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 from genflux.models.config import ConfigCreate
 from genflux.progress import ProgressBar
 
-client = GenFlux()
+client = Genflux()
 
 # Config の取得または作成
 POLICY_CONFIG_NAME="My RAG API (PolicyCheck)"
@@ -315,10 +315,10 @@ if details.details and details.details.recommendations:
 `config_id` を指定せず、アカウントのデフォルト Config で実行します。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 from genflux.progress import ProgressBar
 
-client = GenFlux()
+client = Genflux()
 
 # Job 作成と完了待ち（デフォルト config 使用）
 job = client.jobs.create(execution_type="policy_check")
@@ -353,11 +353,11 @@ if details.details and details.details.recommendations:
 評価対象 API 用の Config を用意し、`config_id` を指定して実行します。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 from genflux.models.config import ConfigCreate
 from genflux.progress import ProgressBar
 
-client = GenFlux()
+client = Genflux()
 
 # Config の取得または作成（RedTeam 評価対象 API 用）
 REDTEAM_CONFIG_NAME = "MY RAG API (RedTeam)"
@@ -427,10 +427,10 @@ if details.details and details.details.recommendations:
 `config_id` を指定せず、アカウントのデフォルト Config で実行します。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 from genflux.progress import ProgressBar
 
-client = GenFlux()
+client = Genflux()
 
 # Job 作成と完了待ち（デフォルト config 使用）
 execution_type = "redteam_static"  # または "redteam_dynamic"
@@ -470,7 +470,7 @@ if details.details and details.details.recommendations:
 
 ```python
 import time
-from genflux import GenFlux
+from genflux import Genflux
 from genflux.exceptions import (
     AuthenticationError,
     NotFoundError,
@@ -481,7 +481,7 @@ from genflux.exceptions import (
     APIError
 )
 
-client = GenFlux()
+client = Genflux()
 
 def evaluate_with_retry(
     evaluator,
@@ -583,9 +583,9 @@ Job の作成、監視、キャンセルの例です。
 
 ```python
 import time
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 
 # Job作成（低レベルAPI）
 print("Job作成中...")
@@ -658,14 +658,14 @@ CI/CD用評価スクリプト
 """
 
 import sys
-from genflux import GenFlux
+from genflux import Genflux
 
 # 閾値設定
 FAITHFULNESS_THRESHOLD = 0.7
 RELEVANCY_THRESHOLD = 0.7
 
 def main():
-    client = GenFlux()
+    client = Genflux()
     
     # Configを取得
     configs = client.configs.list()
@@ -785,10 +785,10 @@ jobs:
 進捗表示をカスタマイズする例です。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 import datetime
 
-client = GenFlux()
+client = Genflux()
 configs = client.configs.list()
 config_id = str(configs.configs[0].id)
 evaluator = client.evaluation(config_id)
@@ -848,9 +848,9 @@ result = evaluator.faithfulness(
 評価結果のレポートを取得して分析する例です。
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 
 # 最近のJobを取得
 jobs = client.jobs.list(

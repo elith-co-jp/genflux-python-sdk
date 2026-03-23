@@ -1,4 +1,4 @@
-# GenFlux Python SDK - サンプルコード集
+# GENFLUX Python SDK - サンプルコード集
 
 実際のユースケースごとのサンプルコードを紹介します。
 
@@ -22,9 +22,9 @@
 ### Faithfulness 評価
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 
 # 既存のConfigを使用
 configs = client.configs.list()
@@ -57,9 +57,9 @@ else:
 ### 同じデータで複数のメトリックを評価
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 evaluator = client.evaluation(config_id="xxx")
 
 question = "AIとは何ですか？"
@@ -103,9 +103,9 @@ print(f"\n平均スコア: {avg_score:.2f}")
 ### 複数のテストケースを順次評価
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 evaluator = client.evaluation(config_id="xxx")
 
 # テストケース
@@ -167,9 +167,9 @@ print(f"\n合格率: {passed_count}/{total_count} ({passed_count/total_count*100
 ### Config の完全なライフサイクル
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 
 # 1. Config作成
 print("1. Config作成中...")
@@ -229,9 +229,9 @@ print("   ✅ Config削除完了")
 
 ```python
 import time
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 
 # Job作成（低レベルAPI）
 print("Job作成中...")
@@ -289,7 +289,7 @@ if final_job.results:
 
 ```python
 import time
-from genflux import GenFlux
+from genflux import Genflux
 from genflux.exceptions import (
     AuthenticationError,
     NotFoundError,
@@ -300,7 +300,7 @@ from genflux.exceptions import (
     APIError
 )
 
-client = GenFlux()
+client = Genflux()
 
 def evaluate_with_retry(evaluator, max_retries=3):
     """リトライ機能付き評価"""
@@ -398,14 +398,14 @@ CI/CD用評価スクリプト
 """
 
 import sys
-from genflux import GenFlux
+from genflux import Genflux
 
 # 閾値設定
 FAITHFULNESS_THRESHOLD = 0.7
 RELEVANCY_THRESHOLD = 0.7
 
 def main():
-    client = GenFlux()
+    client = Genflux()
     
     # Configを取得
     configs = client.configs.list()
@@ -486,9 +486,9 @@ if __name__ == "__main__":
 ### プログレスバーのカスタマイズ
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 evaluator = client.evaluation(config_id="xxx")
 
 # 1. プログレスバー非表示
@@ -548,7 +548,7 @@ result = evaluator.faithfulness(
 
 ## まとめ
 
-これらのサンプルコードを参考に、GenFlux Python SDKを活用してください。
+これらのサンプルコードを参考に、GENFLUX Python SDKを活用してください。
 
 さらに詳しい情報は以下を参照:
 - [README.md](../README.md) - 基本的な使い方
@@ -556,5 +556,5 @@ result = evaluator.faithfulness(
 
 ---
 
-**GenFlux Python SDK - サンプルコード集**
+**GENFLUX Python SDK - サンプルコード集**
 

@@ -4,13 +4,13 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/GENFLUX_logotype_w.png" width="320">
     <source media="(prefers-color-scheme: light)" srcset="assets/GENFLUX_logotype.png" width="320">
-    <img src="assets/GENFLUX_logotype.png" alt="Genflux" width="320">
+    <img src="assets/GENFLUX_logotype.png" alt="GENFLUX" width="320">
   </picture>
 </p>
 
 <p align="center">
-  <strong>Genflux Python SDK</strong><br>
-  Genflux Platform 公式 Python SDK。RAG システムの回答品質スコアリング、セキュリティテスト、ポリシーチェックを Python から実行できます。
+  <strong>GENFLUX Python SDK</strong><br>
+  GENFLUX Platform 公式 Python SDK。RAG システムの回答品質スコアリング、セキュリティテスト、ポリシーチェックを Python から実行できます。
 </p>
 
 [![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](https://github.com/elith-co-jp/genflux-python-sdk/releases/tag/v0.1.2)
@@ -25,21 +25,21 @@
 - [クイックスタート](./docs/QUICKSTART.md) — Config 不要で今すぐ試せるサンプル
 - [ワークフロー](./docs/WORKFLOW.md) — バッチ評価、CI/CD 統合、エラーハンドリング
 
-## Why Genflux
+## Why GENFLUX
 
 RAG システムを本番運用する際、「回答品質が十分か」「安全性に問題はないか」を継続的に検証する仕組みが不可欠です。
 
-Genflux は **RAG の品質・安全性を数値で可視化** するプラットフォームです。この SDK を使って Python から直接評価を実行できます。
+GENFLUX は **RAG の品質・安全性を数値で可視化** するプラットフォームです。この SDK を使って Python から直接評価を実行できます。
 
 - **8 種類の評価メトリック** — Faithfulness、Hallucination、Toxicity など、RAG に必要な品質指標をワンライナーで計測
 - **CI/CD 統合** — テストパイプラインに組み込み、品質劣化を自動検知（[ワークフロー例](./docs/WORKFLOW.md#cicd統合)）
-- **セキュリティテスト** — Genflux Platform 上で Red Teaming による攻撃シミュレーションを実行し、脆弱性を事前に検出
-- **ポリシーチェック** — Genflux Platform 上で AI 事業者ガイドライン準拠を自動検証
+- **セキュリティテスト** — GENFLUX Platform 上で Red Teaming による攻撃シミュレーションを実行し、脆弱性を事前に検出
+- **ポリシーチェック** — GENFLUX Platform 上で AI 事業者ガイドライン準拠を自動検証
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 result = client.evaluation().faithfulness(
     question="What is RAG?",
     answer="RAG is Retrieval-Augmented Generation.",
@@ -138,14 +138,14 @@ if result.score < 0.8:
 
 ```mermaid
 graph TB
-    User["Your Code"] --> GF["Genflux Client"]
+    User["Your Code"] --> GF["GENFLUX Client"]
 
     GF --> CC["client.configs<br/><small>ConfigClient</small>"]
     GF --> JC["client.jobs<br/><small>JobsClient</small>"]
     GF --> RC["client.reports<br/><small>ReportsClient</small>"]
     GF --> EC["client.evaluation()<br/><small>EvaluationClient</small>"]
 
-    CC --> API["Genflux Backend API"]
+    CC --> API["GENFLUX Backend API"]
     JC --> API
     RC --> API
     EC --> API
@@ -160,7 +160,7 @@ graph TB
 
 | クライアント | アクセス方法 | 説明 |
 |---|---|---|
-| `GenFlux` | `GenFlux()` | メインクライアント（認証・サブクライアント管理） |
+| `Genflux` | `Genflux()` | メインクライアント（認証・サブクライアント管理） |
 | `EvaluationClient` | `client.evaluation()` | 8 種類のメトリックによる評価実行 |
 | `ConfigClient` | `client.configs` | RAG API 設定の CRUD |
 | `JobsClient` | `client.jobs` | 非同期ジョブの作成・監視・キャンセル |
@@ -175,9 +175,9 @@ pip install genflux
 ## クイックスタート
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()  # 環境変数 GENFLUX_API_KEY を使用
+client = Genflux()  # 環境変数 GENFLUX_API_KEY を使用
 
 evaluator = client.evaluation()
 result = evaluator.faithfulness(
@@ -193,7 +193,7 @@ print(result.reason)  # "The answer is based on the provided context."
 API Key は明示的に渡すこともできます。
 
 ```python
-client = GenFlux(api_key="pk_xxx")
+client = Genflux(api_key="pk_xxx")
 ```
 
 ## 評価メトリック
@@ -265,7 +265,7 @@ except JobFailedError as e:
 | `GENFLUX_ENVIRONMENT` | `"local"` / `"dev"` / `"prod"` | `"prod"` |
 | `GENFLUX_API_BASE_URL` | ベース URL の上書き（最優先） | — |
 
-API Key は [Genflux Platform](https://www.platform.genflux.jp/) から発行してください。
+API Key は [GENFLUX Platform](https://www.platform.genflux.jp/) から発行してください。
 
 ## サポート
 

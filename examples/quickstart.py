@@ -1,4 +1,4 @@
-"""QuickStart: GenFlux SDK の最小限の使用例
+"""QuickStart: GENFLUX SDK の最小限の使用例
 
 このファイルをコピーして、自分のプロジェクトで使用できます。
 """
@@ -13,14 +13,14 @@ from genflux import ConfigClient, ConfigCreate
 
 
 def main():
-    """GenFlux SDK クイックスタート"""
+    """GENFLUX SDK クイックスタート"""
     # Step 1: API Keyを設定
     api_key = os.getenv("GENFLUX_API_KEY", "your_api_key_here")
 
     # Step 2: クライアントを初期化
     client = ConfigClient(api_key=api_key)
 
-    print("🚀 GenFlux SDK QuickStart")
+    print("🚀 GENFLUX SDK QuickStart")
     print("=" * 50)
 
     # Step 3: Configを作成

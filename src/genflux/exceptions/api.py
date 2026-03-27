@@ -1,4 +1,4 @@
-"""Custom exceptions for GenFlux SDK."""
+"""Custom exceptions for GENFLUX SDK."""
 
 
 def _extract_resource_from_url_path(
@@ -72,13 +72,13 @@ def _parse_not_found_from_response(
     return resource, resource_id, message
 
 
-class GenFluxError(Exception):
-    """GenFlux SDKの基底例外クラス。"""
+class GenfluxError(Exception):
+    """GENFLUX SDKの基底例外クラス。"""
 
     pass
 
 
-class APIError(GenFluxError):
+class APIError(GenfluxError):
     """APIリクエストが失敗しました。"""
 
     def __init__(self, status_code: int, message: str, details: dict | None = None):
@@ -144,7 +144,7 @@ class ValidationError(APIError):
         super().__init__(422, message, details)
 
 
-class TimeoutError(GenFluxError):
+class TimeoutError(GenfluxError):
     """操作がタイムアウトしました。"""
 
     def __init__(
@@ -182,7 +182,7 @@ class TimeoutError(GenFluxError):
         super().__init__(msg)
 
 
-class JobFailedError(GenFluxError):
+class JobFailedError(GenfluxError):
     """ジョブの実行に失敗しました。"""
 
     def __init__(
@@ -224,7 +224,7 @@ class RateLimitError(APIError):
         self.retry_after = retry_after
 
 
-class ConfigNotFoundError(GenFluxError):
+class ConfigNotFoundError(GenfluxError):
     """設定が見つかりません。"""
 
     def __init__(self, config_id: str | None = None):
@@ -242,7 +242,7 @@ class ConfigNotFoundError(GenFluxError):
             )
 
 
-class ResourceNotFoundError(GenFluxError):
+class ResourceNotFoundError(GenfluxError):
     """汎用リソースが見つからないエラー。"""
 
     def __init__(self, resource_type: str, resource_id: str):

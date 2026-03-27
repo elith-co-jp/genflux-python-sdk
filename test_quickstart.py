@@ -12,7 +12,7 @@ if "GENFLUX_API_KEY" not in os.environ:
 def main():
     """メイン処理."""
     try:
-        from genflux import GenFlux
+        from genflux import Genflux
 
         print("="*70)
         print("  QUICKSTART動作確認テスト")
@@ -20,7 +20,7 @@ def main():
 
         # クライアント初期化
         print("\n1. クライアント初期化...")
-        client = GenFlux(base_url="http://localhost:9000/api/v1/external")
+        client = Genflux(base_url="http://localhost:9000/api/v1/external")
         print("   ✅ クライアント初期化成功")
 
         # Config一覧取得

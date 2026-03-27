@@ -7,7 +7,7 @@ Backend APIの基本機能のみをテストします。
 import os
 import sys
 
-from genflux import GenFlux
+from genflux import Genflux
 
 
 def test_api_health():
@@ -31,8 +31,8 @@ def test_external_api_endpoints():
     # APIキーを環境変数から取得
     api_key = os.getenv("GENFLUX_API_KEY", "dev_test_key_12345")
 
-    # GenFluxクライアントを使用してAPIエンドポイントをテスト
-    client = GenFlux(api_key=api_key, base_url="http://localhost:9000/api/v1/external")
+    # GENFLUXクライアントを使用してAPIエンドポイントをテスト
+    client = Genflux(api_key=api_key, base_url="http://localhost:9000/api/v1/external")
 
     # GET /configs
     print("\n1️⃣  Testing GET /configs...")
@@ -61,7 +61,7 @@ def test_sdk_client():
     print("🧪 Test 3: SDK Client Initialization")
     print("=" * 60)
 
-    client = GenFlux(
+    client = Genflux(
         api_key="test_key",
         base_url="http://localhost:9000/api/v1/external",
     )
@@ -78,7 +78,7 @@ def test_sdk_client():
 def main():
     """メインテスト実行"""
     print("\n" + "=" * 60)
-    print("🚀 GenFlux SDK 簡易テスト")
+    print("🚀 GENFLUX SDK 簡易テスト")
     print("=" * 60)
     print()
 

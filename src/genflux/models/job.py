@@ -1,4 +1,4 @@
-"""Job-related data models for GenFlux SDK."""
+"""Job-related data models for GENFLUX SDK."""
 
 from dataclasses import dataclass
 from datetime import datetime

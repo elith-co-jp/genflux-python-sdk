@@ -1,13 +1,13 @@
-# Genflux Python SDK
+# GENFLUX Python SDK
 
-> Genflux Python SDK は RAG（Retrieval-Augmented Generation）システムの**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための公式クライアントライブラリです。同期的な API の裏で非同期 Job をポーリングし、結果を返すアーキテクチャを採用しています。
+> GENFLUX Python SDK は RAG（Retrieval-Augmented Generation）システムの**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための公式クライアントライブラリです。同期的な API の裏で非同期 Job をポーリングし、結果を返すアーキテクチャを採用しています。
 
 ## Quick Start
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux(api_key="pk_xxx")           # or set GENFLUX_API_KEY env var
+client = Genflux(api_key="pk_xxx")           # or set GENFLUX_API_KEY env var
 evaluator = client.evaluation(config_id="cfg_123")  # config_id is optional
 result = evaluator.faithfulness(
     question="What is Python?",
@@ -22,7 +22,7 @@ print(result.score, result.reason)
 The core execution flow is:
 
 ```
-GenFlux(api_key) → .evaluation(config_id) → EvaluationClient
+Genflux(api_key) → .evaluation(config_id) → EvaluationClient
   → EvaluationClient.faithfulness(q, a, contexts)
     → JobsClient.create()  →  Backend API (Job Queue)
     → JobsClient.wait()    →  Poll until completed
@@ -73,7 +73,7 @@ Priority: `GENFLUX_API_BASE_URL` > `GENFLUX_ENVIRONMENT` > default (`"prod"`).
 ```
 src/genflux/
 ├── __init__.py          # Public API (__all__) — single source of truth
-├── client.py            # Genflux main client (entry point)
+├── client.py            # GENFLUX main client (entry point)
 ├── evaluation.py        # EvaluationClient (12 metric methods)
 ├── jobs.py              # JobsClient (create / wait / cancel jobs)
 ├── progress.py          # ProgressBar / create_progress_callback
@@ -86,7 +86,7 @@ src/genflux/
 │   ├── job.py           # Job / JobProgress / MetricResult
 │   └── report.py        # Report / ReportSummary / ReportDetails
 └── exceptions/
-    └── api.py           # GenFluxError hierarchy
+    └── api.py           # GenfluxError hierarchy
 ```
 
 ## Coding Conventions
@@ -133,6 +133,6 @@ make llms-check    # Verify llms.txt is up-to-date
 
 ## Optional
 
-- [Backend API Reference](docs/BACKEND_API_REFERENCE.md): REST API endpoints of the Genflux Platform backend
+- [Backend API Reference](docs/BACKEND_API_REFERENCE.md): REST API endpoints of the GENFLUX Platform backend
 - [Test Evaluation Sheet](docs/TEST_EVALUATION_SHEET.md): Test cases and evaluation criteria
 - [Local Setup](docs/LOCAL_SETUP.md): Local development environment setup with Docker

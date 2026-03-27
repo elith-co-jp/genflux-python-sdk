@@ -1,14 +1,14 @@
-# Genflux Python SDK — Full Context for LLMs
+# GENFLUX Python SDK — Full Context for LLMs
 
-> Genflux Python SDK は RAG（Retrieval-Augmented Generation）システムの**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための公式クライアントライブラリです。このファイルには LLM がコードを生成・修正するために必要な全 API 情報が含まれています。
+> GENFLUX Python SDK は RAG（Retrieval-Augmented Generation）システムの**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための公式クライアントライブラリです。このファイルには LLM がコードを生成・修正するために必要な全 API 情報が含まれています。
 
 ## Quick Start
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
 # Initialize (GENFLUX_API_KEY env var or explicit)
-client = GenFlux(api_key="pk_xxx")
+client = Genflux(api_key="pk_xxx")
 
 # Simple evaluation
 evaluator = client.evaluation(config_id="cfg_123")  # config_id optional
@@ -40,7 +40,7 @@ report = client.reports.get(report_id=jobs[0].id, view="details")
 ## Architecture
 
 ```
-GenFlux(api_key)
+Genflux(api_key)
 ├── .evaluation(config_id) → EvaluationClient
 │     ├── .faithfulness(q, a, contexts) → MetricResult
 │     ├── .answer_relevancy(q, a)       → MetricResult
@@ -79,20 +79,20 @@ Priority: `GENFLUX_API_BASE_URL` > `GENFLUX_ENVIRONMENT` > default (`"prod"`).
 Everything exported from `genflux/__init__.py`:
 
 ```python
-# Clients: GenFlux, ConfigClient, EvaluationClient, JobsClient, ReportsClient
+# Clients: Genflux, ConfigClient, EvaluationClient, JobsClient, ReportsClient
 # Models:  Config, ConfigCreate, ConfigUpdate, ConfigListResponse, Job, JobProgress, MetricResult, Report, ReportSummary, ReportDetails, EvaluationSummary, RedTeamSummary, PolicySummary, CategoryBreakdown, FailedCase, Violation
-# Errors:  GenFluxError, APIError, AuthenticationError, NotFoundError, ValidationError, TimeoutError, JobFailedError, RateLimitError, ConfigNotFoundError, ResourceNotFoundError
+# Errors:  GenfluxError, APIError, AuthenticationError, NotFoundError, ValidationError, TimeoutError, JobFailedError, RateLimitError, ConfigNotFoundError, ResourceNotFoundError
 # Utils:   ProgressBar, create_progress_callback
 ```
 
-## Genflux Client
+## GENFLUX Client
 
 ```python
 @dataclass
-class GenFlux(api_key: str | None = None, base_url: str | None = None, environment: str | None = None, timeout: float = 60.0) -> None
+class Genflux(api_key: str | None = None, base_url: str | None = None, environment: str | None = None, timeout: float = 60.0) -> None
 ```
 
-GenFlux APIクライアント。
+Genflux APIクライアント。
 
 **Constructor Parameters:**
 
@@ -414,7 +414,7 @@ RedTeamサマリ
 
 ```
 Exception
-└── GenFluxError (base)
+└── GenfluxError (base)
     ├── APIError (status_code, message, details)
     │   ├── AuthenticationError (401)
     │   ├── NotFoundError (404)
@@ -428,7 +428,7 @@ Exception
 
 All exceptions:
 
-- `GenFluxError`: GenFlux SDKの基底例外クラス。
+- `GenfluxError`: GENFLUX SDKの基底例外クラス。
 - `APIError`: APIリクエストが失敗しました。
 - `AuthenticationError`: 認証に失敗しました（401）。
 - `NotFoundError`: リソースが見つかりません（404）。
@@ -458,7 +458,7 @@ All exceptions:
 genflux-python-sdk/
 ├── src/genflux/            # SDK source
 │   ├── __init__.py         # Public API (__all__)
-│   ├── client.py           # Genflux main client
+│   ├── client.py           # GENFLUX main client
 │   ├── evaluation.py       # EvaluationClient
 │   ├── jobs.py             # JobsClient
 │   ├── progress.py         # Progress display utilities

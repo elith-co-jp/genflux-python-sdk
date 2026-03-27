@@ -92,7 +92,7 @@ Everything exported from `genflux/__init__.py`:
 class Genflux(api_key: str | None = None, base_url: str | None = None, environment: str | None = None, timeout: float = 60.0) -> None
 ```
 
-Genflux APIクライアント。
+GENFLUX APIクライアント。
 
 **Constructor Parameters:**
 

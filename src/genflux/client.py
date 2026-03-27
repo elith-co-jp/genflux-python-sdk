@@ -17,7 +17,7 @@ from .jobs import JobsClient
 
 @dataclass
 class Genflux:
-    """GENFLUX API Client.
+    """GENFLUX APIクライアント。
 
     Args:
         api_key: API key for authentication. If not provided, uses GENFLUX_API_KEY env var.
@@ -25,7 +25,7 @@ class Genflux:
                   or constructs from environment setting.
         environment: Environment name ("local", "dev", or "prod"). Uses GENFLUX_ENVIRONMENT env var if not provided.
                      Defaults to "prod".
-        timeout: Request timeout in seconds (default: 60)
+        timeout (float): Request timeout in seconds (default: 60.0)
 
     Example:
         >>> from genflux import Genflux
@@ -84,7 +84,7 @@ class Genflux:
         self.jobs = JobsClient(self)
 
     def evaluation(self, config_id: str | None = None) -> EvaluationClient:
-        """Create an evaluation client for the given config.
+        """指定された設定で評価クライアントを作成します。
 
         Args:
             config_id: Config ID to use for evaluations (optional, uses default if not provided)
@@ -113,7 +113,7 @@ class Genflux:
         return EvaluationClient(self.jobs, config_id)
 
     def _get_headers(self) -> dict[str, str]:
-        """Get HTTP headers for API requests.
+        """APIリクエスト用のHTTPヘッダーを取得します。
 
         Returns:
             Dictionary of headers
@@ -128,7 +128,7 @@ class Genflux:
         return headers
 
     def _post(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
-        """Send POST request to API.
+        """APIにPOSTリクエストを送信します。
 
         Args:
             path: API endpoint path
@@ -149,7 +149,7 @@ class Genflux:
             raise  # Never reached, but makes type checker happy
 
     def _get(self, path: str) -> dict[str, Any]:
-        """Send GET request to API.
+        """APIにGETリクエストを送信します。
 
         Args:
             path: API endpoint path
@@ -169,7 +169,7 @@ class Genflux:
             raise  # Never reached, but makes type checker happy
 
     def _put(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
-        """Send PUT request to API.
+        """APIにPUTリクエストを送信します。
 
         Args:
             path: API endpoint path
@@ -190,7 +190,7 @@ class Genflux:
             raise  # Never reached, but makes type checker happy
 
     def _delete(self, path: str) -> None:
-        """Send DELETE request to API.
+        """APIにDELETEリクエストを送信します。
 
         Args:
             path: API endpoint path
@@ -205,7 +205,7 @@ class Genflux:
             self._handle_http_error(e)
 
     def _handle_http_error(self, error: httpx.HTTPStatusError) -> None:
-        """Handle HTTP errors and raise appropriate exceptions.
+        """HTTPエラーを処理し、適切な例外を発生させます。
 
         Args:
             error: HTTP status error
@@ -253,6 +253,6 @@ class Genflux:
             raise APIError(status_code, message, details)
 
     def __del__(self) -> None:
-        """Clean up HTTP client."""
+        """HTTPクライアントをクリーンアップします。"""
         if hasattr(self, "_http_client"):
             self._http_client.close()

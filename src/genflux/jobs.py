@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class JobsClient:
-    """Client for Job (Execution) management."""
+    """ジョブ（実行）管理用クライアント。"""
 
     def __init__(self, client: "Genflux"):
         """Initialize JobsClient.
@@ -44,7 +44,7 @@ class JobsClient:
         config_id: str | None = None,
         data: dict[str, Any] | None = None,
     ) -> Job:
-        """Create a new job.
+        """新しいジョブを作成します。
 
         Args:
             execution_type: Execution type (e.g., 'quick_evaluate', 'evaluation')
@@ -100,7 +100,7 @@ class JobsClient:
         execution_type: str | None = None,
         limit: int = 100,
     ) -> list[Job]:
-        """List jobs.
+        """ジョブ一覧を取得します。
 
         Args:
             status: Filter by status (e.g., 'completed', 'running', 'failed')
@@ -138,7 +138,7 @@ class JobsClient:
         return [Job.from_dict(job_data) for job_data in jobs_data]
 
     def get(self, job_id: str) -> Job:
-        """Get job by ID.
+        """IDでジョブを取得します。
 
         Args:
             job_id: Job ID
@@ -170,7 +170,7 @@ class JobsClient:
         poll_interval: float = 5.0,
         callback: Callable[[Job], None] | None = None,
     ) -> Job:
-        """Wait for job completion.
+        """ジョブの完了を待機します。
 
         Args:
             job_id: Job ID to wait for
@@ -275,7 +275,7 @@ class JobsClient:
         )
 
     def cancel(self, job_id: str) -> Job:
-        """Cancel a running job.
+        """実行中のジョブをキャンセルします。
 
         Args:
             job_id: Job ID to cancel

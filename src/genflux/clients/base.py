@@ -18,7 +18,7 @@ from genflux.exceptions.api import (
 
 
 class BaseClient:
-    """Base HTTP client for GENFLUX API."""
+    """GENFLUX API用の基底HTTPクライアント。"""
 
     def __init__(
         self,
@@ -26,7 +26,7 @@ class BaseClient:
         base_url: str | None = None,
         timeout: int = 30,
     ):
-        """Initialize base client.
+        """基底クライアントを初期化します。
 
         Args:
             api_key: API key for authentication (optional)
@@ -63,11 +63,11 @@ class BaseClient:
         self.close()
 
     def close(self):
-        """Close HTTP client."""
+        """HTTPクライアントを閉じます。"""
         self._client.close()
 
     def _get_headers(self) -> dict[str, str]:
-        """Get request headers with authentication.
+        """認証付きのリクエストヘッダーを取得します。
 
         Returns:
             Request headers
@@ -78,7 +78,7 @@ class BaseClient:
         return headers
 
     def _build_url(self, path: str) -> str:
-        """Build full URL from path.
+        """パスから完全なURLを構築します。
 
         Args:
             path: API path (e.g., "/configs")
@@ -89,7 +89,7 @@ class BaseClient:
         return urljoin(self.base_url + "/", path.lstrip("/"))
 
     def _handle_error(self, response: httpx.Response) -> None:
-        """Handle API error responses.
+        """APIエラーレスポンスを処理します。
 
         Args:
             response: HTTP response
@@ -136,7 +136,7 @@ class BaseClient:
             raise APIError(response.status_code, message, details)
 
     def get(self, path: str, **kwargs: Any) -> dict[str, Any]:
-        """Send GET request.
+        """GETリクエストを送信します。
 
         Args:
             path: API path
@@ -155,7 +155,7 @@ class BaseClient:
         return response.json()
 
     def post(self, path: str, json: dict[str, Any] | None = None, **kwargs: Any) -> dict[str, Any]:
-        """Send POST request.
+        """POSTリクエストを送信します。
 
         Args:
             path: API path
@@ -175,7 +175,7 @@ class BaseClient:
         return response.json()
 
     def put(self, path: str, json: dict[str, Any] | None = None, **kwargs: Any) -> dict[str, Any]:
-        """Send PUT request.
+        """PUTリクエストを送信します。
 
         Args:
             path: API path
@@ -195,7 +195,7 @@ class BaseClient:
         return response.json()
 
     def delete(self, path: str, **kwargs: Any) -> dict[str, Any] | None:
-        """Send DELETE request.
+        """DELETEリクエストを送信します。
 
         Args:
             path: API path

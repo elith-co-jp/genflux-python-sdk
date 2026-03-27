@@ -209,7 +209,7 @@ def _collect_sdk_info() -> SDKInfo:
     # --- Public API ---
     public_api = list(gf.__all__)
 
-    # --- Genflux Client ---
+    # --- GENFLUX Client ---
     def _client_methods(cls: type) -> list[tuple[str, str, str]]:
         methods = []
         for name, obj in _get_public_methods(cls):
@@ -440,7 +440,7 @@ def _generate_llms_txt(info: SDKInfo) -> str:
     lines.append("```")
     lines.append("src/genflux/")
     lines.append("├── __init__.py          # Public API (__all__) — single source of truth")
-    lines.append("├── client.py            # Genflux main client (entry point)")
+    lines.append("├── client.py            # GENFLUX main client (entry point)")
     lines.append("├── evaluation.py        # EvaluationClient (12 metric methods)")
     lines.append("├── jobs.py              # JobsClient (create / wait / cancel jobs)")
     lines.append("├── progress.py          # ProgressBar / create_progress_callback")
@@ -795,7 +795,7 @@ def _generate_llms_full_txt(info: SDKInfo) -> str:
     lines.append("    ├── APIError (status_code, message, details)")
     lines.append("    │   ├── AuthenticationError (401)")
     lines.append("    │   ├── NotFoundError (404)")
-    lines.append("    │   ├── ValidationError (422)")
+    lines.append("    │   ├── ValidationError (400, 422)")
     lines.append("    │   └── RateLimitError (429, retry_after)")
     lines.append("    ├── TimeoutError (operation, timeout, job_id)")
     lines.append("    ├── JobFailedError (job_id, error_message)")
@@ -841,7 +841,7 @@ def _generate_llms_full_txt(info: SDKInfo) -> str:
     lines.append("genflux-python-sdk/")
     lines.append("├── src/genflux/            # SDK source")
     lines.append("│   ├── __init__.py         # Public API (__all__)")
-    lines.append("│   ├── client.py           # Genflux main client")
+    lines.append("│   ├── client.py           # GENFLUX main client")
     lines.append("│   ├── evaluation.py       # EvaluationClient")
     lines.append("│   ├── jobs.py             # JobsClient")
     lines.append("│   ├── progress.py         # Progress display utilities")

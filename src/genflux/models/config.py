@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 
 class ApiSettings(BaseModel):
-    """API settings configuration."""
+    """API設定。"""
 
     api_endpoint: str
     auth_type: str
@@ -19,7 +19,7 @@ class ApiSettings(BaseModel):
 
 
 class RagQualityConfig(BaseModel):
-    """RAG Quality evaluation configuration."""
+    """RAG品質評価の設定。"""
 
     evaluation_metrics: dict[str, Any] = Field(default_factory=dict)
     total_prompt_count: int | None = None
@@ -29,7 +29,7 @@ class RagQualityConfig(BaseModel):
 
 
 class RedteamConfig(BaseModel):
-    """RedTeam evaluation configuration."""
+    """RedTeam評価の設定。"""
 
     redteam_objectives: list[str] | None = None
     redteam_max_turns: int | None = None
@@ -37,14 +37,14 @@ class RedteamConfig(BaseModel):
 
 
 class PolicyCheckConfig(BaseModel):
-    """Policy check configuration."""
+    """ポリシーチェックの設定。"""
 
     compliance_frameworks: list[str] | None = None
     policy_compliance_rate_threshold: float | None = None
 
 
 class Config(BaseModel):
-    """Complete config object."""
+    """完全な設定オブジェクト。"""
 
     id: UUID
     tenant_id: UUID
@@ -61,7 +61,7 @@ class Config(BaseModel):
 
 
 class ConfigCreate(BaseModel):
-    """Request model for creating a config."""
+    """設定作成用のリクエストモデル。"""
 
     name: str = Field(..., description="Config name")
     description: str | None = Field(None, description="Config description")
@@ -93,7 +93,7 @@ class ConfigCreate(BaseModel):
 
 
 class ConfigUpdate(BaseModel):
-    """Request model for updating a config."""
+    """設定更新用のリクエストモデル。"""
 
     name: str | None = None
     description: str | None = None
@@ -125,7 +125,7 @@ class ConfigUpdate(BaseModel):
 
 
 class ConfigListResponse(BaseModel):
-    """Response model for listing configs."""
+    """設定一覧取得用のレスポンスモデル。"""
 
     configs: list[Config]
     total: int

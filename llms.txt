@@ -1,13 +1,13 @@
-# GENFLUX Python SDK
+# Genflux Python SDK
 
-> GENFLUX Python SDK は RAG（Retrieval-Augmented Generation）システムの**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための公式クライアントライブラリです。同期的な API の裏で非同期 Job をポーリングし、結果を返すアーキテクチャを採用しています。
+> Genflux Python SDK は RAG（Retrieval-Augmented Generation）システムの**評価・セキュリティテスト・ポリシーチェック**を Python から実行するための公式クライアントライブラリです。同期的な API の裏で非同期 Job をポーリングし、結果を返すアーキテクチャを採用しています。
 
 ## Quick Start
 
 ```python
-from genflux import Genflux
+from genflux import GenFlux
 
-client = Genflux(api_key="pk_xxx")           # or set GENFLUX_API_KEY env var
+client = GenFlux(api_key="pk_xxx")           # or set GENFLUX_API_KEY env var
 evaluator = client.evaluation(config_id="cfg_123")  # config_id is optional
 result = evaluator.faithfulness(
     question="What is Python?",
@@ -22,7 +22,7 @@ print(result.score, result.reason)
 The core execution flow is:
 
 ```
-Genflux(api_key) → .evaluation(config_id) → EvaluationClient
+GenFlux(api_key) → .evaluation(config_id) → EvaluationClient
   → EvaluationClient.faithfulness(q, a, contexts)
     → JobsClient.create()  →  Backend API (Job Queue)
     → JobsClient.wait()    →  Poll until completed
@@ -86,7 +86,7 @@ src/genflux/
 │   ├── job.py           # Job / JobProgress / MetricResult
 │   └── report.py        # Report / ReportSummary / ReportDetails
 └── exceptions/
-    └── api.py           # GenfluxError hierarchy
+    └── api.py           # GenFluxError hierarchy
 ```
 
 ## Coding Conventions
@@ -133,6 +133,6 @@ make llms-check    # Verify llms.txt is up-to-date
 
 ## Optional
 
-- [Backend API Reference](docs/BACKEND_API_REFERENCE.md): REST API endpoints of the GENFLUX Platform backend
+- [Backend API Reference](docs/BACKEND_API_REFERENCE.md): REST API endpoints of the Genflux Platform backend
 - [Test Evaluation Sheet](docs/TEST_EVALUATION_SHEET.md): Test cases and evaluation criteria
 - [Local Setup](docs/LOCAL_SETUP.md): Local development environment setup with Docker

@@ -7,10 +7,10 @@ from genflux.models.config import Config, ConfigCreate, ConfigListResponse, Conf
 
 
 class ConfigClient(BaseClient):
-    """Client for managing evaluation configs."""
+    """評価設定管理用クライアント。"""
 
     def create(self, config: ConfigCreate) -> Config:
-        """Create a new config.
+        """新しい設定を作成します。
 
         Args:
             config: Config creation parameters
@@ -48,7 +48,7 @@ class ConfigClient(BaseClient):
         return Config.model_validate(response_data)
 
     def get(self, config_id: str | UUID) -> Config:  # type: ignore[override]
-        """Get config by ID.
+        """IDで設定を取得します。
 
         Args:
             config_id: Config ID
@@ -70,7 +70,7 @@ class ConfigClient(BaseClient):
         return Config.model_validate(response_data)
 
     def list(self, limit: int = 100, offset: int = 0) -> ConfigListResponse:
-        """List all configs.
+        """すべての設定を一覧取得します。
 
         Args:
             limit: Maximum number of configs to return
@@ -93,7 +93,7 @@ class ConfigClient(BaseClient):
         return ConfigListResponse.model_validate(response_data)
 
     def update(self, config_id: str | UUID, config_update: ConfigUpdate) -> Config:
-        """Update config.
+        """設定を更新します。
 
         Args:
             config_id: Config ID
@@ -125,7 +125,7 @@ class ConfigClient(BaseClient):
         return Config.model_validate(response_data)
 
     def delete(self, config_id: str | UUID) -> bool:  # type: ignore[override]
-        """Delete config.
+        """設定を削除します。
 
         Args:
             config_id: Config ID

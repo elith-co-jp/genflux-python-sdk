@@ -265,7 +265,8 @@ except JobFailedError as e:
 | `GENFLUX_ENVIRONMENT` | `"local"` / `"dev"` / `"prod"` | `"prod"` |
 | `GENFLUX_API_BASE_URL` | ベース URL の上書き（最優先） | — |
 
-API Key は [GENFLUX Platform](https://www.platform.genflux.jp/) から発行してください。
+API Key は [GENFLUX Platform](https://www.platform.genflux.jp/) から発行してください。<br>
+**📝 無料トライアル:** アカウント作成時に **20 クレジット** が自動付与されます。SDK の機能を今すぐ無料でお試しいただけます。
 
 ## サポート
 

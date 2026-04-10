@@ -100,7 +100,15 @@ class Job:
 
 @dataclass
 class MetricResult:
-    """単一メトリックの評価結果。"""
+    """単一メトリックの評価結果。
+
+    Attributes:
+        metric: 評価メトリック名（例: "faithfulness", "answer_relevancy"）。
+        score: 評価スコア（0.0〜1.0）。
+        reason: 評価理由の説明文。メトリックによっては None。
+        engine: 評価エンジン識別子。現在は ``"genflux"`` が返される。
+        execution_time_seconds: 評価の実行時間（秒）。取得できない場合は None。
+    """
 
     metric: str
     score: float

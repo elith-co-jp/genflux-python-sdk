@@ -61,7 +61,7 @@ Priority: `GENFLUX_API_BASE_URL` > `GENFLUX_ENVIRONMENT` > default (`"prod"`).
 
 ## Tech Stack
 
-- Python >= 3.11, SDK version 0.1.2
+- Python >= 3.11, SDK version 0.1.3
 - HTTP client: httpx
 - Data models: Pydantic v2 (BaseModel) + dataclasses
 - Build: hatchling, managed with uv

@@ -4,6 +4,7 @@ from genflux.exceptions.api import (
     APIError,
     AuthenticationError,
     ConfigNotFoundError,
+    GenFluxError,
     GenfluxError,
     JobFailedError,
     NotFoundError,
@@ -15,6 +16,7 @@ from genflux.exceptions.api import (
 
 __all__ = [
     "GenfluxError",
+    "GenFluxError",
     "APIError",
     "AuthenticationError",
     "NotFoundError",

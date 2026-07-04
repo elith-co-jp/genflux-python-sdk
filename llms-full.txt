@@ -79,9 +79,9 @@ Priority: `GENFLUX_API_BASE_URL` > `GENFLUX_ENVIRONMENT` > default (`"prod"`).
 Everything exported from `genflux/__init__.py`:
 
 ```python
-# Clients: Genflux, ConfigClient, EvaluationClient, JobsClient, ReportsClient
+# Clients: Genflux, GenFlux, ConfigClient, EvaluationClient, JobsClient, ReportsClient
 # Models:  Config, ConfigCreate, ConfigUpdate, ConfigListResponse, Job, JobProgress, MetricResult, Report, ReportSummary, ReportDetails, EvaluationSummary, RedTeamSummary, PolicySummary, CategoryBreakdown, FailedCase, Violation
-# Errors:  GenfluxError, APIError, AuthenticationError, NotFoundError, ValidationError, TimeoutError, JobFailedError, RateLimitError, ConfigNotFoundError, ResourceNotFoundError
+# Errors:  GenfluxError, GenFluxError, APIError, AuthenticationError, NotFoundError, ValidationError, TimeoutError, JobFailedError, RateLimitError, ConfigNotFoundError, ResourceNotFoundError
 # Utils:   ProgressBar, create_progress_callback
 ```
 

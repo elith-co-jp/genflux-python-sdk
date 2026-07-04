@@ -1,7 +1,7 @@
-"""GenFlux SDK の動作確認サンプル."""
+"""GENFLUX SDK の動作確認サンプル."""
 
 import genflux
-from genflux import GenFlux
+from genflux import Genflux
 
 
 def main() -> None:
@@ -9,12 +9,12 @@ def main() -> None:
     # モジュール関数を試す
     print("=== genflux モジュール ===")
     print(genflux.hello())  # type: ignore[attr-defined]
-    print(genflux.hello("GenFlux"))  # type: ignore[attr-defined]
+    print(genflux.hello("GENFLUX"))  # type: ignore[attr-defined]
     print(f"Version: {genflux.version()}")  # type: ignore[attr-defined]
 
     # クライアントを試す
-    print("\n=== GenFlux Client ===")
-    client = GenFlux()
+    print("\n=== GENFLUX Client ===")
+    client = Genflux()
 
     # ping
     result = client.ping()  # type: ignore[attr-defined]

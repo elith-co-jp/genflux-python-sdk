@@ -1,6 +1,6 @@
 """Example: How to use ConfigClient.
 
-This example demonstrates how to manage evaluation configs using the GenFlux SDK.
+This example demonstrates how to manage evaluation configs using the GENFLUX SDK.
 """
 
 import os
@@ -23,7 +23,7 @@ def main():
     client = ConfigClient(api_key=api_key)
 
     print("="* 70)
-    print("GenFlux ConfigClient Example")
+    print("GENFLUX ConfigClient Example")
     print("=" * 70)
 
     # 1. Create a new config
@@ -31,7 +31,7 @@ def main():
     config = client.create(
         ConfigCreate(  # type: ignore[call-arg]
             name="My First Config",
-            description="Example configuration for GenFlux",
+            description="Example configuration for GENFLUX",
             api_endpoint="https://api.openai.com/v1/chat/completions",
             auth_type="bearer_token",
             auth_token="your_openai_api_key_here",

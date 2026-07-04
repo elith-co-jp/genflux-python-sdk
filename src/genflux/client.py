@@ -1,4 +1,4 @@
-"""GenFlux Client module."""
+"""GENFLUX Client module."""
 
 import os
 from dataclasses import dataclass, field
@@ -16,28 +16,28 @@ from .jobs import JobsClient
 
 
 @dataclass
-class GenFlux:
-    """GenFlux APIクライアント。
+class Genflux:
+    """GENFLUX APIクライアント。
 
     Args:
         api_key: API key for authentication. If not provided, uses GENFLUX_API_KEY env var.
-        base_url: Base URL for the GenFlux API. If not provided, uses GENFLUX_API_BASE_URL env var
+        base_url: Base URL for the GENFLUX API. If not provided, uses GENFLUX_API_BASE_URL env var
                   or constructs from environment setting.
         environment: Environment name ("local", "dev", or "prod"). Uses GENFLUX_ENVIRONMENT env var if not provided.
                      Defaults to "prod".
         timeout (float): Request timeout in seconds (default: 60.0)
 
     Example:
-        >>> from genflux import GenFlux
+        >>> from genflux import Genflux
         >>>
         >>> # Production (default)
-        >>> client = GenFlux(api_key="pk_xxx")
+        >>> client = Genflux(api_key="pk_xxx")
         >>>
         >>> # Development
-        >>> client = GenFlux(api_key="pk_xxx", environment="dev")
+        >>> client = Genflux(api_key="pk_xxx", environment="dev")
         >>>
         >>> # Local development
-        >>> client = GenFlux(api_key="dev_test_key", environment="local")
+        >>> client = Genflux(api_key="dev_test_key", environment="local")
     """
 
     api_key: str | None = field(default=None, repr=False)
@@ -80,7 +80,7 @@ class GenFlux:
         # New ConfigClient uses BaseClient (independent HTTP client)
         self.configs = ConfigClient(api_key=self.api_key, base_url=self.base_url, timeout=int(self.timeout))
         self.reports = ReportsClient(api_key=self.api_key, base_url=self.base_url, timeout=int(self.timeout))
-        # Old-style clients use GenFlux instance
+        # Old-style clients use Genflux instance
         self.jobs = JobsClient(self)
 
     def evaluation(self, config_id: str | None = None) -> EvaluationClient:
@@ -94,7 +94,7 @@ class GenFlux:
 
         Example:
             >>> # With explicit config
-            >>> client = GenFlux(api_key="pk_xxx")
+            >>> client = Genflux(api_key="pk_xxx")
             >>> evaluator = client.evaluation(config_id="config_123")
             >>> result = evaluator.faithfulness(
             ...     question="What is Python?",

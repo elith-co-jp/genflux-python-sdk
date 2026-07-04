@@ -1,4 +1,4 @@
-"""Reports client for GenFlux SDK."""
+"""Reports client for GENFLUX SDK."""
 
 from typing import Literal
 from uuid import UUID
@@ -32,8 +32,8 @@ class ReportsClient(BaseClient):
             ValidationError: If report not ready (job not completed)
 
         Example:
-            >>> from genflux import GenFlux
-            >>> client = GenFlux(api_key="genflux_xxx")
+            >>> from genflux import Genflux
+            >>> client = Genflux(api_key="genflux_xxx")
             >>>
             >>> # Get summary report
             >>> report = client.reports.get(

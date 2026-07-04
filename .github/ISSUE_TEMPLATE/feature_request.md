@@ -19,9 +19,9 @@ assignees: []
 <!-- 可能であれば、どのような形で使いたいかコード例で示してください -->
 
 ```python
-from genflux import GenFlux
+from genflux import Genflux
 
-client = GenFlux()
+client = Genflux()
 # こんな感じで使いたい...
 ```
 

@@ -1,4 +1,4 @@
-"""Progress display utilities for GenFlux SDK."""
+"""Progress display utilities for GENFLUX SDK."""
 
 import sys
 from collections.abc import Callable
@@ -93,10 +93,10 @@ def create_progress_callback(enable: bool = True) -> Callable[[Job], None]:
         Callback function for job.wait()
 
     Example:
-        >>> from genflux import GenFlux
+        >>> from genflux import Genflux
         >>> from genflux.progress import create_progress_callback
         >>>
-        >>> client = GenFlux(api_key="pk_xxx")
+        >>> client = Genflux(api_key="pk_xxx")
         >>> job = client.jobs.create(...)
         >>>
         >>> # With progress bar

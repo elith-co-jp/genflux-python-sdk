@@ -1,10 +1,10 @@
-"""GenFlux Python SDK.
+"""GENFLUX Python SDK.
 
-A Python SDK for interacting with the GenFlux API.
+A Python SDK for interacting with the GENFLUX API.
 """
 
 # Main client
-from genflux.client import GenFlux
+from genflux.client import Genflux
 
 # Specialized clients
 from genflux.clients.config import ConfigClient
@@ -17,6 +17,7 @@ from genflux.exceptions import (
     AuthenticationError,
     ConfigNotFoundError,
     GenFluxError,
+    GenfluxError,
     JobFailedError,
     NotFoundError,
     RateLimitError,
@@ -48,10 +49,13 @@ from genflux.models.report import (
 # Progress
 from genflux.progress import ProgressBar, create_progress_callback
 
-__version__ = "0.1.2"
+GenFlux = Genflux
+
+__version__ = "0.1.3"
 
 __all__ = [
     # Main Client
+    "Genflux",
     "GenFlux",
     # Specialized Clients
     "ConfigClient",
@@ -79,6 +83,7 @@ __all__ = [
     "ProgressBar",
     "create_progress_callback",
     # Exceptions
+    "GenfluxError",
     "GenFluxError",
     "APIError",
     "AuthenticationError",

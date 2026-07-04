@@ -4,7 +4,7 @@ import os
 import sys
 import time
 
-from genflux import GenFlux
+from genflux import Genflux
 
 # Set environment - 環境変数から取得、なければデフォルト値
 if "GENFLUX_API_KEY" not in os.environ:
@@ -19,9 +19,9 @@ def test_quick_evaluation():
     print("=" * 60)
 
     # Initialize client
-    print("\n📡 Initializing GenFlux client...")
+    print("\n📡 Initializing GENFLUX client...")
     print(f"   Base URL: {BASE_URL}")
-    client = GenFlux(base_url=BASE_URL)
+    client = Genflux(base_url=BASE_URL)
     print("✅ Client initialized")
 
     # Use existing config (first one from list)

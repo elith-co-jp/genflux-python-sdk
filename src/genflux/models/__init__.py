@@ -1,4 +1,4 @@
-"""Data models for GenFlux SDK."""
+"""Data models for GENFLUX SDK."""
 
 from genflux.models.config import (
     Config,

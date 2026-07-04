@@ -1,4 +1,4 @@
-"""Jobs Client for GenFlux SDK."""
+"""Jobs Client for GENFLUX SDK."""
 
 import logging
 import time
@@ -22,7 +22,7 @@ VALID_METRICS = frozenset({
 })
 
 if TYPE_CHECKING:
-    from genflux import GenFlux
+    from genflux import Genflux
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +30,11 @@ logger = logging.getLogger(__name__)
 class JobsClient:
     """ジョブ（実行）管理用クライアント。"""
 
-    def __init__(self, client: "GenFlux"):
+    def __init__(self, client: "Genflux"):
         """Initialize JobsClient.
 
         Args:
-            client: Parent GenFlux client
+            client: Parent Genflux client
         """
         self._client = client
 

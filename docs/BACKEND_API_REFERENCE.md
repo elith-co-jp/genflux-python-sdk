@@ -1,6 +1,6 @@
-# GenFlux Backend API Reference - External API
+# GENFLUX Backend API Reference - External API
 
-> **📘 Note**: このドキュメントは、GenFlux Python SDK が内部で使用する REST API の仕様です。  
+> **📘 Note**: このドキュメントは、GENFLUX Python SDK が内部で使用する REST API の仕様です。  
 > SDK の使い方については、[Python SDK API Reference](./API_REFERENCE.md) を参照してください。
 
 ## 📚 関連ドキュメント
@@ -14,7 +14,7 @@
 **Version**: 1.0.0
 
 
-GenFlux Platform Backend API
+GENFLUX Platform Backend API
 
 ## API Surfaces
 

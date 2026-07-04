@@ -1,4 +1,4 @@
-"""API clients for GenFlux SDK."""
+"""API clients for GENFLUX SDK."""
 
 from genflux.clients.config import ConfigClient
 

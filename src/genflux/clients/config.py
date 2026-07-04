@@ -1,4 +1,4 @@
-"""Config management client for GenFlux SDK."""
+"""Config management client for GENFLUX SDK."""
 
 from uuid import UUID
 

@@ -108,11 +108,11 @@ def check_sdk_basic_usage():
     print_section("SDK 基本動作確認")
 
     try:
-        from genflux import GenFlux
+        from genflux import Genflux
 
         # クライアント初期化
-        client = GenFlux(base_url="http://localhost:9000/api/v1/external")
-        print("✅ GenFlux クライアントを初期化しました")
+        client = Genflux(base_url="http://localhost:9000/api/v1/external")
+        print("✅ GENFLUX クライアントを初期化しました")
 
         # Config 一覧取得を試行
         try:
@@ -143,7 +143,7 @@ def check_sdk_basic_usage():
 def main():
     """メイン処理"""
     print("\n" + "="*70)
-    print("  GenFlux SDK セットアップ確認")
+    print("  GENFLUX SDK セットアップ確認")
     print("="*70)
 
     results = []

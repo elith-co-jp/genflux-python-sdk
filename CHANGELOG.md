@@ -12,6 +12,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/),
 
 ---
 
+## 0.1.3
+Released: 2026-07-04
+
+### Added
+
+- `GenFlux` / `GenFluxError` を互換 alias として復元し、既存ユーザーの `from genflux import GenFlux` / `GenFluxError` import を維持
+- `Genflux` / `GenfluxError` を推奨名として残しつつ、新旧両方の import をテストで固定
+
+### Changed
+
+- README、API Reference、LLM context、サンプル、生成スクリプトの GENFLUX ブランド表記と SDK ドキュメントを整理
+- `MetricResult` の docstring と評価メトリクス仕様ドキュメントを追加
+
+### Breaking changes
+
+- なし。旧名 `GenFlux` / `GenFluxError` は互換 alias として維持
+
+---
+
 ## 0.1.2
 Released: 2026-03-02
 
@@ -66,7 +85,8 @@ Released: 2026-03-02
 
 - なし（初回リリースのため）
 
-[Unreleased]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/elith-co-jp/genflux-python-sdk/releases/tag/v0.1.0

@@ -78,6 +78,9 @@ class GenfluxError(Exception):
     pass
 
 
+GenFluxError = GenfluxError
+
+
 class APIError(GenfluxError):
     """APIリクエストが失敗しました。"""
 
@@ -255,4 +258,3 @@ class ResourceNotFoundError(GenfluxError):
         self.resource_type = resource_type
         self.resource_id = resource_id
         super().__init__(f"{resource_type} {resource_id} not found")
-

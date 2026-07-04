@@ -16,6 +16,7 @@ from genflux.exceptions import (
     APIError,
     AuthenticationError,
     ConfigNotFoundError,
+    GenFluxError,
     GenfluxError,
     JobFailedError,
     NotFoundError,
@@ -48,11 +49,14 @@ from genflux.models.report import (
 # Progress
 from genflux.progress import ProgressBar, create_progress_callback
 
-__version__ = "0.1.2"
+GenFlux = Genflux
+
+__version__ = "0.1.3"
 
 __all__ = [
     # Main Client
     "Genflux",
+    "GenFlux",
     # Specialized Clients
     "ConfigClient",
     "EvaluationClient",
@@ -80,6 +84,7 @@ __all__ = [
     "create_progress_callback",
     # Exceptions
     "GenfluxError",
+    "GenFluxError",
     "APIError",
     "AuthenticationError",
     "NotFoundError",

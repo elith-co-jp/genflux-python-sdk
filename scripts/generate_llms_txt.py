@@ -653,7 +653,7 @@ def _generate_llms_full_txt(info: SDKInfo) -> str:
     lines.append("")
     lines.append("```python")
     # Group them
-    clients = [n for n in info.public_api if n.endswith("Client") or n == "Genflux"]
+    clients = [n for n in info.public_api if n.endswith("Client") or n in ("Genflux", "GenFlux")]
     _util_names = ("ProgressBar", "create_progress_callback")
     models = [
         n for n in info.public_api
@@ -985,4 +985,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

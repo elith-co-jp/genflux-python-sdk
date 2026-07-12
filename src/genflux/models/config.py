@@ -43,6 +43,14 @@ class PolicyCheckConfig(BaseModel):
     policy_compliance_rate_threshold: float | None = None
 
 
+class ConsistencyCreditEstimate(BaseModel):
+    """Platformが算定した一貫性評価の1問あたりクレジット見積り。"""
+
+    target_call_count: int = Field(ge=1)
+    credits_per_prompt: int = Field(ge=0)
+    incremental_credits_per_prompt: int = Field(ge=0)
+
+
 class Config(BaseModel):
     """完全な設定オブジェクト。"""
 
@@ -54,6 +62,7 @@ class Config(BaseModel):
     locale: str = "ja"
     consistency_repeat_count: int = Field(default=3, ge=1, le=5)
     version: int = Field(default=1, ge=1)
+    consistency_credit_estimate: ConsistencyCreditEstimate | None = None
     api_settings: ApiSettings | None = None
     rag_quality_config: RagQualityConfig | None = None
     redteam_config: RedteamConfig | None = None

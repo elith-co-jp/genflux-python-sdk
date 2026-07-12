@@ -189,6 +189,9 @@ Accessed via `client.reports`. Fetch evaluation reports.
 | `name` | `str` |  |
 | `description` | `str | None` |  |
 | `locale` | `str` |  |
+| `consistency_repeat_count` | `int` |  |
+| `version` | `int` |  |
+| `consistency_credit_estimate` | `ConsistencyCreditEstimate | None` |  |
 | `api_settings` | `ApiSettings | None` |  |
 | `rag_quality_config` | `RagQualityConfig | None` |  |
 | `redteam_config` | `RedteamConfig | None` |  |
@@ -205,6 +208,7 @@ Accessed via `client.reports`. Fetch evaluation reports.
 | `name` | `str` | Config name |
 | `description` | `str | None` | Config description |
 | `locale` | `str` | Locale (ja/en) |
+| `consistency_repeat_count` | `int` |  |
 | `api_endpoint` | `str` | API endpoint URL |
 | `auth_type` | `str` | Authentication type |
 | `auth_header` | `str | None` | Auth header name |
@@ -231,6 +235,7 @@ Accessed via `client.reports`. Fetch evaluation reports.
 | `name` | `str | None` |  |
 | `description` | `str | None` |  |
 | `locale` | `str | None` |  |
+| `consistency_repeat_count` | `int | None` |  |
 | `api_endpoint` | `str | None` |  |
 | `auth_type` | `str | None` |  |
 | `auth_header` | `str | None` |  |

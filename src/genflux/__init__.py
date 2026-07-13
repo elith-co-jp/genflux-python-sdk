@@ -51,7 +51,7 @@ from genflux.progress import ProgressBar, create_progress_callback
 
 GenFlux = Genflux
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 __all__ = [
     # Main Client

@@ -284,6 +284,7 @@ Accessed via `client.reports`. Fetch evaluation reports.
 | `completed_at` | `datetime | None` |  |
 | `created_at` | `datetime | None` |  |
 | `updated_at` | `datetime | None` |  |
+| `usage_summary` | `ExecutionUsageSummary | None` | default: None |
 
 ### `JobProgress`
 
@@ -306,6 +307,60 @@ Accessed via `client.reports`. Fetch evaluation reports.
 | `engine` | `str` |  |
 | `execution_time_seconds` | `float | None` | default: None |
 
+### `TokenCounts`
+
+Provider token counts; unavailable dimensions remain ``None``.
+
+| Field | Type | Description |
+|---|---|---|
+| `input_tokens` | `int | None` |  |
+| `cached_input_tokens` | `int | None` |  |
+| `output_tokens` | `int | None` |  |
+| `reasoning_tokens` | `int | None` |  |
+| `total_tokens` | `int | None` |  |
+
+### `ProviderTokenUsage`
+
+Token usage aggregated by provider, model, and evaluation stage.
+
+| Field | Type | Description |
+|---|---|---|
+| `provider` | `str` |  |
+| `model` | `str` |  |
+| `stage` | `str` |  |
+| `measurement` | `Literal[actual, estimated, unavailable]` |  |
+| `billable` | `bool` |  |
+| `tokens` | `TokenCounts` |  |
+
+### `TokenUsageSummary`
+
+Provider token usage for one execution.
+
+| Field | Type | Description |
+|---|---|---|
+| `measurement` | `Literal[actual, estimated, unavailable]` |  |
+| `totals` | `TokenCounts` |  |
+| `breakdown` | `list[ProviderTokenUsage]` |  |
+
+### `CreditUsageSummary`
+
+Credits charged or estimated for one execution.
+
+| Field | Type | Description |
+|---|---|---|
+| `amount` | `Decimal` |  |
+| `measurement` | `Literal[actual, estimated]` |  |
+
+### `ExecutionUsageSummary`
+
+Optional usage contract returned by newer Platform versions.
+
+| Field | Type | Description |
+|---|---|---|
+| `schema_version` | `Literal[1]` |  |
+| `tokens` | `TokenUsageSummary | None` |  |
+| `credits` | `CreditUsageSummary | None` |  |
+
 ### `Report`
 
 レポートモデル。
@@ -320,6 +375,7 @@ Accessed via `client.reports`. Fetch evaluation reports.
 | `created_at` | `datetime` |  |
 | `summary` | `ReportSummary` |  |
 | `details` | `ReportDetails | None` |  |
+| `usage_summary` | `ExecutionUsageSummary | None` |  |
 
 ### `ReportSummary`
 

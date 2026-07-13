@@ -658,6 +658,13 @@ def _generate_external_reference() -> str:
         ReportSummary,
         Violation,
     )
+    from genflux.models.usage import (
+        CreditUsageSummary,
+        ExecutionUsageSummary,
+        ProviderTokenUsage,
+        TokenCounts,
+        TokenUsageSummary,
+    )
     from genflux.progress import ProgressBar, create_progress_callback
 
     now = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -728,6 +735,8 @@ GENFLUX Python SDK の完全な API リファレンスです。
         Config, ConfigCreate, ConfigUpdate, ConfigListResponse,
         ApiSettings, RagQualityConfig, RedteamConfig, PolicyCheckConfig,
         Job, JobProgress, MetricResult,
+        TokenCounts, ProviderTokenUsage, TokenUsageSummary,
+        CreditUsageSummary, ExecutionUsageSummary,
         Report, ReportSummary, ReportDetails,
         EvaluationSummary, RedTeamSummary, PolicySummary,
         CategoryBreakdown, FailedCase, Violation,
@@ -831,6 +840,13 @@ def _generate_developer_reference() -> str:
         ReportSummary,
         Violation,
     )
+    from genflux.models.usage import (
+        CreditUsageSummary,
+        ExecutionUsageSummary,
+        ProviderTokenUsage,
+        TokenCounts,
+        TokenUsageSummary,
+    )
     from genflux.progress import ProgressBar, create_progress_callback
 
     now = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -904,6 +920,8 @@ def _generate_developer_reference() -> str:
         Config, ConfigCreate, ConfigUpdate, ConfigListResponse,
         ApiSettings, RagQualityConfig, RedteamConfig, PolicyCheckConfig,
         Job, JobProgress, MetricResult,
+        TokenCounts, ProviderTokenUsage, TokenUsageSummary,
+        CreditUsageSummary, ExecutionUsageSummary,
         Report, ReportSummary, ReportDetails,
         EvaluationSummary, RedTeamSummary, PolicySummary,
         CategoryBreakdown, FailedCase, Violation,
@@ -1589,4 +1607,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

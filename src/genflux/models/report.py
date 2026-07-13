@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from genflux.models.usage import ExecutionUsageSummary
+
 
 class CategoryBreakdown(BaseModel):
     """カテゴリ別内訳"""
@@ -97,4 +99,4 @@ class Report(BaseModel):
     created_at: datetime
     summary: ReportSummary
     details: ReportDetails | None = None
-
+    usage_summary: ExecutionUsageSummary | None = None

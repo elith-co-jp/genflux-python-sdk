@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from genflux.models.usage import ExecutionUsageSummary
+
 
 @dataclass
 class JobProgress:
@@ -33,6 +35,7 @@ class Job:
     completed_at: datetime | None
     created_at: datetime | None
     updated_at: datetime | None
+    usage_summary: ExecutionUsageSummary | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Job":
@@ -57,6 +60,11 @@ class Job:
         completed_at = datetime.fromisoformat(data["completed_at"]) if data.get("completed_at") else None
         created_at = datetime.fromisoformat(data["created_at"]) if data.get("created_at") else None
         updated_at = datetime.fromisoformat(data["updated_at"]) if data.get("updated_at") else None
+        usage_summary = (
+            ExecutionUsageSummary.model_validate(data["usage_summary"])
+            if data.get("usage_summary") is not None
+            else None
+        )
 
         return cls(
             id=data["id"],
@@ -75,6 +83,7 @@ class Job:
             completed_at=completed_at,
             created_at=created_at,
             updated_at=updated_at,
+            usage_summary=usage_summary,
         )
 
     @property

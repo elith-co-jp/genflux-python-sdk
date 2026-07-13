@@ -12,6 +12,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/),
 
 ---
 
+## 0.1.4
+Released: 2026-07-13
+
+### Added
+
+- [#37](https://github.com/elith-co-jp/genflux-python-sdk/pull/37): `Config` / `ConfigCreate` / `ConfigUpdate` に一貫性評価の反復回数 `consistency_repeat_count` を追加し、Platform が算定する `consistency_credit_estimate` を型付きで保持
+- [#38](https://github.com/elith-co-jp/genflux-python-sdk/pull/38): `Job` / `Report` に optional な `usage_summary` を追加し、token・credit の actual / estimated / unavailable と provider・model・stage・billable の内訳を型付きモデルとして公開
+
+### Changed
+
+- [#38](https://github.com/elith-co-jp/genflux-python-sdk/pull/38): `usage_summary` を返さない旧 Platform レスポンスは引き続き `None` として読み込み、後方互換性を維持
+- [#37](https://github.com/elith-co-jp/genflux-python-sdk/pull/37) / [#38](https://github.com/elith-co-jp/genflux-python-sdk/pull/38): API Reference と LLM context を再生成し、一貫性ポリシー・クレジット見積り・usage 5モデルを反映
+
+### Breaking changes
+
+- なし
+
+---
+
 ## 0.1.3
 Released: 2026-07-04
 
@@ -85,7 +104,8 @@ Released: 2026-03-02
 
 - なし（初回リリースのため）
 
-[Unreleased]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/elith-co-jp/genflux-python-sdk/compare/v0.1.0...v0.1.1

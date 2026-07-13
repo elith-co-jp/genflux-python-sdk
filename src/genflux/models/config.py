@@ -43,6 +43,14 @@ class PolicyCheckConfig(BaseModel):
     policy_compliance_rate_threshold: float | None = None
 
 
+class ConsistencyCreditEstimate(BaseModel):
+    """Platformが算定した一貫性評価の1問あたりクレジット見積り。"""
+
+    target_call_count: int = Field(ge=1)
+    credits_per_prompt: int = Field(ge=0)
+    incremental_credits_per_prompt: int = Field(ge=0)
+
+
 class Config(BaseModel):
     """完全な設定オブジェクト。"""
 
@@ -52,6 +60,9 @@ class Config(BaseModel):
     name: str
     description: str | None = None
     locale: str = "ja"
+    consistency_repeat_count: int = Field(default=3, ge=1, le=5)
+    version: int = Field(default=1, ge=1)
+    consistency_credit_estimate: ConsistencyCreditEstimate | None = None
     api_settings: ApiSettings | None = None
     rag_quality_config: RagQualityConfig | None = None
     redteam_config: RedteamConfig | None = None
@@ -66,6 +77,7 @@ class ConfigCreate(BaseModel):
     name: str = Field(..., description="Config name")
     description: str | None = Field(None, description="Config description")
     locale: str = Field(default="ja", description="Locale (ja/en)")
+    consistency_repeat_count: int = Field(default=3, ge=1, le=5)
 
     # API Settings (required)
     api_endpoint: str = Field(..., description="API endpoint URL")
@@ -98,6 +110,7 @@ class ConfigUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
     locale: str | None = None
+    consistency_repeat_count: int | None = Field(default=None, ge=1, le=5)
 
     # API Settings (optional)
     api_endpoint: str | None = None
@@ -129,4 +142,3 @@ class ConfigListResponse(BaseModel):
 
     configs: list[Config]
     total: int
-

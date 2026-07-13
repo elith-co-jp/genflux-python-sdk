@@ -13,7 +13,7 @@
   GENFLUX Platform 公式 Python SDK。RAG システムの回答品質スコアリング、セキュリティテスト、ポリシーチェックを Python から実行できます。
 </p>
 
-[![Version](https://img.shields.io/badge/version-0.1.3-blue.svg)](https://github.com/elith-co-jp/genflux-python-sdk/releases/tag/v0.1.3)
+[![Version](https://img.shields.io/badge/version-0.1.4-blue.svg)](https://github.com/elith-co-jp/genflux-python-sdk/releases/tag/v0.1.4)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 

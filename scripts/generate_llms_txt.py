@@ -205,6 +205,13 @@ def _collect_sdk_info() -> SDKInfo:
         ReportSummary,
         Violation,
     )
+    from genflux.models.usage import (
+        CreditUsageSummary,
+        ExecutionUsageSummary,
+        ProviderTokenUsage,
+        TokenCounts,
+        TokenUsageSummary,
+    )
 
     # --- Public API ---
     public_api = list(gf.__all__)
@@ -236,6 +243,8 @@ def _collect_sdk_info() -> SDKInfo:
     model_classes: list[type] = [
         Config, ConfigCreate, ConfigUpdate, ConfigListResponse,
         Job, JobProgress, MetricResult,
+        TokenCounts, ProviderTokenUsage, TokenUsageSummary,
+        CreditUsageSummary, ExecutionUsageSummary,
         Report, ReportSummary, ReportDetails,
         EvaluationSummary, RedTeamSummary, PolicySummary,
         CategoryBreakdown, FailedCase, Violation,

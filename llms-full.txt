@@ -284,6 +284,7 @@ Accessed via `client.reports`. Fetch evaluation reports.
 | `completed_at` | `datetime | None` |  |
 | `created_at` | `datetime | None` |  |
 | `updated_at` | `datetime | None` |  |
+| `usage_summary` | `ExecutionUsageSummary | None` | default: None |
 
 ### `JobProgress`
 
@@ -320,6 +321,7 @@ Accessed via `client.reports`. Fetch evaluation reports.
 | `created_at` | `datetime` |  |
 | `summary` | `ReportSummary` |  |
 | `details` | `ReportDetails | None` |  |
+| `usage_summary` | `ExecutionUsageSummary | None` |  |
 
 ### `ReportSummary`
 

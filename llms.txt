@@ -46,7 +46,7 @@ Sub-clients are accessed as attributes or factory methods:
 | `evaluator.contextual_recall()` | Answer info can be attributed to contexts (requires ground_truth) | 0-1 (higher is better) |
 | `evaluator.contextual_relevancy()` | Retrieved contexts are relevant to the question | 0-1 (higher is better) |
 | `evaluator.faithfulness()` | Answer is grounded in provided contexts | 0-1 (higher is better) |
-| `evaluator.hallucination()` | Answer contains info NOT in contexts | 0-1 (lower is better) |
+| `evaluator.hallucination()` | Answer avoids claims unsupported by contexts | 0-1 (higher is better) |
 | `evaluator.toxicity()` | Answer contains toxic content | 0-1 (lower is better) |
 
 ## Environment Variables

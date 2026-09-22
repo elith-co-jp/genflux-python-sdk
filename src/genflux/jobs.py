@@ -2,39 +2,27 @@
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable
 
-import httpx
-
-from .exceptions import JobFailedError, NotFoundError, TimeoutError, ValidationError
+from .clients.base import BaseClient
+from .exceptions import JobFailedError, TimeoutError
 from .models import Job
-
-# Valid metric names for quick_evaluate (SDK-side validation for early typo detection)
-VALID_METRICS = frozenset({
-    "faithfulness",
-    "answer_relevancy",
-    "context_relevancy",
-    "llm_context_precision",
-    "context_recall",
-    "hallucination",
-    "toxicity",
-    "bias",
-})
-
-if TYPE_CHECKING:
-    from genflux import Genflux
 
 logger = logging.getLogger(__name__)
 
 
 class JobsClient:
-    """ジョブ（実行）管理用クライアント。"""
+    """ジョブ（実行）管理用クライアント。
 
-    def __init__(self, client: "Genflux"):
+    Metric名の妥当性判定は Platform backend が担います（SSoT）。
+    SDK はサーバーの 400 応答を ValidationError としてそのまま返します。
+    """
+
+    def __init__(self, client: BaseClient):
         """Initialize JobsClient.
 
         Args:
-            client: Parent Genflux client
+            client: Shared HTTP transport
         """
         self._client = client
 
@@ -81,17 +69,11 @@ class JobsClient:
             payload["config_id"] = config_id
 
         if data:
-            if execution_type == "quick_evaluate":
-                metric_name = data.get("metric_name")
-                if metric_name is not None and metric_name not in VALID_METRICS:
-                    raise ValidationError(
-                        f"Invalid metric: {metric_name!r}. Valid metrics: {sorted(VALID_METRICS)}",
-                        details={"metric": metric_name, "valid_metrics": sorted(VALID_METRICS)},
-                    )
-            # Store data directly in checkpoint_data for quick_evaluate
+            # Store data directly in checkpoint_data for quick_evaluate.
+            # Metric名は Platform が検証するため、SDK 側では事前検証しない。
             payload["checkpoint_data"] = data
 
-        response = self._client._post("/jobs", payload)
+        response = self._client.post("/jobs", json=payload)
         return Job.from_dict(response)
 
     def list(
@@ -129,11 +111,7 @@ class JobsClient:
         if execution_type:
             params["type_filter"] = execution_type
 
-        response = self._client._http_client.get("/jobs", params=params)
-        if not response.is_success:
-            response.raise_for_status()
-
-        data = response.json()
+        data = self._client.get("/jobs", params=params)
         jobs_data = data.get("jobs", [])
         return [Job.from_dict(job_data) for job_data in jobs_data]
 
@@ -155,13 +133,8 @@ class JobsClient:
             >>> print(job.status)
             'running'
         """
-        try:
-            response = self._client._get(f"/jobs/{job_id}")
-            return Job.from_dict(response)
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 404:
-                raise NotFoundError("job", str(job_id))
-            raise
+        response = self._client.get(f"/jobs/{job_id}")
+        return Job.from_dict(response)
 
     def wait(
         self,
@@ -293,7 +266,7 @@ class JobsClient:
             >>> print(job.status)
             'cancelled'
         """
-        self._client._post(f"/jobs/{job_id}/cancel", {})
+        self._client.post(f"/jobs/{job_id}/cancel", json={})
         # Cancel endpoint may return a partial response; return full job via get
         return self.get(job_id)
 

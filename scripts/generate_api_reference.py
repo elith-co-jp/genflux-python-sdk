@@ -1043,7 +1043,7 @@ graph TB
 | Contextual Relevancy | `evaluator.contextual_relevancy()` | 必須 | — | 0〜1（高いほど良い） |
 | Contextual Precision | `evaluator.contextual_precision()` | 必須 | — | 0〜1（高いほど良い） |
 | Contextual Recall | `evaluator.contextual_recall()` | 必須 | 必須 | 0〜1（高いほど良い） |
-| Hallucination | `evaluator.hallucination()` | 必須 | — | 0〜1（低いほど良い） |
+| Hallucination | `evaluator.hallucination()` | 必須 | — | 0〜1（高いほど良い） |
 | Toxicity | `evaluator.toxicity()` | 任意 | — | 0〜1（低いほど良い） |
 | Bias | `evaluator.bias()` | 任意 | — | 0〜1（低いほど良い） |
 

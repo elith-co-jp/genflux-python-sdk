@@ -111,6 +111,7 @@ GENFLUX APIクライアント。
 
 **Methods:**
 
+- `close() -> None` — HTTPクライアントをクリーンアップします。
 - `evaluation(config_id: str | None = None) -> EvaluationClient` — 指定された設定で評価クライアントを作成します。
 
 ## EvaluationClient
@@ -510,7 +511,7 @@ All exceptions:
 | `contextual_recall` | Yes | **Yes** | Higher = better recall |
 | `contextual_relevancy` | Yes | No | Higher = more relevant contexts |
 | `faithfulness` | Yes | No | Higher = more faithful |
-| `hallucination` | Yes | No | **Lower = less hallucination** |
+| `hallucination` | Yes | No | **Higher = better hallucination prevention** |
 | `toxicity` | Optional | No | **Lower = less toxic** |
 
 ## Repository Structure

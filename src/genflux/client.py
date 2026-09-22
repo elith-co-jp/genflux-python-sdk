@@ -2,16 +2,14 @@
 
 import os
 from dataclasses import dataclass, field
-from typing import Any
 
 import httpx
 
+from .clients.base import BaseClient
 from .clients.config import ConfigClient
 from .clients.reports import ReportsClient
 from .constants import ENV_URLS
 from .evaluation import EvaluationClient
-from .exceptions import APIError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
-from .exceptions.api import _parse_not_found_from_response
 from .jobs import JobsClient
 
 
@@ -68,20 +66,29 @@ class Genflux:
 
                 self.base_url = ENV_URLS[self.environment]
 
-        # Initialize HTTP client
-        self._http_client = httpx.Client(
-            base_url=self.base_url,
-            timeout=self.timeout,
-            headers=self._get_headers(),
-            follow_redirects=True,  # Follow 307 redirects
-        )
+        # Single shared HTTP transport for all sub-clients
+        self._session = httpx.Client(timeout=self.timeout, follow_redirects=True)
 
-        # Initialize sub-clients
-        # New ConfigClient uses BaseClient (independent HTTP client)
-        self.configs = ConfigClient(api_key=self.api_key, base_url=self.base_url, timeout=int(self.timeout))
-        self.reports = ReportsClient(api_key=self.api_key, base_url=self.base_url, timeout=int(self.timeout))
-        # Old-style clients use Genflux instance
-        self.jobs = JobsClient(self)
+        # Sub-clients share the session; Genflux owns its lifecycle
+        self._api = BaseClient(
+            api_key=self.api_key,
+            base_url=self.base_url,
+            timeout=int(self.timeout),
+            session=self._session,
+        )
+        self.configs = ConfigClient(
+            api_key=self.api_key,
+            base_url=self.base_url,
+            timeout=int(self.timeout),
+            session=self._session,
+        )
+        self.reports = ReportsClient(
+            api_key=self.api_key,
+            base_url=self.base_url,
+            timeout=int(self.timeout),
+            session=self._session,
+        )
+        self.jobs = JobsClient(self._api)
 
     def evaluation(self, config_id: str | None = None) -> EvaluationClient:
         """指定された設定で評価クライアントを作成します。
@@ -112,147 +119,19 @@ class Genflux:
         """
         return EvaluationClient(self.jobs, config_id)
 
-    def _get_headers(self) -> dict[str, str]:
-        """APIリクエスト用のHTTPヘッダーを取得します。
+    def close(self) -> None:
+        """HTTPクライアントをクリーンアップします。"""
+        self._session.close()
 
-        Returns:
-            Dictionary of headers
-        """
-        headers = {
-            "Content-Type": "application/json",
-        }
+    def __enter__(self) -> "Genflux":
+        """Enter context manager."""
+        return self
 
-        if self.api_key:
-            headers["X-API-Key"] = self.api_key
-
-        return headers
-
-    def _post(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
-        """APIにPOSTリクエストを送信します。
-
-        Args:
-            path: API endpoint path
-            data: Request body data
-
-        Returns:
-            Response data
-
-        Raises:
-            APIError: If request fails
-        """
-        try:
-            response = self._http_client.post(path, json=data)
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPStatusError as e:
-            self._handle_http_error(e)
-            raise  # Never reached, but makes type checker happy
-
-    def _get(self, path: str) -> dict[str, Any]:
-        """APIにGETリクエストを送信します。
-
-        Args:
-            path: API endpoint path
-
-        Returns:
-            Response data
-
-        Raises:
-            APIError: If request fails
-        """
-        try:
-            response = self._http_client.get(path)
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPStatusError as e:
-            self._handle_http_error(e)
-            raise  # Never reached, but makes type checker happy
-
-    def _put(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
-        """APIにPUTリクエストを送信します。
-
-        Args:
-            path: API endpoint path
-            data: Request body data
-
-        Returns:
-            Response data
-
-        Raises:
-            APIError: If request fails
-        """
-        try:
-            response = self._http_client.put(path, json=data)
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPStatusError as e:
-            self._handle_http_error(e)
-            raise  # Never reached, but makes type checker happy
-
-    def _delete(self, path: str) -> None:
-        """APIにDELETEリクエストを送信します。
-
-        Args:
-            path: API endpoint path
-
-        Raises:
-            APIError: If request fails
-        """
-        try:
-            response = self._http_client.delete(path)
-            response.raise_for_status()
-        except httpx.HTTPStatusError as e:
-            self._handle_http_error(e)
-
-    def _handle_http_error(self, error: httpx.HTTPStatusError) -> None:
-        """HTTPエラーを処理し、適切な例外を発生させます。
-
-        Args:
-            error: HTTP status error
-
-        Raises:
-            AuthenticationError: For 401 errors
-            NotFoundError: For 404 errors
-            ValidationError: For 400, 422 errors
-            RateLimitError: For 429 errors
-            APIError: For other errors
-        """
-        status_code = error.response.status_code
-        try:
-            response_data = error.response.json()
-        except Exception:
-            response_data = {"detail": error.response.text}
-
-        message = response_data.get("detail", f"HTTP {status_code} error")
-        details = response_data if isinstance(response_data, dict) else {}
-
-        if status_code == 401:
-            raise AuthenticationError(message, details)
-        elif status_code == 404:
-            url_path = getattr(error.response.request, "url", None)
-            path_str = str(url_path.path) if url_path else ""
-            resource, resource_id, detail_msg = _parse_not_found_from_response(
-                path_str, details
-            )
-            msg = (
-                detail_msg
-                if resource_id == "unknown" and detail_msg
-                else None
-            )
-            raise NotFoundError(resource, resource_id, details, message=msg)
-        elif status_code in (400, 422):
-            raise ValidationError(message, details)
-        elif status_code == 429:
-            retry_after = error.response.headers.get("Retry-After")
-            raise RateLimitError(
-                message,
-                retry_after=int(retry_after) if retry_after else None,
-                details=details,
-            )
-        else:
-            raise APIError(status_code, message, details)
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Exit context manager."""
+        self.close()
 
     def __del__(self) -> None:
         """HTTPクライアントをクリーンアップします。"""
-        if hasattr(self, "_http_client"):
-            self._http_client.close()
+        if hasattr(self, "_session"):
+            self._session.close()

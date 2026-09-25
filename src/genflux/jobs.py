@@ -9,6 +9,8 @@ from .clients.base import BaseClient
 from .clients.resource_path import resource_path
 from .exceptions import JobFailedError, TimeoutError
 from .models import Job
+from .models.assessment import AssessmentBundle
+from .models.assessment_contract import parse_assessment_bundle
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +157,41 @@ class JobsClient:
         if job.client_request_id != request_id:
             raise ValueError("Job receipt does not match the requested submission")
         return job
+
+    def get_assessment_revision(self, job_id: str, assessment_id: str, revision: int) -> AssessmentBundle:
+        """Read one persisted assessment revision and its exact input snapshots.
+
+        This read never adopts a newer revision, runs an evaluator, or retries billing.
+        Missing revisions raise NotFoundError rather than falling back to current results.
+        """
+        execution_uuid, assessment_uuid = UUID(job_id), UUID(assessment_id)
+        if type(revision) is not int or revision < 1:
+            raise ValueError("Assessment revision must be a positive integer")
+        response = self._client.get(f"/jobs/{execution_uuid}/assessments/{assessment_uuid}/revisions/{revision}")
+        bundle = parse_assessment_bundle(response)
+        if bundle is None or bundle.execution_id != execution_uuid or len(bundle.assessments) != 1:
+            raise ValueError("Assessment response does not match requested execution")
+        assessment = bundle.assessments[0]
+        if (assessment.assessment_id, assessment.revision, assessment.execution_id, assessment.tenant_id) != (
+            assessment_uuid,
+            revision,
+            execution_uuid,
+            bundle.tenant_id,
+        ):
+            raise ValueError("Assessment response does not match requested revision")
+        references = {ref.input_id: ref.input_hash for ref in assessment.inputs}
+        if (
+            len(bundle.inputs) != len(references)
+            or {item.input_id for item in bundle.inputs} != set(references)
+            or any(
+                item.execution_id != execution_uuid
+                or item.tenant_id != bundle.tenant_id
+                or item.input_hash != references[item.input_id]
+                for item in bundle.inputs
+            )
+        ):
+            raise ValueError("Assessment input scope mismatch")
+        return bundle
 
     def wait(
         self,

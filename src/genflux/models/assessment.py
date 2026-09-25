@@ -182,6 +182,7 @@ class InputReference(BaseModel):
         extra='forbid',
         frozen=True,
     )
+    context_ids: Annotated[list[UUID] | None, Field(title='Context Ids')] = None
     input_hash: Annotated[str, Field(pattern='^[a-f0-9]{64}$', title='Input Hash')]
     input_id: Annotated[UUID, Field(title='Input Id')]
     role: Annotated[

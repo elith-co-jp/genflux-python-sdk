@@ -43,7 +43,8 @@
           "input_id": "a8690ceb-4711-4c0c-ab68-e6ece1171dbc",
           "input_hash": "46db90d383535b1d87aad0e76485e6d29c1b75a5d358c6de619303c030b15dda",
           "role": "primary",
-          "sequence": 0
+          "sequence": 0,
+          "context_ids": []
         }
       ],
       "metric": {
@@ -108,7 +109,7 @@
         "revision": 1,
         "assessment_id": "8a23b1aa-3c61-405d-a33d-7d257263b0ac",
         "assessment_revision": 1,
-        "input_set_hash": "ea51e023eca1486c794cdd43d369794b37fec2f785087c65dac2d6c4d2b005ce",
+        "input_set_hash": "be6609af69eee79ed89f5d0024269be4307f7249e6b114de01180a45266988a5",
         "status": "not_requested",
         "issues": [],
         "message_code": "not_requested",

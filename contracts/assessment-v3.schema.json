@@ -781,6 +781,14 @@
     "InputReference": {
       "additionalProperties": false,
       "properties": {
+        "context_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Context Ids",
+          "type": "array"
+        },
         "input_hash": {
           "pattern": "^[a-f0-9]{64}$",
           "title": "Input Hash",

@@ -163,8 +163,10 @@ Accessed via `client.jobs`. Manages asynchronous evaluation jobs.
 **Methods:**
 
 - `cancel(job_id: str) -> Job` — 実行中のジョブをキャンセルします。
-- `create(execution_type: str, config_id: str | None = None, data: dict[str, Any] | None = None) -> Job` — 新しいジョブを作成します。
+- `create(execution_type: str, config_id: str | None = None, data: dict[str, Any] | None = None, client_request_id: str | None = None) -> Job` — 新しいジョブを作成します。
 - `get(job_id: str) -> Job` — IDでジョブを取得します。
+- `get_assessment_revision(job_id: str, assessment_id: str, revision: int) -> AssessmentBundle` — Read one persisted assessment revision and its exact input snapshots.
+- `get_by_client_request(client_request_id: str) -> Job` — Read an accepted job by its tenant-scoped submission UUID.
 - `list(status: str | None = None, execution_type: str | None = None, limit: int = 100) -> list[Job]` — ジョブ一覧を取得します。
 - `wait(job_id: str, timeout: int = 600, poll_interval: float = 5.0, callback: Union[Callable[Job, None], None] = None) -> Job` — ジョブの完了を待機します。
 
@@ -286,8 +288,10 @@ Accessed via `client.reports`. Fetch evaluation reports.
 | `created_at` | `datetime | None` |  |
 | `updated_at` | `datetime | None` |  |
 | `usage_summary` | `ExecutionUsageSummary | None` | default: None |
+| `client_request_id` | `str | None` | default: None |
 | `target_type` | `str` | default: 'rag' |
 | `assessment_bundle` | `AssessmentBundle | None` | default: None |
+| `accepted_assessment_plan` | `AcceptedAssessmentPlan | None` | default: None |
 
 ### `JobProgress`
 
@@ -380,6 +384,7 @@ Optional usage contract returned by newer Platform versions.
 | `details` | `ReportDetails | None` |  |
 | `usage_summary` | `ExecutionUsageSummary | None` |  |
 | `assessment_bundle` | `AssessmentBundle | None` |  |
+| `accepted_assessment_plan` | `AcceptedAssessmentPlan | None` |  |
 
 ### `ReportSummary`
 

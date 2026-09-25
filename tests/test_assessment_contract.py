@@ -152,3 +152,64 @@ def test_accepted_plan_rejects_invalid_or_cross_scope_wire_data(bad):
         plan["slots"] = []
     with pytest.raises(ValueError):
         Job.from_dict({**response, "accepted_assessment_plan": plan})
+
+
+def local_fixture():
+    """Build an explicit local receipt without provider usage."""
+    wire = fixture()
+    attempt = wire["assessments"][0]["attempts"][0]
+    attempt.update(
+        execution_mode="local_mock",
+        evaluator="yaml_defined_local_evaluation_mock",
+        provider_call_id=None,
+        requested_model=None,
+        resolved_model=None,
+        provider_request_id=None,
+        transport_version=None,
+    )
+    attempt["usage"].update(
+        measurement="not_incurred",
+        input_tokens=None,
+        output_tokens=None,
+        cost_usd=None,
+        cost_source=None,
+        price_revision=None,
+    )
+    return wire
+
+
+def test_local_fixture_receipt_preserves_null_provider_and_no_incurred_usage():
+    """Preserve local receipt semantics through the public job contract."""
+    wire = local_fixture()
+    assert parse_assessment_bundle(wire).model_dump(mode="json") == wire
+    job = Job.from_dict(
+        {**_job_response(), "id": wire["execution_id"], "tenant_id": wire["tenant_id"], "assessment_bundle": wire}
+    )
+    assert job.assessment_bundle.model_dump(mode="json") == wire
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("execution_mode", "quick"),
+        ("resolved_model", "fictional-remote"),
+        ("provider_call_id", "11111111-1111-4111-8111-111111111111"),
+        ("evaluator", "jev"),
+        ("purpose", "target"),
+    ],
+)
+def test_local_receipt_cannot_impersonate_provider(field, value):
+    """Reject local receipts with remote provider identity."""
+    wire = local_fixture()
+    wire["assessments"][0]["attempts"][0][field] = value
+    with pytest.raises(ValueError):
+        parse_assessment_bundle(wire)
+
+
+@pytest.mark.parametrize("field,value", [("measurement", "unknown"), ("cost_usd", 1.0), ("input_tokens", 1)])
+def test_local_receipt_cannot_assert_external_usage(field, value):
+    """Reject fabricated provider usage on local receipts."""
+    wire = local_fixture()
+    wire["assessments"][0]["attempts"][0]["usage"][field] = value
+    with pytest.raises(ValueError):
+        parse_assessment_bundle(wire)

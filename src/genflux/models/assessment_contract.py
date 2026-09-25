@@ -14,7 +14,36 @@ def parse_assessment_bundle(value: Any) -> AssessmentBundle | None:
     if isinstance(value, AssessmentBundle):
         value = value.model_dump(mode="json")
     # JSON mode accepts UUID/date wire strings; strict Python mode does not.
-    return AssessmentBundle.model_validate_json(json.dumps(value, allow_nan=False), strict=True)
+    bundle = AssessmentBundle.model_validate_json(json.dumps(value, allow_nan=False), strict=True)
+    for assessment in bundle.assessments:
+        for attempt in assessment.attempts:
+            usage = attempt.usage
+            if attempt.execution_mode == "local_mock":
+                if (
+                    attempt.provider_call_id is not None
+                    or attempt.evaluator != "yaml_defined_local_evaluation_mock"
+                    or attempt.purpose != "judge"
+                    or usage.measurement != "not_incurred"
+                    or any(
+                        v is not None
+                        for v in (
+                            attempt.requested_model,
+                            attempt.resolved_model,
+                            attempt.provider_request_id,
+                            attempt.transport_version,
+                        )
+                    )
+                ):
+                    raise ValueError("Invalid local fixture receipt")
+            elif attempt.provider_call_id is None:
+                raise ValueError("Remote receipt requires provider call identity")
+            elif (attempt.status == "not_sent") != (usage.measurement == "not_incurred"):
+                raise ValueError("Remote receipt send and usage states differ")
+            if usage.measurement == "not_incurred" and any(
+                v not in (None, 0) for v in (usage.input_tokens, usage.output_tokens, usage.cost_usd)
+            ):
+                raise ValueError("Local or unsent receipt cannot incur usage")
+    return bundle
 
 
 def parse_accepted_assessment_plan(value: Any) -> AcceptedAssessmentPlan | None:

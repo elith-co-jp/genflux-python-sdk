@@ -298,7 +298,7 @@ class AssessmentAttempt(BaseModel):
     probabilities: Annotated[dict[str, float] | None, Field(title='Probabilities')] = (
         None
     )
-    provider_call_id: Annotated[UUID, Field(title='Provider Call Id')]
+    provider_call_id: Annotated[UUID | None, Field(title='Provider Call Id')] = None
     provider_request_id: Annotated[str | None, Field(title='Provider Request Id')] = (
         None
     )

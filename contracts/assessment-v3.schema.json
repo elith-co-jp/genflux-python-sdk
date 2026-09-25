@@ -84,9 +84,16 @@
           "title": "Probabilities"
         },
         "provider_call_id": {
-          "format": "uuid",
-          "title": "Provider Call Id",
-          "type": "string"
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provider Call Id"
         },
         "provider_request_id": {
           "anyOf": [

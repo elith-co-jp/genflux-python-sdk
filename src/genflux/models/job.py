@@ -39,6 +39,7 @@ class Job:
     created_at: datetime | None
     updated_at: datetime | None
     usage_summary: ExecutionUsageSummary | None = None
+    client_request_id: str | None = None
     target_type: str = "rag"
     assessment_bundle: AssessmentBundle | None = None
     accepted_assessment_plan: AcceptedAssessmentPlan | None = None
@@ -103,6 +104,7 @@ class Job:
             updated_at=updated_at,
             usage_summary=usage_summary,
             target_type=data.get("target_type", "rag"),
+            client_request_id=data.get("client_request_id"),
             assessment_bundle=assessment_bundle,
             accepted_assessment_plan=accepted_plan,
         )

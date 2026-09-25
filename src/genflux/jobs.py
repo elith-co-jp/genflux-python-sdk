@@ -3,6 +3,7 @@
 import logging
 import time
 from typing import Any, Callable
+from uuid import UUID
 
 from .clients.base import BaseClient
 from .clients.resource_path import resource_path
@@ -32,6 +33,8 @@ class JobsClient:
         execution_type: str,
         config_id: str | None = None,
         data: dict[str, Any] | None = None,
+        *,
+        client_request_id: str | None = None,
     ) -> Job:
         """新しいジョブを作成します。
 
@@ -39,6 +42,7 @@ class JobsClient:
             execution_type: Execution type (e.g., 'quick_evaluate', 'evaluation')
             config_id: Config ID (optional, uses default if not provided)
             data: Additional data for the job (for quick_evaluate)
+            client_request_id: Stable UUID for receipt lookup after an uncertain response.
 
         Returns:
             Created Job object
@@ -64,6 +68,9 @@ class JobsClient:
         payload: dict[str, Any] = {
             "execution_type": execution_type,
         }
+
+        if client_request_id is not None:
+            payload["client_request_id"] = str(UUID(client_request_id))
 
         # Add config_id if provided (optional)
         if config_id:
@@ -136,6 +143,18 @@ class JobsClient:
         """
         response = self._client.get(resource_path("jobs", job_id))
         return Job.from_dict(response)
+
+    def get_by_client_request(self, client_request_id: str) -> Job:
+        """Read an accepted job by its tenant-scoped submission UUID.
+
+        This lookup never creates a job. An absent receipt raises NotFoundError.
+        """
+        request_id = str(UUID(client_request_id))
+        response = self._client.get(f"/jobs/by-client-request/{request_id}")
+        job = Job.from_dict(response)
+        if job.client_request_id != request_id:
+            raise ValueError("Job receipt does not match the requested submission")
+        return job
 
     def wait(
         self,
@@ -211,14 +230,10 @@ class JobsClient:
             except Exception as e:
                 # Handle network errors or API errors
                 error_count += 1
-                logger.warning(
-                    f"Error polling job {job_id} (attempt {error_count}/{max_errors}): {e}"
-                )
+                logger.warning(f"Error polling job {job_id} (attempt {error_count}/{max_errors}): {e}")
 
                 if error_count >= max_errors:
-                    logger.error(
-                        f"Max errors reached while polling job {job_id}"
-                    )
+                    logger.error(f"Max errors reached while polling job {job_id}")
                     raise
 
                 # Check if timeout reached after error
@@ -232,14 +247,9 @@ class JobsClient:
         progress_info = None
         if last_job:
             if last_job.total_count and last_job.total_count > 0:
-                progress_info = (
-                    f"{last_job.progress_count}/{last_job.total_count}"
-                )
+                progress_info = f"{last_job.progress_count}/{last_job.total_count}"
 
-        logger.error(
-            f"Job {job_id} timed out after {timeout}s "
-            f"(status: {last_job.status if last_job else 'unknown'})"
-        )
+        logger.error(f"Job {job_id} timed out after {timeout}s (status: {last_job.status if last_job else 'unknown'})")
         raise TimeoutError(
             operation="Job execution",
             timeout=timeout,
@@ -270,4 +280,3 @@ class JobsClient:
         self._client.post(resource_path("jobs", job_id) + "/cancel", json={})
         # Cancel endpoint may return a partial response; return full job via get
         return self.get(job_id)
-

@@ -116,7 +116,8 @@
         "message_code": "not_requested",
         "generation_attempt_id": null,
         "prompt_version": null
-      }
+      },
+      "subject_key": "answer"
     }
   ]
 }

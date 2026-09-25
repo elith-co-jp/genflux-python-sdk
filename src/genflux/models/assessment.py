@@ -346,6 +346,7 @@ class AssessmentRevision(BaseModel):
     selected_attempt_id: Annotated[UUID | None, Field(title='Selected Attempt Id')] = (
         None
     )
+    subject_key: Annotated[str, Field(min_length=1, title='Subject Key')]
     subject_kind: Annotated[
         Literal['answer', 'repeat_set', 'rule', 'turn'], Field(title='Subject Kind')
     ]

@@ -326,6 +326,11 @@
           ],
           "title": "Selected Attempt Id"
         },
+        "subject_key": {
+          "minLength": 1,
+          "title": "Subject Key",
+          "type": "string"
+        },
         "subject_kind": {
           "enum": [
             "answer",
@@ -351,6 +356,7 @@
         "case_id",
         "answer_id",
         "subject_kind",
+        "subject_key",
         "inputs",
         "metric",
         "outcome",

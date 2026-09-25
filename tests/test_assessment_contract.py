@@ -72,3 +72,14 @@ def test_job_rejects_bundle_from_another_execution_or_tenant():
                     **overrides,
                 }
             )
+
+
+@pytest.mark.parametrize("key", [None, ""])
+def test_subject_key_must_be_explicit_and_nonempty(key):
+    wire = fixture()
+    if key is None:
+        wire["assessments"][0].pop("subject_key")
+    else:
+        wire["assessments"][0]["subject_key"] = key
+    with pytest.raises(ValidationError):
+        parse_assessment_bundle(wire)

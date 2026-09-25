@@ -7,7 +7,8 @@ from uuid import UUID
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from genflux.models.assessment import AssessmentBundle
-from genflux.models.assessment_contract import parse_assessment_bundle
+from genflux.models.assessment_contract import parse_accepted_assessment_plan, parse_assessment_bundle
+from genflux.models.assessment_plan import AcceptedAssessmentPlan
 from genflux.models.usage import ExecutionUsageSummary
 
 
@@ -105,6 +106,13 @@ class Report(BaseModel):
     usage_summary: ExecutionUsageSummary | None = None
 
     assessment_bundle: AssessmentBundle | None = None
+    accepted_assessment_plan: AcceptedAssessmentPlan | None = None
+
+    @field_validator("accepted_assessment_plan", mode="before")
+    @classmethod
+    def validate_accepted_plan(cls, value: object) -> AcceptedAssessmentPlan | None:
+        """Validate the producer receipt without changing its subjects."""
+        return parse_accepted_assessment_plan(value)
 
     @field_validator("assessment_bundle", mode="before")
     @classmethod
@@ -117,4 +125,11 @@ class Report(BaseModel):
         """Reject canonical data attached to another job."""
         if self.assessment_bundle is not None and self.assessment_bundle.execution_id != self.job_id:
             raise ValueError("assessment bundle does not belong to this report job")
+        if self.accepted_assessment_plan is not None:
+            if self.accepted_assessment_plan.execution_id != self.job_id:
+                raise ValueError("accepted plan does not belong to this report job")
+            if self.assessment_bundle is not None and (
+                self.assessment_bundle.tenant_id != self.accepted_assessment_plan.tenant_id
+            ):
+                raise ValueError("accepted plan and bundle tenants differ")
         return self

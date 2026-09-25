@@ -5,7 +5,8 @@ from datetime import datetime
 from typing import Any
 
 from genflux.models.assessment import AssessmentBundle
-from genflux.models.assessment_contract import parse_assessment_bundle
+from genflux.models.assessment_contract import parse_accepted_assessment_plan, parse_assessment_bundle
+from genflux.models.assessment_plan import AcceptedAssessmentPlan
 from genflux.models.usage import ExecutionUsageSummary
 
 
@@ -40,6 +41,7 @@ class Job:
     usage_summary: ExecutionUsageSummary | None = None
     target_type: str = "rag"
     assessment_bundle: AssessmentBundle | None = None
+    accepted_assessment_plan: AcceptedAssessmentPlan | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Job":
@@ -70,6 +72,11 @@ class Job:
             else None
         )
 
+        accepted_plan = parse_accepted_assessment_plan(data.get("accepted_assessment_plan"))
+        if accepted_plan is not None and (
+            str(accepted_plan.execution_id) != str(data["id"]) or str(accepted_plan.tenant_id) != str(data["tenant_id"])
+        ):
+            raise ValueError("accepted plan does not belong to this job and tenant")
         assessment_bundle = parse_assessment_bundle(data.get("assessment_bundle"))
         if assessment_bundle is not None and (
             str(assessment_bundle.execution_id) != str(data["id"])
@@ -97,6 +104,7 @@ class Job:
             usage_summary=usage_summary,
             target_type=data.get("target_type", "rag"),
             assessment_bundle=assessment_bundle,
+            accepted_assessment_plan=accepted_plan,
         )
 
     @property

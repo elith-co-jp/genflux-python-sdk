@@ -116,3 +116,41 @@ def test_report_remains_compatible_with_old_platform_response() -> None:
     )
 
     assert report.usage_summary is None
+
+
+def test_job_preserves_target_type():
+    """Verify job preserves target type."""
+    payload = _job_response()
+    payload["target_type"] = "agent"
+    assert Job.from_dict(payload).target_type == "agent"
+    del payload["target_type"]
+    assert Job.from_dict(payload).target_type == "rag"
+
+
+def test_report_preserves_unmeasured_results():
+    """Transport null rates without inferring pass or risk."""
+    report = Report.model_validate(
+        {
+            "report_id": "00000000-0000-0000-0000-000000000001",
+            "job_id": "00000000-0000-0000-0000-000000000001",
+            "config_id": None,
+            "type": "quick_evaluate",
+            "status": "partial",
+            "created_at": "2026-09-26T00:00:00Z",
+            "summary": {
+                "evaluation": {"success_rate": None, "total_tests": 1, "passed": 0, "failed": 0, "unmeasured": 1},
+                "redteam": {
+                    "attack_success_rate": None,
+                    "risk_level": "unknown",
+                    "total_attacks": 1,
+                    "successful_attacks": None,
+                },
+                "policy": {"compliance_rate": None, "total_checks": 1, "violations_count": 0},
+            },
+        }
+    )
+    assert report.summary.evaluation.success_rate is None
+    assert report.summary.evaluation.unmeasured == 1
+    assert report.summary.redteam.risk_level == "unknown"
+    assert report.summary.redteam.successful_attacks is None
+    assert report.summary.policy.compliance_rate is None

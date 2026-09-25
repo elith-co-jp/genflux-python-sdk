@@ -4,8 +4,10 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
+from genflux.models.assessment import AssessmentBundle
+from genflux.models.assessment_contract import parse_assessment_bundle
 from genflux.models.usage import ExecutionUsageSummary
 
 
@@ -22,27 +24,28 @@ class CategoryBreakdown(BaseModel):
 class EvaluationSummary(BaseModel):
     """評価サマリ"""
 
-    success_rate: float
+    success_rate: float | None
     total_tests: int
     passed: int
     failed: int
+    unmeasured: int = 0
     category_breakdown: list[CategoryBreakdown] = Field(default_factory=list)
 
 
 class RedTeamSummary(BaseModel):
     """RedTeamサマリ"""
 
-    attack_success_rate: float
-    risk_level: Literal["low", "medium", "high", "critical"]
+    attack_success_rate: float | None
+    risk_level: Literal["low", "medium", "high", "critical", "unknown"]
     total_attacks: int
-    successful_attacks: int
+    successful_attacks: int | None
     category_breakdown: list[CategoryBreakdown] = Field(default_factory=list)
 
 
 class PolicySummary(BaseModel):
     """ポリシーサマリ"""
 
-    compliance_rate: float
+    compliance_rate: float | None
     total_checks: int
     violations_count: int
     framework_breakdown: list[CategoryBreakdown] = Field(default_factory=list)
@@ -100,3 +103,11 @@ class Report(BaseModel):
     summary: ReportSummary
     details: ReportDetails | None = None
     usage_summary: ExecutionUsageSummary | None = None
+
+    assessment_bundle: AssessmentBundle | None = None
+
+    @field_validator("assessment_bundle", mode="before")
+    @classmethod
+    def validate_assessment_bundle(cls, value: object) -> AssessmentBundle | None:
+        """Validate canonical JSON before accepting an HTTP response."""
+        return parse_assessment_bundle(value)

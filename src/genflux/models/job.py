@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from genflux.models.assessment import AssessmentBundle
+from genflux.models.assessment_contract import parse_assessment_bundle
 from genflux.models.usage import ExecutionUsageSummary
 
 
@@ -36,6 +38,8 @@ class Job:
     created_at: datetime | None
     updated_at: datetime | None
     usage_summary: ExecutionUsageSummary | None = None
+    target_type: str = "rag"
+    assessment_bundle: AssessmentBundle | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Job":
@@ -84,6 +88,8 @@ class Job:
             created_at=created_at,
             updated_at=updated_at,
             usage_summary=usage_summary,
+            target_type=data.get("target_type", "rag"),
+            assessment_bundle=parse_assessment_bundle(data.get("assessment_bundle")),
         )
 
     @property

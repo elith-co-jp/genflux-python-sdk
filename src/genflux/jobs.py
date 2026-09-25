@@ -5,6 +5,7 @@ import time
 from typing import Any, Callable
 
 from .clients.base import BaseClient
+from .clients.resource_path import resource_path
 from .exceptions import JobFailedError, TimeoutError
 from .models import Job
 
@@ -133,7 +134,7 @@ class JobsClient:
             >>> print(job.status)
             'running'
         """
-        response = self._client.get(f"/jobs/{job_id}")
+        response = self._client.get(resource_path("jobs", job_id))
         return Job.from_dict(response)
 
     def wait(
@@ -266,7 +267,7 @@ class JobsClient:
             >>> print(job.status)
             'cancelled'
         """
-        self._client.post(f"/jobs/{job_id}/cancel", json={})
+        self._client.post(resource_path("jobs", job_id) + "/cancel", json={})
         # Cancel endpoint may return a partial response; return full job via get
         return self.get(job_id)
 

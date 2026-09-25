@@ -21,7 +21,9 @@ def test_generated_model_preserves_every_producer_field():
     """UUID, nulls, enum states, provenance and revision survive roundtrip."""
     wire = fixture()
     assert parse_assessment_bundle(wire).model_dump(mode="json") == wire
-    job = Job.from_dict({**_job_response(), "assessment_bundle": wire})
+    job = Job.from_dict(
+        {**_job_response(), "id": wire["execution_id"], "tenant_id": wire["tenant_id"], "assessment_bundle": wire}
+    )
     assert job.assessment_bundle.model_dump(mode="json") == wire
     report = Report.model_validate(
         {
@@ -54,3 +56,19 @@ def test_unknown_major_and_invalid_revision_rejected(field, value):
     wire["assessments"][0][field] = value
     with pytest.raises(ValidationError):
         parse_assessment_bundle(wire)
+
+
+def test_job_rejects_bundle_from_another_execution_or_tenant():
+    """Top-level resource scope cannot disagree with the attached provenance."""
+    wire = fixture()
+    for overrides in ({"id": "other"}, {"tenant_id": "other"}):
+        with pytest.raises(ValueError, match="does not belong"):
+            Job.from_dict(
+                {
+                    **_job_response(),
+                    "id": wire["execution_id"],
+                    "tenant_id": wire["tenant_id"],
+                    "assessment_bundle": wire,
+                    **overrides,
+                }
+            )

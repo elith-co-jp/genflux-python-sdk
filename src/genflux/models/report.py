@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from genflux.models.assessment import AssessmentBundle
 from genflux.models.assessment_contract import parse_assessment_bundle
@@ -111,3 +111,10 @@ class Report(BaseModel):
     def validate_assessment_bundle(cls, value: object) -> AssessmentBundle | None:
         """Validate canonical JSON before accepting an HTTP response."""
         return parse_assessment_bundle(value)
+
+    @model_validator(mode="after")
+    def validate_assessment_scope(self) -> "Report":
+        """Reject canonical data attached to another job."""
+        if self.assessment_bundle is not None and self.assessment_bundle.execution_id != self.job_id:
+            raise ValueError("assessment bundle does not belong to this report job")
+        return self

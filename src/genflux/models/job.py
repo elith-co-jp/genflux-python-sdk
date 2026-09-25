@@ -70,6 +70,13 @@ class Job:
             else None
         )
 
+        assessment_bundle = parse_assessment_bundle(data.get("assessment_bundle"))
+        if assessment_bundle is not None and (
+            str(assessment_bundle.execution_id) != str(data["id"])
+            or str(assessment_bundle.tenant_id) != str(data["tenant_id"])
+        ):
+            raise ValueError("assessment bundle does not belong to this job and tenant")
+
         return cls(
             id=data["id"],
             tenant_id=data["tenant_id"],
@@ -89,7 +96,7 @@ class Job:
             updated_at=updated_at,
             usage_summary=usage_summary,
             target_type=data.get("target_type", "rag"),
-            assessment_bundle=parse_assessment_bundle(data.get("assessment_bundle")),
+            assessment_bundle=assessment_bundle,
         )
 
     @property

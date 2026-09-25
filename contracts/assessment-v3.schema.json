@@ -966,6 +966,15 @@
           ],
           "title": "Acceptance Minimum"
         },
+        "acceptance_operator": {
+          "default": "gte",
+          "enum": [
+            "gte",
+            "gt"
+          ],
+          "title": "Acceptance Operator",
+          "type": "string"
+        },
         "definition_revision": {
           "pattern": "^[a-f0-9]{64}$",
           "title": "Definition Revision",

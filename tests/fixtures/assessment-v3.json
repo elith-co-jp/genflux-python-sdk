@@ -50,7 +50,7 @@
       "metric": {
         "metric_id": "quality.fictional",
         "namespace": "quality",
-        "definition_revision": "1525d72c059d6d26e91685ff3ea7ead14a295fa873cd5e63dc2b48ab2a9c7849",
+        "definition_revision": "c7d12cf223e6cd446cf34038fc120421a00fc7e27335e42893d5404ad03052ab",
         "rubric_version": null,
         "rubric_hash": null,
         "required_inputs": [
@@ -60,6 +60,7 @@
         "methodology": "fictional-judge-v1",
         "score_direction": "higher_is_better",
         "acceptance_minimum": 0.5,
+        "acceptance_operator": "gte",
         "good_minimum": 0.7,
         "review_minimum": 0.4
       },

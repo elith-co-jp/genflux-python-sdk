@@ -244,6 +244,9 @@ class MetricDefinition(BaseModel):
     acceptance_minimum: Annotated[
         AcceptanceMinimum | None, Field(title='Acceptance Minimum')
     ] = None
+    acceptance_operator: Annotated[
+        Literal['gte', 'gt'] | None, Field(title='Acceptance Operator')
+    ] = 'gte'
     definition_revision: Annotated[
         str, Field(pattern='^[a-f0-9]{64}$', title='Definition Revision')
     ]

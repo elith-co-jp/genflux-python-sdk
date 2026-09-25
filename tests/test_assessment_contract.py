@@ -215,19 +215,29 @@ def test_local_receipt_cannot_assert_external_usage(field, value):
         parse_assessment_bundle(wire)
 
 
+@pytest.mark.parametrize("purpose", ["judge", "target", "explanation"])
 @pytest.mark.parametrize("status,measurement", [("not_sent", "not_incurred"), ("error", "unknown")])
-def test_explanation_without_provider_identity_is_explicit_failure(status, measurement):
+def test_remote_without_provider_identity_is_explicit_failure(status, measurement, purpose):
     """Missing evidence must cross HTTP without inventing provider receipts."""
     wire = local_fixture()
     attempt = wire["assessments"][0]["attempts"][0]
     attempt.update(
         execution_mode="quick",
         evaluator="unavailable",
-        purpose="explanation",
+        purpose=purpose,
         status=status,
         error_code="missing_provider_receipt",
     )
     attempt["usage"]["measurement"] = measurement
+    wire["assessments"][0]["outcome"] = {
+        "measurement_status": "error",
+        "score": None,
+        "quality_band": None,
+        "acceptance_verdict": None,
+        "review_state": "not_assessed",
+        "reason_code": "missing_provider_receipt",
+    }
+    wire["assessments"][0]["selected_attempt_id"] = None
     assert parse_assessment_bundle(wire).model_dump(mode="json") == wire
     attempt["status"] = "measured"
     with pytest.raises(ValueError):

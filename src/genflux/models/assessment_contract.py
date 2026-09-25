@@ -36,7 +36,7 @@ def parse_assessment_bundle(value: Any) -> AssessmentBundle | None:
                 ):
                     raise ValueError("Invalid local fixture receipt")
             elif attempt.provider_call_id is None:
-                if attempt.purpose != "explanation" or not (
+                if not (
                     (attempt.status == "not_sent" and usage.measurement == "not_incurred")
                     or (
                         attempt.status == "error"

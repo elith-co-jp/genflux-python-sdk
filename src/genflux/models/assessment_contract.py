@@ -36,7 +36,15 @@ def parse_assessment_bundle(value: Any) -> AssessmentBundle | None:
                 ):
                     raise ValueError("Invalid local fixture receipt")
             elif attempt.provider_call_id is None:
-                raise ValueError("Remote receipt requires provider call identity")
+                if attempt.purpose != "explanation" or not (
+                    (attempt.status == "not_sent" and usage.measurement == "not_incurred")
+                    or (
+                        attempt.status == "error"
+                        and attempt.error_code == "missing_provider_receipt"
+                        and usage.measurement == "unknown"
+                    )
+                ):
+                    raise ValueError("Remote receipt requires provider call identity")
             elif (attempt.status == "not_sent") != (usage.measurement == "not_incurred"):
                 raise ValueError("Remote receipt send and usage states differ")
             if usage.measurement == "not_incurred" and any(

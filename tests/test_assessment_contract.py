@@ -1,7 +1,9 @@
 """Producer fixture roundtrip and strict HTTP response validation."""
 
 import json
+from hashlib import sha256
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 from pydantic import ValidationError
@@ -38,6 +40,29 @@ def test_generated_model_preserves_every_producer_field():
         }
     )
     assert report.assessment_bundle.model_dump(mode="json") == wire
+
+
+def test_target_collection_receipt_roundtrip_and_answer_binding():
+    """Preserve a typed target receipt and reject a self-consistent forged answer hash."""
+    wire = fixture()
+    source = wire["inputs"][0]
+    payload = source["payload"]
+    payload["collection_receipt"] = {
+        "source": "evaluation_bff",
+        "call_id": str(uuid4()),
+        "answer_sha256": sha256(payload["answer"].encode()).hexdigest(),
+    }
+    source["input_hash"] = sha256(
+        json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
+    ).hexdigest()
+    wire["assessments"][0]["inputs"][0]["input_hash"] = source["input_hash"]
+    assert parse_assessment_bundle(wire).model_dump(mode="json") == wire
+    payload["collection_receipt"]["answer_sha256"] = "0" * 64
+    source["input_hash"] = sha256(
+        json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
+    ).hexdigest()
+    with pytest.raises(ValueError, match="does not match answer"):
+        parse_assessment_bundle(wire)
 
 
 @pytest.mark.parametrize("value", [True, "0.5", -0.1, 1.1, float("nan"), float("inf"), None])

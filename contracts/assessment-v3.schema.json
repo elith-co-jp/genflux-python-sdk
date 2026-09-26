@@ -456,6 +456,34 @@
       "title": "AttemptUsage",
       "type": "object"
     },
+    "BffTargetCollectionReceipt": {
+      "additionalProperties": false,
+      "description": "External collection identity; never a Platform provider-call identity.",
+      "properties": {
+        "answer_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Answer Sha256",
+          "type": "string"
+        },
+        "call_id": {
+          "format": "uuid",
+          "title": "Call Id",
+          "type": "string"
+        },
+        "source": {
+          "const": "evaluation_bff",
+          "default": "evaluation_bff",
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call_id",
+        "answer_sha256"
+      ],
+      "title": "BffTargetCollectionReceipt",
+      "type": "object"
+    },
     "ContextEvidence": {
       "additionalProperties": false,
       "properties": {
@@ -681,6 +709,17 @@
           ],
           "default": null,
           "title": "Client Case Id"
+        },
+        "collection_receipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BffTargetCollectionReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "collection_status": {
           "enum": [

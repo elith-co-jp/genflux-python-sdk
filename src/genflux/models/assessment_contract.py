@@ -1,6 +1,7 @@
 """Strict HTTP boundary for producer-generated assessment models."""
 
 import json
+from hashlib import sha256
 from typing import Any
 
 from genflux.models.assessment import AssessmentBundle
@@ -15,6 +16,24 @@ def parse_assessment_bundle(value: Any) -> AssessmentBundle | None:
         value = value.model_dump(mode="json")
     # JSON mode accepts UUID/date wire strings; strict Python mode does not.
     bundle = AssessmentBundle.model_validate_json(json.dumps(value, allow_nan=False), strict=True)
+    receipt_ids = set()
+    for source in bundle.inputs:
+        payload = source.payload.model_dump(mode="json")
+        digest = sha256(
+            json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode()
+        ).hexdigest()
+        if digest != source.input_hash:
+            raise ValueError("Input hash does not match payload")
+        receipt = source.payload.collection_receipt
+        if receipt is not None:
+            if (
+                source.payload.answer is None
+                or receipt.answer_sha256 != sha256(source.payload.answer.encode()).hexdigest()
+            ):
+                raise ValueError("Target collection receipt does not match answer")
+            if receipt.call_id in receipt_ids:
+                raise ValueError("Duplicate target collection receipt")
+            receipt_ids.add(receipt.call_id)
     for assessment in bundle.assessments:
         for attempt in assessment.attempts:
             usage = attempt.usage

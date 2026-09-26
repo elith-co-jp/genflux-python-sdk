@@ -74,6 +74,20 @@ class AttemptUsage(BaseModel):
     price_revision: Annotated[str | None, Field(title='Price Revision')] = None
 
 
+class BffTargetCollectionReceipt(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        frozen=True,
+    )
+    answer_sha256: Annotated[
+        str, Field(pattern='^[a-f0-9]{64}$', title='Answer Sha256')
+    ]
+    call_id: Annotated[UUID, Field(title='Call Id')]
+    source: Annotated[Literal['evaluation_bff'], Field(title='Source')] = (
+        'evaluation_bff'
+    )
+
+
 class ContextEvidence(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -161,6 +175,9 @@ class InputPayload(BaseModel):
     )
     answer: Annotated[str | None, Field(title='Answer')] = None
     client_case_id: Annotated[str | None, Field(title='Client Case Id')] = None
+    collection_receipt: BffTargetCollectionReceipt | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
     collection_status: Annotated[
         Literal['collected', 'error', 'unavailable'], Field(title='Collection Status')
     ]

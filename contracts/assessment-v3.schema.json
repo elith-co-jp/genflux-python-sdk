@@ -873,6 +873,19 @@
         "payload": {
           "$ref": "#/$defs/InputPayload"
         },
+        "provider_call_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Call Id"
+        },
         "schema_version": {
           "const": 1,
           "default": 1,

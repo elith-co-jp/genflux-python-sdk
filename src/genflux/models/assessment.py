@@ -203,6 +203,7 @@ class InputSnapshot(BaseModel):
     input_hash: Annotated[str, Field(pattern='^[a-f0-9]{64}$', title='Input Hash')]
     input_id: Annotated[UUID, Field(title='Input Id')]
     payload: InputPayload
+    provider_call_id: Annotated[UUID | None, Field(title='Provider Call Id')] = None
     schema_version: Annotated[Literal[1], Field(title='Schema Version')] = 1
     tenant_id: Annotated[UUID, Field(title='Tenant Id')]
 

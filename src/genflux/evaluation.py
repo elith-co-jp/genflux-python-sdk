@@ -351,7 +351,7 @@ class EvaluationClient:
             timeout: Maximum wait time in seconds
 
         Returns:
-            MetricResult with hallucination score (lower is better)
+            MetricResult with hallucination score (higher is better)
         """
         return self.evaluate(
             metric="hallucination",

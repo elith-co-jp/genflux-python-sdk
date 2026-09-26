@@ -598,6 +598,9 @@ Read one persisted assessment revision and its exact input snapshots.
 
 This read never adopts a newer revision, runs an evaluator, or retries billing.
 Missing revisions raise NotFoundError rather than falling back to current results.
+Each returned input snapshot keeps its canonical input hash and an optional
+`provider_call_id` for the durable target or generation call that collected it.
+A null call ID is not a synthetic receipt or evidence of zero usage.
 
 **パラメータ:**
 
@@ -1716,4 +1719,4 @@ job.wait()用のプログレスコールバックを作成します。
 
 *Auto-generated at 2026-09-25 22:35 UTC by `scripts/generate_api_reference.py`*
 
-<!-- source-hash: a455df04cf699aa8 -->
+<!-- source-hash: c98d27512eafe40a -->

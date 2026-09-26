@@ -163,6 +163,9 @@ class JobsClient:
 
         This read never adopts a newer revision, runs an evaluator, or retries billing.
         Missing revisions raise NotFoundError rather than falling back to current results.
+        Each input keeps its canonical hash. `provider_call_id` refers to a
+        Platform-owned send; an optional `collection_receipt` identifies a
+        BFF-owned target send and answer hash. Neither is invented when absent.
         """
         execution_uuid, assessment_uuid = UUID(job_id), UUID(assessment_id)
         if type(revision) is not int or revision < 1:

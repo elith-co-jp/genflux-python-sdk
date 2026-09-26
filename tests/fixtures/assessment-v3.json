@@ -1,0 +1,124 @@
+{
+  "schema_version": 3,
+  "tenant_id": "e8e4921f-ad9d-4b4e-9d58-d7bb483ba8bc",
+  "execution_id": "5fe70b4a-3912-4d1a-bd6a-14abefd112ff",
+  "inputs": [
+    {
+      "schema_version": 1,
+      "tenant_id": "e8e4921f-ad9d-4b4e-9d58-d7bb483ba8bc",
+      "execution_id": "5fe70b4a-3912-4d1a-bd6a-14abefd112ff",
+      "input_id": "a8690ceb-4711-4c0c-ab68-e6ece1171dbc",
+      "case_id": "c488c496-b3c7-4be5-8103-d25dd0038896",
+      "answer_id": "00dd44a4-98b6-4fed-bb26-23e9ef4e1d4c",
+      "captured_at": "2026-09-25T16:26:45.984440Z",
+      "input_hash": "46db90d383535b1d87aad0e76485e6d29c1b75a5d358c6de619303c030b15dda",
+      "payload": {
+        "question": "fictional question",
+        "answer": "😀fictional answer",
+        "collection_status": "collected",
+        "target_revision": "fictional-target-v1",
+        "contexts": [],
+        "ground_truth": null,
+        "client_case_id": null,
+        "repeat_index": 0,
+        "scenario_id": null,
+        "turn_index": null,
+        "rule_id": null,
+        "rule_revision": null
+      },
+      "provider_call_id": "7f5a1b2c-3d4e-4f5a-8b9c-0d1e2f3a4b5c"
+    }
+  ],
+  "assessments": [
+    {
+      "schema_version": 3,
+      "tenant_id": "e8e4921f-ad9d-4b4e-9d58-d7bb483ba8bc",
+      "execution_id": "5fe70b4a-3912-4d1a-bd6a-14abefd112ff",
+      "assessment_id": "8a23b1aa-3c61-405d-a33d-7d257263b0ac",
+      "revision": 1,
+      "case_id": "c488c496-b3c7-4be5-8103-d25dd0038896",
+      "answer_id": "00dd44a4-98b6-4fed-bb26-23e9ef4e1d4c",
+      "subject_kind": "answer",
+      "inputs": [
+        {
+          "input_id": "a8690ceb-4711-4c0c-ab68-e6ece1171dbc",
+          "input_hash": "46db90d383535b1d87aad0e76485e6d29c1b75a5d358c6de619303c030b15dda",
+          "role": "primary",
+          "sequence": 0,
+          "context_ids": []
+        }
+      ],
+      "metric": {
+        "metric_id": "quality.fictional",
+        "namespace": "quality",
+        "definition_revision": "c7d12cf223e6cd446cf34038fc120421a00fc7e27335e42893d5404ad03052ab",
+        "rubric_version": null,
+        "rubric_hash": null,
+        "required_inputs": [
+          "question",
+          "answer"
+        ],
+        "methodology": "fictional-judge-v1",
+        "score_direction": "higher_is_better",
+        "acceptance_minimum": 0.5,
+        "acceptance_operator": "gte",
+        "good_minimum": 0.7,
+        "review_minimum": 0.4
+      },
+      "outcome": {
+        "measurement_status": "measured",
+        "score": 0.6,
+        "quality_band": "review",
+        "acceptance_verdict": "pass",
+        "review_state": "not_assessed",
+        "reason_code": null
+      },
+      "selected_attempt_id": "b5bdf63f-969a-4c33-b9ac-9666aefeaaa9",
+      "attempts": [
+        {
+          "attempt_id": "b5bdf63f-969a-4c33-b9ac-9666aefeaaa9",
+          "provider_call_id": "3663b27c-9f49-4286-aa8e-c72ebd1e8074",
+          "purpose": "judge",
+          "attempt_number": 1,
+          "evaluator": "fake",
+          "execution_mode": "quick",
+          "requested_model": "fictional",
+          "resolved_model": null,
+          "provider_request_id": null,
+          "transport_version": "1",
+          "rubric_version": null,
+          "rubric_hash": null,
+          "input_hash": "46db90d383535b1d87aad0e76485e6d29c1b75a5d358c6de619303c030b15dda",
+          "status": "measured",
+          "error_code": null,
+          "provider_score": null,
+          "provider_scale_maximum": null,
+          "provider_score_direction": null,
+          "probabilities": null,
+          "confidence": null,
+          "usage": {
+            "measurement": "known",
+            "input_tokens": 1,
+            "output_tokens": 1,
+            "cost_usd": null,
+            "cost_source": null,
+            "price_revision": null
+          }
+        }
+      ],
+      "explanation": {
+        "explanation_id": "b50020d0-3ea1-4707-bf3b-8579f905e694",
+        "revision": 1,
+        "assessment_id": "8a23b1aa-3c61-405d-a33d-7d257263b0ac",
+        "assessment_revision": 1,
+        "input_set_hash": "be6609af69eee79ed89f5d0024269be4307f7249e6b114de01180a45266988a5",
+        "status": "not_requested",
+        "issues": [],
+        "message_code": "not_requested",
+        "generation_attempt_id": null,
+        "prompt_version": null
+      },
+      "subject_key": "answer"
+    }
+  ]
+}

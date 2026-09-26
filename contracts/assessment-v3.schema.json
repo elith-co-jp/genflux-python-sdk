@@ -1,0 +1,1252 @@
+{
+  "$defs": {
+    "AssessmentAttempt": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": {
+          "format": "uuid",
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "attempt_number": {
+          "minimum": 1,
+          "title": "Attempt Number",
+          "type": "integer"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error Code"
+        },
+        "evaluator": {
+          "minLength": 1,
+          "title": "Evaluator",
+          "type": "string"
+        },
+        "execution_mode": {
+          "enum": [
+            "quick",
+            "batch",
+            "policy",
+            "redteam",
+            "local_mock"
+          ],
+          "title": "Execution Mode",
+          "type": "string"
+        },
+        "input_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Input Hash"
+        },
+        "probabilities": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probabilities"
+        },
+        "provider_call_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provider Call Id"
+        },
+        "provider_request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Request Id"
+        },
+        "provider_scale_maximum": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Scale Maximum"
+        },
+        "provider_score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Score"
+        },
+        "provider_score_direction": {
+          "anyOf": [
+            {
+              "enum": [
+                "higher_is_better",
+                "lower_is_better"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Score Direction"
+        },
+        "purpose": {
+          "enum": [
+            "judge",
+            "explanation",
+            "target"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        },
+        "requested_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested Model"
+        },
+        "resolved_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resolved Model"
+        },
+        "rubric_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rubric Hash"
+        },
+        "rubric_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rubric Version"
+        },
+        "status": {
+          "enum": [
+            "measured",
+            "error",
+            "unknown",
+            "not_sent"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "transport_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Transport Version"
+        },
+        "usage": {
+          "$ref": "#/$defs/AttemptUsage"
+        }
+      },
+      "required": [
+        "attempt_id",
+        "provider_call_id",
+        "purpose",
+        "attempt_number",
+        "evaluator",
+        "execution_mode",
+        "requested_model",
+        "resolved_model",
+        "transport_version",
+        "rubric_version",
+        "rubric_hash",
+        "input_hash",
+        "status",
+        "error_code",
+        "usage"
+      ],
+      "title": "AssessmentAttempt",
+      "type": "object"
+    },
+    "AssessmentRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "answer_id": {
+          "format": "uuid",
+          "title": "Answer Id",
+          "type": "string"
+        },
+        "assessment_id": {
+          "format": "uuid",
+          "title": "Assessment Id",
+          "type": "string"
+        },
+        "attempts": {
+          "items": {
+            "$ref": "#/$defs/AssessmentAttempt"
+          },
+          "title": "Attempts",
+          "type": "array"
+        },
+        "case_id": {
+          "format": "uuid",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "execution_id": {
+          "format": "uuid",
+          "title": "Execution Id",
+          "type": "string"
+        },
+        "explanation": {
+          "$ref": "#/$defs/ExplanationRevision"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/InputReference"
+          },
+          "minItems": 1,
+          "title": "Inputs",
+          "type": "array"
+        },
+        "metric": {
+          "$ref": "#/$defs/MetricDefinition"
+        },
+        "outcome": {
+          "discriminator": {
+            "mapping": {
+              "error": "#/$defs/UnmeasuredOutcome",
+              "measured": "#/$defs/MeasuredOutcome",
+              "skipped": "#/$defs/UnmeasuredOutcome",
+              "unavailable": "#/$defs/UnmeasuredOutcome"
+            },
+            "propertyName": "measurement_status"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/MeasuredOutcome"
+            },
+            {
+              "$ref": "#/$defs/UnmeasuredOutcome"
+            }
+          ],
+          "title": "Outcome"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": 3,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "selected_attempt_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Selected Attempt Id"
+        },
+        "subject_key": {
+          "minLength": 1,
+          "title": "Subject Key",
+          "type": "string"
+        },
+        "subject_kind": {
+          "enum": [
+            "answer",
+            "repeat_set",
+            "rule",
+            "turn"
+          ],
+          "title": "Subject Kind",
+          "type": "string"
+        },
+        "tenant_id": {
+          "format": "uuid",
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "execution_id",
+        "assessment_id",
+        "revision",
+        "case_id",
+        "answer_id",
+        "subject_kind",
+        "subject_key",
+        "inputs",
+        "metric",
+        "outcome",
+        "selected_attempt_id",
+        "attempts",
+        "explanation"
+      ],
+      "title": "AssessmentRevision",
+      "type": "object"
+    },
+    "AttemptUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "cost_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Source"
+        },
+        "cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Usd"
+        },
+        "input_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Tokens"
+        },
+        "measurement": {
+          "enum": [
+            "known",
+            "unknown",
+            "not_incurred"
+          ],
+          "title": "Measurement",
+          "type": "string"
+        },
+        "output_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Tokens"
+        },
+        "price_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Price Revision"
+        }
+      },
+      "required": [
+        "measurement"
+      ],
+      "title": "AttemptUsage",
+      "type": "object"
+    },
+    "BffTargetCollectionReceipt": {
+      "additionalProperties": false,
+      "description": "External collection identity; never a Platform provider-call identity.",
+      "properties": {
+        "answer_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Answer Sha256",
+          "type": "string"
+        },
+        "call_id": {
+          "format": "uuid",
+          "title": "Call Id",
+          "type": "string"
+        },
+        "source": {
+          "const": "evaluation_bff",
+          "default": "evaluation_bff",
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call_id",
+        "answer_sha256"
+      ],
+      "title": "BffTargetCollectionReceipt",
+      "type": "object"
+    },
+    "BffTargetFailureReceipt": {
+      "additionalProperties": false,
+      "description": "Ordered BFF sends ending in a definitive target failure.",
+      "properties": {
+        "call_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Call Ids",
+          "type": "array"
+        },
+        "source": {
+          "const": "evaluation_bff",
+          "default": "evaluation_bff",
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call_ids"
+      ],
+      "title": "BffTargetFailureReceipt",
+      "type": "object"
+    },
+    "ContextEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "context_id": {
+          "format": "uuid",
+          "title": "Context Id",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "source_kind": {
+          "enum": [
+            "retrieved",
+            "reference"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "context_id",
+        "source_kind",
+        "sequence",
+        "text"
+      ],
+      "title": "ContextEvidence",
+      "type": "object"
+    },
+    "EvidenceSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "context_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Id"
+        },
+        "end": {
+          "exclusiveMinimum": 0,
+          "title": "End",
+          "type": "integer"
+        },
+        "field": {
+          "enum": [
+            "question",
+            "answer",
+            "ground_truth",
+            "context"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "input_id": {
+          "format": "uuid",
+          "title": "Input Id",
+          "type": "string"
+        },
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_id",
+        "field",
+        "start",
+        "end"
+      ],
+      "title": "EvidenceSpan",
+      "type": "object"
+    },
+    "ExplanationIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "claim": {
+          "minLength": 1,
+          "title": "Claim",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceSpan"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "claim",
+        "evidence"
+      ],
+      "title": "ExplanationIssue",
+      "type": "object"
+    },
+    "ExplanationRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "assessment_id": {
+          "format": "uuid",
+          "title": "Assessment Id",
+          "type": "string"
+        },
+        "assessment_revision": {
+          "minimum": 1,
+          "title": "Assessment Revision",
+          "type": "integer"
+        },
+        "explanation_id": {
+          "format": "uuid",
+          "title": "Explanation Id",
+          "type": "string"
+        },
+        "generation_attempt_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Generation Attempt Id"
+        },
+        "input_set_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Input Set Hash",
+          "type": "string"
+        },
+        "issues": {
+          "items": {
+            "$ref": "#/$defs/ExplanationIssue"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "message_code": {
+          "minLength": 1,
+          "title": "Message Code",
+          "type": "string"
+        },
+        "prompt_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Prompt Version"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "supported_issue",
+            "assessment_conflict",
+            "insufficient_evidence",
+            "generation_error",
+            "not_requested"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "explanation_id",
+        "revision",
+        "assessment_id",
+        "assessment_revision",
+        "input_set_hash",
+        "status",
+        "issues",
+        "message_code",
+        "generation_attempt_id",
+        "prompt_version"
+      ],
+      "title": "ExplanationRevision",
+      "type": "object"
+    },
+    "InputPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Answer"
+        },
+        "client_case_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Client Case Id"
+        },
+        "collection_failure_receipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BffTargetFailureReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "collection_receipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BffTargetCollectionReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "collection_status": {
+          "enum": [
+            "collected",
+            "error",
+            "unavailable"
+          ],
+          "title": "Collection Status",
+          "type": "string"
+        },
+        "contexts": {
+          "items": {
+            "$ref": "#/$defs/ContextEvidence"
+          },
+          "title": "Contexts",
+          "type": "array"
+        },
+        "ground_truth": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ground Truth"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "repeat_index": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Repeat Index",
+          "type": "integer"
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rule Id"
+        },
+        "rule_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rule Revision"
+        },
+        "scenario_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scenario Id"
+        },
+        "target_revision": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Revision"
+        },
+        "turn_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Turn Index"
+        }
+      },
+      "required": [
+        "question",
+        "answer",
+        "collection_status",
+        "target_revision"
+      ],
+      "title": "InputPayload",
+      "type": "object"
+    },
+    "InputReference": {
+      "additionalProperties": false,
+      "properties": {
+        "context_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Context Ids",
+          "type": "array"
+        },
+        "input_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Input Hash",
+          "type": "string"
+        },
+        "input_id": {
+          "format": "uuid",
+          "title": "Input Id",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "primary",
+            "repeat",
+            "turn",
+            "reference"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_id",
+        "input_hash",
+        "role",
+        "sequence"
+      ],
+      "title": "InputReference",
+      "type": "object"
+    },
+    "InputSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "answer_id": {
+          "format": "uuid",
+          "title": "Answer Id",
+          "type": "string"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "case_id": {
+          "format": "uuid",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "execution_id": {
+          "format": "uuid",
+          "title": "Execution Id",
+          "type": "string"
+        },
+        "input_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Input Hash",
+          "type": "string"
+        },
+        "input_id": {
+          "format": "uuid",
+          "title": "Input Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/InputPayload"
+        },
+        "provider_call_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Call Id"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "tenant_id": {
+          "format": "uuid",
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "execution_id",
+        "input_id",
+        "case_id",
+        "answer_id",
+        "captured_at",
+        "input_hash",
+        "payload"
+      ],
+      "title": "InputSnapshot",
+      "type": "object"
+    },
+    "MeasuredOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance_verdict": {
+          "enum": [
+            "pass",
+            "fail",
+            "undetermined",
+            "not_applicable"
+          ],
+          "title": "Acceptance Verdict",
+          "type": "string"
+        },
+        "measurement_status": {
+          "const": "measured",
+          "title": "Measurement Status",
+          "type": "string"
+        },
+        "quality_band": {
+          "enum": [
+            "good",
+            "review",
+            "poor"
+          ],
+          "title": "Quality Band",
+          "type": "string"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "review_state": {
+          "enum": [
+            "not_assessed",
+            "required",
+            "resolved"
+          ],
+          "title": "Review State",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "measurement_status",
+        "score",
+        "quality_band",
+        "acceptance_verdict",
+        "review_state"
+      ],
+      "title": "MeasuredOutcome",
+      "type": "object"
+    },
+    "MetricDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance_minimum": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Acceptance Minimum"
+        },
+        "acceptance_operator": {
+          "default": "gte",
+          "enum": [
+            "gte",
+            "gt"
+          ],
+          "title": "Acceptance Operator",
+          "type": "string"
+        },
+        "definition_revision": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Definition Revision",
+          "type": "string"
+        },
+        "good_minimum": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Good Minimum",
+          "type": "number"
+        },
+        "methodology": {
+          "minLength": 1,
+          "title": "Methodology",
+          "type": "string"
+        },
+        "metric_id": {
+          "minLength": 1,
+          "title": "Metric Id",
+          "type": "string"
+        },
+        "namespace": {
+          "minLength": 1,
+          "title": "Namespace",
+          "type": "string"
+        },
+        "required_inputs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Inputs",
+          "type": "array"
+        },
+        "review_minimum": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Review Minimum",
+          "type": "number"
+        },
+        "rubric_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rubric Hash"
+        },
+        "rubric_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rubric Version"
+        },
+        "score_direction": {
+          "const": "higher_is_better",
+          "default": "higher_is_better",
+          "title": "Score Direction",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric_id",
+        "namespace",
+        "definition_revision",
+        "rubric_version",
+        "rubric_hash",
+        "required_inputs",
+        "methodology",
+        "acceptance_minimum",
+        "good_minimum",
+        "review_minimum"
+      ],
+      "title": "MetricDefinition",
+      "type": "object"
+    },
+    "UnmeasuredOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance_verdict": {
+          "default": null,
+          "title": "Acceptance Verdict",
+          "type": "null"
+        },
+        "measurement_status": {
+          "enum": [
+            "skipped",
+            "error",
+            "unavailable"
+          ],
+          "title": "Measurement Status",
+          "type": "string"
+        },
+        "quality_band": {
+          "default": null,
+          "title": "Quality Band",
+          "type": "null"
+        },
+        "reason_code": {
+          "minLength": 1,
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "review_state": {
+          "const": "not_assessed",
+          "default": "not_assessed",
+          "title": "Review State",
+          "type": "string"
+        },
+        "score": {
+          "default": null,
+          "title": "Score",
+          "type": "null"
+        }
+      },
+      "required": [
+        "measurement_status",
+        "reason_code"
+      ],
+      "title": "UnmeasuredOutcome",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "assessments": {
+      "items": {
+        "$ref": "#/$defs/AssessmentRevision"
+      },
+      "title": "Assessments",
+      "type": "array"
+    },
+    "execution_id": {
+      "format": "uuid",
+      "title": "Execution Id",
+      "type": "string"
+    },
+    "inputs": {
+      "items": {
+        "$ref": "#/$defs/InputSnapshot"
+      },
+      "title": "Inputs",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": 3,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "tenant_id": {
+      "format": "uuid",
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "tenant_id",
+    "execution_id",
+    "inputs",
+    "assessments"
+  ],
+  "title": "AssessmentBundle",
+  "type": "object"
+}

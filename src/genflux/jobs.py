@@ -2,39 +2,31 @@
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable
+from uuid import UUID
 
-import httpx
-
-from .exceptions import JobFailedError, NotFoundError, TimeoutError, ValidationError
+from .clients.base import BaseClient
+from .clients.resource_path import resource_path
+from .exceptions import JobFailedError, TimeoutError
 from .models import Job
-
-# Valid metric names for quick_evaluate (SDK-side validation for early typo detection)
-VALID_METRICS = frozenset({
-    "faithfulness",
-    "answer_relevancy",
-    "context_relevancy",
-    "llm_context_precision",
-    "context_recall",
-    "hallucination",
-    "toxicity",
-    "bias",
-})
-
-if TYPE_CHECKING:
-    from genflux import Genflux
+from .models.assessment import AssessmentBundle
+from .models.assessment_contract import parse_assessment_bundle
 
 logger = logging.getLogger(__name__)
 
 
 class JobsClient:
-    """ジョブ（実行）管理用クライアント。"""
+    """ジョブ（実行）管理用クライアント。
 
-    def __init__(self, client: "Genflux"):
+    Metric名の妥当性判定は Platform backend が担います（SSoT）。
+    SDK はサーバーの 400 応答を ValidationError としてそのまま返します。
+    """
+
+    def __init__(self, client: BaseClient):
         """Initialize JobsClient.
 
         Args:
-            client: Parent Genflux client
+            client: Shared HTTP transport
         """
         self._client = client
 
@@ -43,6 +35,8 @@ class JobsClient:
         execution_type: str,
         config_id: str | None = None,
         data: dict[str, Any] | None = None,
+        *,
+        client_request_id: str | None = None,
     ) -> Job:
         """新しいジョブを作成します。
 
@@ -50,6 +44,7 @@ class JobsClient:
             execution_type: Execution type (e.g., 'quick_evaluate', 'evaluation')
             config_id: Config ID (optional, uses default if not provided)
             data: Additional data for the job (for quick_evaluate)
+            client_request_id: Stable UUID for receipt lookup after an uncertain response.
 
         Returns:
             Created Job object
@@ -76,22 +71,19 @@ class JobsClient:
             "execution_type": execution_type,
         }
 
+        if client_request_id is not None:
+            payload["client_request_id"] = str(UUID(client_request_id))
+
         # Add config_id if provided (optional)
         if config_id:
             payload["config_id"] = config_id
 
         if data:
-            if execution_type == "quick_evaluate":
-                metric_name = data.get("metric_name")
-                if metric_name is not None and metric_name not in VALID_METRICS:
-                    raise ValidationError(
-                        f"Invalid metric: {metric_name!r}. Valid metrics: {sorted(VALID_METRICS)}",
-                        details={"metric": metric_name, "valid_metrics": sorted(VALID_METRICS)},
-                    )
-            # Store data directly in checkpoint_data for quick_evaluate
+            # Store data directly in checkpoint_data for quick_evaluate.
+            # Metric名は Platform が検証するため、SDK 側では事前検証しない。
             payload["checkpoint_data"] = data
 
-        response = self._client._post("/jobs", payload)
+        response = self._client.post("/jobs", json=payload)
         return Job.from_dict(response)
 
     def list(
@@ -129,11 +121,7 @@ class JobsClient:
         if execution_type:
             params["type_filter"] = execution_type
 
-        response = self._client._http_client.get("/jobs", params=params)
-        if not response.is_success:
-            response.raise_for_status()
-
-        data = response.json()
+        data = self._client.get("/jobs", params=params)
         jobs_data = data.get("jobs", [])
         return [Job.from_dict(job_data) for job_data in jobs_data]
 
@@ -155,13 +143,58 @@ class JobsClient:
             >>> print(job.status)
             'running'
         """
-        try:
-            response = self._client._get(f"/jobs/{job_id}")
-            return Job.from_dict(response)
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 404:
-                raise NotFoundError("job", str(job_id))
-            raise
+        response = self._client.get(resource_path("jobs", job_id))
+        return Job.from_dict(response)
+
+    def get_by_client_request(self, client_request_id: str) -> Job:
+        """Read an accepted job by its tenant-scoped submission UUID.
+
+        This lookup never creates a job. An absent receipt raises NotFoundError.
+        """
+        request_id = str(UUID(client_request_id))
+        response = self._client.get(f"/jobs/by-client-request/{request_id}")
+        job = Job.from_dict(response)
+        if job.client_request_id != request_id:
+            raise ValueError("Job receipt does not match the requested submission")
+        return job
+
+    def get_assessment_revision(self, job_id: str, assessment_id: str, revision: int) -> AssessmentBundle:
+        """Read one persisted assessment revision and its exact input snapshots.
+
+        This read never adopts a newer revision, runs an evaluator, or retries billing.
+        Missing revisions raise NotFoundError rather than falling back to current results.
+        Each input keeps its canonical hash. `provider_call_id` refers to a
+        Platform-owned send; an optional `collection_receipt` identifies a
+        BFF-owned target send and answer hash. Neither is invented when absent.
+        """
+        execution_uuid, assessment_uuid = UUID(job_id), UUID(assessment_id)
+        if type(revision) is not int or revision < 1:
+            raise ValueError("Assessment revision must be a positive integer")
+        response = self._client.get(f"/jobs/{execution_uuid}/assessments/{assessment_uuid}/revisions/{revision}")
+        bundle = parse_assessment_bundle(response)
+        if bundle is None or bundle.execution_id != execution_uuid or len(bundle.assessments) != 1:
+            raise ValueError("Assessment response does not match requested execution")
+        assessment = bundle.assessments[0]
+        if (assessment.assessment_id, assessment.revision, assessment.execution_id, assessment.tenant_id) != (
+            assessment_uuid,
+            revision,
+            execution_uuid,
+            bundle.tenant_id,
+        ):
+            raise ValueError("Assessment response does not match requested revision")
+        references = {ref.input_id: ref.input_hash for ref in assessment.inputs}
+        if (
+            len(bundle.inputs) != len(references)
+            or {item.input_id for item in bundle.inputs} != set(references)
+            or any(
+                item.execution_id != execution_uuid
+                or item.tenant_id != bundle.tenant_id
+                or item.input_hash != references[item.input_id]
+                for item in bundle.inputs
+            )
+        ):
+            raise ValueError("Assessment input scope mismatch")
+        return bundle
 
     def wait(
         self,
@@ -237,14 +270,10 @@ class JobsClient:
             except Exception as e:
                 # Handle network errors or API errors
                 error_count += 1
-                logger.warning(
-                    f"Error polling job {job_id} (attempt {error_count}/{max_errors}): {e}"
-                )
+                logger.warning(f"Error polling job {job_id} (attempt {error_count}/{max_errors}): {e}")
 
                 if error_count >= max_errors:
-                    logger.error(
-                        f"Max errors reached while polling job {job_id}"
-                    )
+                    logger.error(f"Max errors reached while polling job {job_id}")
                     raise
 
                 # Check if timeout reached after error
@@ -258,14 +287,9 @@ class JobsClient:
         progress_info = None
         if last_job:
             if last_job.total_count and last_job.total_count > 0:
-                progress_info = (
-                    f"{last_job.progress_count}/{last_job.total_count}"
-                )
+                progress_info = f"{last_job.progress_count}/{last_job.total_count}"
 
-        logger.error(
-            f"Job {job_id} timed out after {timeout}s "
-            f"(status: {last_job.status if last_job else 'unknown'})"
-        )
+        logger.error(f"Job {job_id} timed out after {timeout}s (status: {last_job.status if last_job else 'unknown'})")
         raise TimeoutError(
             operation="Job execution",
             timeout=timeout,
@@ -293,7 +317,6 @@ class JobsClient:
             >>> print(job.status)
             'cancelled'
         """
-        self._client._post(f"/jobs/{job_id}/cancel", {})
+        self._client.post(resource_path("jobs", job_id) + "/cancel", json={})
         # Cancel endpoint may return a partial response; return full job via get
         return self.get(job_id)
-

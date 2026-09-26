@@ -8,3 +8,7 @@ ignore = ["D100", "D107", "D415", "D212"]
 
 [lint.pydocstyle]
 convention = "google"
+
+[lint.per-file-ignores]
+# Class documentation belongs to the producer schema; this file is generated.
+"src/genflux/models/assessment.py" = ["D101"]

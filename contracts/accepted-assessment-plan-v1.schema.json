@@ -1,0 +1,112 @@
+{
+  "$defs": {
+    "AcceptedAssessmentSlot": {
+      "additionalProperties": false,
+      "properties": {
+        "client_case_id": {
+          "minLength": 1,
+          "title": "Client Case Id",
+          "type": "string"
+        },
+        "input_condition_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Condition Key"
+        },
+        "requested_metric": {
+          "minLength": 1,
+          "title": "Requested Metric",
+          "type": "string"
+        },
+        "slot_id": {
+          "minLength": 1,
+          "title": "Slot Id",
+          "type": "string"
+        },
+        "subject_key": {
+          "minLength": 1,
+          "title": "Subject Key",
+          "type": "string"
+        },
+        "subject_kind": {
+          "enum": [
+            "answer",
+            "repeat_set",
+            "rule",
+            "turn"
+          ],
+          "title": "Subject Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slot_id",
+        "client_case_id",
+        "requested_metric",
+        "subject_kind",
+        "subject_key"
+      ],
+      "title": "AcceptedAssessmentSlot",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "execution_id": {
+      "format": "uuid",
+      "title": "Execution Id",
+      "type": "string"
+    },
+    "plan_id": {
+      "format": "uuid",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "revision": {
+      "const": 1,
+      "default": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "slots": {
+      "items": {
+        "$ref": "#/$defs/AcceptedAssessmentSlot"
+      },
+      "minItems": 1,
+      "title": "Slots",
+      "type": "array"
+    },
+    "state": {
+      "const": "accepted",
+      "default": "accepted",
+      "title": "State",
+      "type": "string"
+    },
+    "tenant_id": {
+      "format": "uuid",
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "execution_id",
+    "plan_id",
+    "slots"
+  ],
+  "title": "AcceptedAssessmentPlan",
+  "type": "object"
+}

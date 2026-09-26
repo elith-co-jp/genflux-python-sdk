@@ -4,6 +4,7 @@ from typing import Literal
 from uuid import UUID
 
 from genflux.clients.base import BaseClient
+from genflux.clients.resource_path import resource_path
 from genflux.exceptions.api import NotFoundError
 from genflux.models.report import Report
 
@@ -50,14 +51,17 @@ class ReportsClient(BaseClient):
             >>> for failed_case in report.details.failed_cases:
             ...     print(f"Failed: {failed_case.reason}")
         """
+        if view not in {"summary", "details"}:
+            raise ValueError("Report view must be summary or details")
+        path = resource_path("reports", report_id)
+
         # Convert UUID to string
         report_id_str = str(report_id)
 
         # Make request (BaseClient.get handles errors automatically)
         try:
             # Call BaseClient.get() to avoid recursion
-            data = super().get(f"/reports/{report_id_str}", params={"view": view})
+            data = super().get(path, params={"view": view})
             return Report(**data)
         except NotFoundError:
             raise NotFoundError("Report", report_id_str)
-

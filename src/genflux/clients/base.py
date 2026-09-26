@@ -25,6 +25,8 @@ class BaseClient:
         api_key: str | None,
         base_url: str | None = None,
         timeout: int = 30,
+        *,
+        session: httpx.Client | None = None,
     ):
         """基底クライアントを初期化します。
 
@@ -32,6 +34,8 @@ class BaseClient:
             api_key: API key for authentication (optional)
             base_url: Base URL for API (GENFLUX_API_BASE_URL env var or environment if not set)
             timeout: Request timeout in seconds
+            session: Shared httpx.Client owned by the caller. When provided,
+                ``close()`` does not close it (the owner is responsible).
         """
         self.api_key = api_key
         if base_url is None:
@@ -52,7 +56,8 @@ class BaseClient:
 
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
-        self._client = httpx.Client(timeout=timeout, follow_redirects=True)
+        self._owns_client = session is None
+        self._client = session if session is not None else httpx.Client(timeout=timeout, follow_redirects=True)
 
     def __enter__(self):
         """Enter context manager."""
@@ -63,8 +68,12 @@ class BaseClient:
         self.close()
 
     def close(self):
-        """HTTPクライアントを閉じます。"""
-        self._client.close()
+        """HTTPクライアントを閉じます。
+
+        共有セッション（``session`` 引数で注入されたもの）は閉じません。
+        """
+        if self._owns_client:
+            self._client.close()
 
     def _get_headers(self) -> dict[str, str]:
         """認証付きのリクエストヘッダーを取得します。

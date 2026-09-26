@@ -25,6 +25,7 @@ def parse_assessment_bundle(value: Any) -> AssessmentBundle | None:
         if digest != source.input_hash:
             raise ValueError("Input hash does not match payload")
         receipt = source.payload.collection_receipt
+        failure_receipt = source.payload.collection_failure_receipt
         if receipt is not None:
             if (
                 source.payload.answer is None
@@ -34,6 +35,16 @@ def parse_assessment_bundle(value: Any) -> AssessmentBundle | None:
             if receipt.call_id in receipt_ids:
                 raise ValueError("Duplicate target collection receipt")
             receipt_ids.add(receipt.call_id)
+        if failure_receipt is not None:
+            if (
+                source.payload.answer is not None
+                or source.payload.collection_status != "error"
+                or receipt is not None
+                or len(set(failure_receipt.call_ids)) != len(failure_receipt.call_ids)
+                or any(call_id in receipt_ids for call_id in failure_receipt.call_ids)
+            ):
+                raise ValueError("Invalid target failure receipt")
+            receipt_ids.update(failure_receipt.call_ids)
     for assessment in bundle.assessments:
         for attempt in assessment.attempts:
             usage = attempt.usage

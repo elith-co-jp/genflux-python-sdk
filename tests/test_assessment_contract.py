@@ -65,6 +65,37 @@ def test_target_collection_receipt_roundtrip_and_answer_binding():
         parse_assessment_bundle(wire)
 
 
+def test_target_failure_receipt_preserves_order_and_requires_error_input():
+    """Failed target sends keep their order without becoming collected answers."""
+    wire = fixture()
+    source = wire["inputs"][0]
+    payload = source["payload"]
+    payload["answer"] = None
+    payload["collection_status"] = "error"
+    call_ids = [str(uuid4()), str(uuid4())]
+    payload["collection_failure_receipt"] = {"source": "evaluation_bff", "call_ids": call_ids}
+
+    def refresh_hash():
+        source["input_hash"] = sha256(
+            json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
+        ).hexdigest()
+        wire["assessments"][0]["inputs"][0]["input_hash"] = source["input_hash"]
+
+    refresh_hash()
+    parsed = parse_assessment_bundle(wire)
+    assert [str(value) for value in parsed.inputs[0].payload.collection_failure_receipt.call_ids] == call_ids
+    payload["collection_failure_receipt"]["call_ids"] = [call_ids[0], call_ids[0]]
+    refresh_hash()
+    with pytest.raises(ValueError, match="Invalid target failure receipt"):
+        parse_assessment_bundle(wire)
+    payload["collection_failure_receipt"]["call_ids"] = call_ids
+    payload["answer"] = "Fictional answer"
+    payload["collection_status"] = "collected"
+    refresh_hash()
+    with pytest.raises(ValueError, match="Invalid target failure receipt"):
+        parse_assessment_bundle(wire)
+
+
 @pytest.mark.parametrize("value", [True, "0.5", -0.1, 1.1, float("nan"), float("inf"), None])
 def test_http_boundary_rejects_invalid_score(value):
     """Keep type/range validation even though generated models are transport-only."""

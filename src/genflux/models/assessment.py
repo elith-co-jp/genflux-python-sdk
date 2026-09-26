@@ -88,6 +88,17 @@ class BffTargetCollectionReceipt(BaseModel):
     )
 
 
+class BffTargetFailureReceipt(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        frozen=True,
+    )
+    call_ids: Annotated[list[UUID], Field(min_length=1, title='Call Ids')]
+    source: Annotated[Literal['evaluation_bff'], Field(title='Source')] = (
+        'evaluation_bff'
+    )
+
+
 class ContextEvidence(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -175,6 +186,9 @@ class InputPayload(BaseModel):
     )
     answer: Annotated[str | None, Field(title='Answer')] = None
     client_case_id: Annotated[str | None, Field(title='Client Case Id')] = None
+    collection_failure_receipt: BffTargetFailureReceipt | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
     collection_receipt: BffTargetCollectionReceipt | None = Field(
         default=None, exclude_if=lambda value: value is None
     )

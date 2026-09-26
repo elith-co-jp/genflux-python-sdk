@@ -484,6 +484,32 @@
       "title": "BffTargetCollectionReceipt",
       "type": "object"
     },
+    "BffTargetFailureReceipt": {
+      "additionalProperties": false,
+      "description": "Ordered BFF sends ending in a definitive target failure.",
+      "properties": {
+        "call_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Call Ids",
+          "type": "array"
+        },
+        "source": {
+          "const": "evaluation_bff",
+          "default": "evaluation_bff",
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call_ids"
+      ],
+      "title": "BffTargetFailureReceipt",
+      "type": "object"
+    },
     "ContextEvidence": {
       "additionalProperties": false,
       "properties": {
@@ -709,6 +735,17 @@
           ],
           "default": null,
           "title": "Client Case Id"
+        },
+        "collection_failure_receipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BffTargetFailureReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "collection_receipt": {
           "anyOf": [

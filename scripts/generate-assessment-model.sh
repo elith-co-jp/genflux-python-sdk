@@ -15,7 +15,10 @@ path = Path('src/genflux/models/assessment.py')
 source = path.read_text()
 old = '    collection_receipt: BffTargetCollectionReceipt | None = None\n'
 assert source.count(old) == 1
-path.write_text(source.replace(old, '    collection_receipt: BffTargetCollectionReceipt | None = Field(\n        default=None, exclude_if=lambda value: value is None\n    )\n'))
+source = source.replace(old, '    collection_receipt: BffTargetCollectionReceipt | None = Field(\n        default=None, exclude_if=lambda value: value is None\n    )\n')
+old_failure = '    collection_failure_receipt: BffTargetFailureReceipt | None = None\n'
+assert source.count(old_failure) == 1
+path.write_text(source.replace(old_failure, '    collection_failure_receipt: BffTargetFailureReceipt | None = Field(\n        default=None, exclude_if=lambda value: value is None\n    )\n'))
 PY
 uvx --from datamodel-code-generator==0.33.0 datamodel-codegen \
   --input contracts/accepted-assessment-plan-v1.schema.json --input-file-type jsonschema \

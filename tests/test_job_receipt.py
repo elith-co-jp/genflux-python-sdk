@@ -48,3 +48,20 @@ def test_invalid_lookup_id_is_rejected_before_http():
     with pytest.raises(ValueError):
         JobsClient(transport).get_by_client_request("../jobs?tenant=another")
     transport.get.assert_not_called()
+
+
+def test_job_readback_preserves_auto_retry_lineage():
+    """Keep Platform lineage fields when converting HTTP JSON to SDK Job."""
+    transport = Mock()
+    parent_id, child_id = str(uuid4()), str(uuid4())
+    transport.get.return_value = {
+        **_job_response(), "id": parent_id, "retry_execution_id": child_id,
+        "auto_retry_pending": False, "auto_retry_blocked_reason": None,
+    }
+    parent = JobsClient(transport).get(parent_id)
+    assert parent.retry_execution_id == child_id
+    assert parent.auto_retry_pending is False
+
+    transport.get.return_value = {**_job_response(), "id": child_id, "retry_parent_execution_id": parent_id}
+    child = JobsClient(transport).get(child_id)
+    assert child.retry_parent_execution_id == parent_id

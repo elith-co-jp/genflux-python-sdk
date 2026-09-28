@@ -43,6 +43,10 @@ class Job:
     target_type: str = "rag"
     assessment_bundle: AssessmentBundle | None = None
     accepted_assessment_plan: AcceptedAssessmentPlan | None = None
+    retry_parent_execution_id: str | None = None
+    retry_execution_id: str | None = None
+    auto_retry_pending: bool = False
+    auto_retry_blocked_reason: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Job":
@@ -107,6 +111,10 @@ class Job:
             client_request_id=data.get("client_request_id"),
             assessment_bundle=assessment_bundle,
             accepted_assessment_plan=accepted_plan,
+            retry_parent_execution_id=data.get("retry_parent_execution_id"),
+            retry_execution_id=data.get("retry_execution_id"),
+            auto_retry_pending=data.get("auto_retry_pending", False),
+            auto_retry_blocked_reason=data.get("auto_retry_blocked_reason"),
         )
 
     @property

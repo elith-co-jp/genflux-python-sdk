@@ -372,7 +372,7 @@ print(job.status)
 
 ---
 
-#### `create(execution_type: str, config_id: str | None = None, data: dict[str, Any] | None = None, client_request_id: str | None = None) -> Job`
+#### `create(execution_type: str, config_id: str | None = None, data: dict[str, Any] | None = None, client_request_id: str | None = None, evaluation_completion_webhook: bool = False) -> Job`
 
 新しいジョブを作成します。
 
@@ -384,6 +384,7 @@ print(job.status)
 | `config_id` | `str \| None` | No | Config ID (optional, uses default if not provided) |
 | `data` | `dict[str, Any] \| None` | No | Additional data for the job (for quick_evaluate) |
 | `client_request_id` | `str \| None` | No | Stable UUID for receipt lookup after an uncertain response. |
+| `evaluation_completion_webhook` | `bool` | No | Request a signed completion hint for an enterprise Evaluation job. |
 
 **戻り値:** Created Job object
 
@@ -1476,4 +1477,4 @@ result = client.jobs.wait(job.id, callback=callback)
 
 *Auto-generated at 2026-09-28 01:37 UTC by `scripts/generate_api_reference.py`*
 
-<!-- source-hash: b527b289b5a770ce -->
+<!-- source-hash: fd8f75ce0c429a62 -->

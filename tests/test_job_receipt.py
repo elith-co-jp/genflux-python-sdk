@@ -22,6 +22,17 @@ def test_create_sends_explicit_request_identity_and_legacy_omits_it():
     assert Job.from_dict(_job_response()).client_request_id is None
 
 
+def test_create_requests_completion_webhook_only_when_opted_in():
+    """Only an explicit Evaluation subscription enters the submission payload."""
+    transport = Mock()
+    transport.post.return_value = _job_response()
+    client = JobsClient(transport)
+    client.create("quick_evaluate", client_request_id=str(uuid4()), evaluation_completion_webhook=True)
+    assert transport.post.call_args.kwargs["json"]["evaluation_completion_webhook"] is True
+    client.create("quick_evaluate")
+    assert "evaluation_completion_webhook" not in transport.post.call_args.kwargs["json"]
+
+
 def test_lookup_is_one_get_without_create_or_poll():
     """An uncertain create response can be resolved without resubmission."""
     transport = Mock()

@@ -99,6 +99,41 @@ class BffTargetFailureReceipt(BaseModel):
     )
 
 
+class CoverageConfidence(RootModel[float]):
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    root: Annotated[float, Field(ge=0.0, le=1.0, title='Coverage Confidence')]
+
+
+class CoverageErrorCode(RootModel[str]):
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    root: Annotated[str, Field(min_length=1, title='Coverage Error Code')]
+
+
+class CoverageScore(RootModel[float]):
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    root: Annotated[float, Field(ge=0.0, le=1.0, title='Coverage Score')]
+
+
+class ErrorCode(RootModel[str]):
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    root: Annotated[str, Field(min_length=1, title='Error Code')]
+
+
+class Score(RootModel[float]):
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    root: Annotated[float, Field(ge=0.0, le=1.0, title='Score')]
+
+
 class ContextEvidence(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -133,36 +168,6 @@ class ExplanationIssue(BaseModel):
     )
     claim: Annotated[str, Field(min_length=1, title='Claim')]
     evidence: Annotated[list[EvidenceSpan], Field(min_length=1, title='Evidence')]
-
-
-class ExplanationRevision(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-        frozen=True,
-    )
-    assessment_id: Annotated[UUID, Field(title='Assessment Id')]
-    assessment_revision: Annotated[int, Field(ge=1, title='Assessment Revision')]
-    explanation_id: Annotated[UUID, Field(title='Explanation Id')]
-    generation_attempt_id: Annotated[
-        UUID | None, Field(title='Generation Attempt Id')
-    ] = None
-    input_set_hash: Annotated[
-        str, Field(pattern='^[a-f0-9]{64}$', title='Input Set Hash')
-    ]
-    issues: Annotated[list[ExplanationIssue], Field(title='Issues')]
-    message_code: Annotated[str, Field(min_length=1, title='Message Code')]
-    prompt_version: Annotated[str | None, Field(title='Prompt Version')] = None
-    revision: Annotated[int, Field(ge=1, title='Revision')]
-    status: Annotated[
-        Literal[
-            'supported_issue',
-            'assessment_conflict',
-            'insufficient_evidence',
-            'generation_error',
-            'not_requested',
-        ],
-        Field(title='Status'),
-    ]
 
 
 class TargetRevision(RootModel[str]):
@@ -343,7 +348,7 @@ class AssessmentAttempt(BaseModel):
         Field(title='Provider Score Direction'),
     ] = None
     purpose: Annotated[
-        Literal['judge', 'explanation', 'target'], Field(title='Purpose')
+        Literal['judge', 'explanation', 'preparation', 'target'], Field(title='Purpose')
     ]
     requested_model: Annotated[str | None, Field(title='Requested Model')] = None
     resolved_model: Annotated[str | None, Field(title='Resolved Model')] = None
@@ -354,6 +359,88 @@ class AssessmentAttempt(BaseModel):
     ]
     transport_version: Annotated[str | None, Field(title='Transport Version')] = None
     usage: AttemptUsage
+
+
+class ClaimJudgment(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        frozen=True,
+    )
+    confidence: Annotated[Confidence | None, Field(title='Confidence')] = None
+    error_code: Annotated[ErrorCode | None, Field(title='Error Code')] = None
+    evidence: Annotated[list[EvidenceSpan], Field(min_length=1, title='Evidence')]
+    probabilities: Annotated[dict[str, float] | None, Field(title='Probabilities')] = (
+        None
+    )
+    question_name: Annotated[
+        str, Field(pattern='^claim_[0-9]{3}$', title='Question Name')
+    ]
+    score: Annotated[Score | None, Field(title='Score')] = None
+    statement: Annotated[str, Field(min_length=1, title='Statement')]
+
+
+class ClaimAnalysis(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        frozen=True,
+    )
+    aggregation: Annotated[Literal['arithmetic_mean'], Field(title='Aggregation')] = (
+        'arithmetic_mean'
+    )
+    claims: Annotated[
+        list[ClaimJudgment], Field(max_length=24, min_length=1, title='Claims')
+    ]
+    coverage_confidence: Annotated[
+        CoverageConfidence | None, Field(title='Coverage Confidence')
+    ] = None
+    coverage_error_code: Annotated[
+        CoverageErrorCode | None, Field(title='Coverage Error Code')
+    ] = None
+    coverage_minimum: Annotated[float, Field(ge=0.0, le=1.0, title='Coverage Minimum')]
+    coverage_score: Annotated[CoverageScore | None, Field(title='Coverage Score')] = (
+        None
+    )
+    extraction_attempt_id: Annotated[UUID, Field(title='Extraction Attempt Id')]
+    judge_attempt_id: Annotated[UUID, Field(title='Judge Attempt Id')]
+    questions_hash: Annotated[
+        str, Field(pattern='^[a-f0-9]{64}$', title='Questions Hash')
+    ]
+    rubric_version: Annotated[str, Field(min_length=1, title='Rubric Version')]
+    version: Annotated[Literal[1], Field(title='Version')] = 1
+
+
+class ExplanationRevision(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        frozen=True,
+    )
+    assessment_id: Annotated[UUID, Field(title='Assessment Id')]
+    assessment_revision: Annotated[int, Field(ge=1, title='Assessment Revision')]
+    claim_analysis: ClaimAnalysis | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
+    explanation_id: Annotated[UUID, Field(title='Explanation Id')]
+    generation_attempt_id: Annotated[
+        UUID | None, Field(title='Generation Attempt Id')
+    ] = None
+    input_set_hash: Annotated[
+        str, Field(pattern='^[a-f0-9]{64}$', title='Input Set Hash')
+    ]
+    issues: Annotated[list[ExplanationIssue], Field(title='Issues')]
+    message_code: Annotated[str, Field(min_length=1, title='Message Code')]
+    prompt_version: Annotated[str | None, Field(title='Prompt Version')] = None
+    revision: Annotated[int, Field(ge=1, title='Revision')]
+    status: Annotated[
+        Literal[
+            'supported_issue',
+            'no_issues',
+            'assessment_conflict',
+            'insufficient_evidence',
+            'generation_error',
+            'not_requested',
+        ],
+        Field(title='Status'),
+    ]
 
 
 class AssessmentRevision(BaseModel):

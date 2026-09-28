@@ -1,0 +1,231 @@
+{
+  "schema_version": 3,
+  "tenant_id": "15e94af9-756d-4136-ba70-63c200c0da65",
+  "execution_id": "5251dae6-93a1-4d78-b306-8b803bb8b82f",
+  "inputs": [
+    {
+      "schema_version": 1,
+      "tenant_id": "15e94af9-756d-4136-ba70-63c200c0da65",
+      "execution_id": "5251dae6-93a1-4d78-b306-8b803bb8b82f",
+      "input_id": "cf39affd-6739-52de-b554-cb4fba842090",
+      "case_id": "296d4fa5-6bc0-58c6-b276-28c6a7f384f1",
+      "answer_id": "73bd298d-e4ce-5346-8436-8f0878344c34",
+      "provider_call_id": null,
+      "captured_at": "2026-09-28T01:28:48.897113Z",
+      "input_hash": "4568f9e47c3a437707fc93997e1b71be538294c99dc9d058c338a48648b62789",
+      "payload": {
+        "question": "fictional question",
+        "answer": "😀架空社の山田氏はCFOで、2020年に入社しました。",
+        "collection_status": "collected",
+        "target_revision": "fictional-target-v1",
+        "contexts": [
+          {
+            "context_id": "d07bdbb2-477f-42a5-951b-56b56491ca6e",
+            "source_kind": "reference",
+            "sequence": 0,
+            "text": "山田氏はCFOです。"
+          },
+          {
+            "context_id": "82c82221-6f98-4e52-a1d9-48d6ee916dd6",
+            "source_kind": "retrieved",
+            "sequence": 0,
+            "text": "使わない参照資料"
+          }
+        ],
+        "ground_truth": null,
+        "client_case_id": null,
+        "repeat_index": 0,
+        "scenario_id": null,
+        "turn_index": null,
+        "rule_id": null,
+        "rule_revision": null
+      }
+    }
+  ],
+  "assessments": [
+    {
+      "schema_version": 3,
+      "tenant_id": "15e94af9-756d-4136-ba70-63c200c0da65",
+      "execution_id": "5251dae6-93a1-4d78-b306-8b803bb8b82f",
+      "assessment_id": "af70b08e-a4d7-5b40-aa36-ac526ae2ee3d",
+      "revision": 1,
+      "case_id": "296d4fa5-6bc0-58c6-b276-28c6a7f384f1",
+      "answer_id": "73bd298d-e4ce-5346-8436-8f0878344c34",
+      "subject_kind": "answer",
+      "subject_key": "answer",
+      "inputs": [
+        {
+          "input_id": "cf39affd-6739-52de-b554-cb4fba842090",
+          "input_hash": "4568f9e47c3a437707fc93997e1b71be538294c99dc9d058c338a48648b62789",
+          "role": "primary",
+          "sequence": 0,
+          "context_ids": [
+            "d07bdbb2-477f-42a5-951b-56b56491ca6e"
+          ]
+        }
+      ],
+      "metric": {
+        "metric_id": "quality.hallucination",
+        "namespace": "quality",
+        "definition_revision": "748a3c3b8788d1deb8c9ebc885d3e9557115a6c51e488949d0b6c6128e048c16",
+        "rubric_version": "hallucination-suppression-claims-ja-v1",
+        "rubric_hash": "bd8d2441b458e11cb8aed7fd509ae1438c3a486e0b6463ea127ca33c22510908",
+        "required_inputs": [
+          "question",
+          "answer",
+          "contexts"
+        ],
+        "methodology": "jev-claims-v1:rag:reference:trim-dedupe-contexts",
+        "score_direction": "higher_is_better",
+        "acceptance_minimum": 0.5,
+        "acceptance_operator": "gte",
+        "good_minimum": 0.7,
+        "review_minimum": 0.4
+      },
+      "outcome": {
+        "measurement_status": "measured",
+        "score": 0.545,
+        "quality_band": "review",
+        "acceptance_verdict": "pass",
+        "review_state": "not_assessed",
+        "reason_code": null
+      },
+      "selected_attempt_id": "dc6ba24d-fd6c-4b7c-8cff-a31915cce4b9",
+      "attempts": [
+        {
+          "attempt_id": "594e53cd-aecf-4efd-8d38-c428367f8b87",
+          "provider_call_id": "7a8b9caa-fd80-470e-a595-21ea2e9c92a7",
+          "purpose": "preparation",
+          "attempt_number": 1,
+          "evaluator": "fictional",
+          "execution_mode": "quick",
+          "requested_model": "fictional-requested",
+          "resolved_model": "fictional-resolved",
+          "provider_request_id": null,
+          "transport_version": "chat-completion-v1",
+          "rubric_version": "quality-claim-extraction-ja-v1",
+          "rubric_hash": "bd8d2441b458e11cb8aed7fd509ae1438c3a486e0b6463ea127ca33c22510908",
+          "input_hash": "4568f9e47c3a437707fc93997e1b71be538294c99dc9d058c338a48648b62789",
+          "status": "measured",
+          "error_code": null,
+          "provider_score": null,
+          "provider_scale_maximum": null,
+          "provider_score_direction": null,
+          "probabilities": null,
+          "confidence": null,
+          "usage": {
+            "measurement": "unknown",
+            "input_tokens": null,
+            "output_tokens": null,
+            "cost_usd": null,
+            "cost_source": null,
+            "price_revision": null
+          }
+        },
+        {
+          "attempt_id": "dc6ba24d-fd6c-4b7c-8cff-a31915cce4b9",
+          "provider_call_id": "4b410ae2-7eec-48c6-a85b-bfb695543c7b",
+          "purpose": "judge",
+          "attempt_number": 1,
+          "evaluator": "jev",
+          "execution_mode": "quick",
+          "requested_model": "jev-fixture",
+          "resolved_model": null,
+          "provider_request_id": null,
+          "transport_version": null,
+          "rubric_version": "hallucination-suppression-claims-ja-v1",
+          "rubric_hash": "bd8d2441b458e11cb8aed7fd509ae1438c3a486e0b6463ea127ca33c22510908",
+          "input_hash": null,
+          "status": "measured",
+          "error_code": null,
+          "provider_score": null,
+          "provider_scale_maximum": null,
+          "provider_score_direction": null,
+          "probabilities": null,
+          "confidence": null,
+          "usage": {
+            "measurement": "known",
+            "input_tokens": 100,
+            "output_tokens": 4,
+            "cost_usd": null,
+            "cost_source": null,
+            "price_revision": null
+          }
+        }
+      ],
+      "explanation": {
+        "explanation_id": "ea5f68c6-fecb-50b2-acaa-283fa2bc2dbf",
+        "revision": 1,
+        "assessment_id": "af70b08e-a4d7-5b40-aa36-ac526ae2ee3d",
+        "assessment_revision": 1,
+        "input_set_hash": "3db5e617caa83bc464ee3b9f79e8d63e5219c57efb0dce7bb27c62b85842565c",
+        "status": "supported_issue",
+        "issues": [
+          {
+            "claim": "「山田氏は2020年に入社しました。」は、評価に使用した参照資料に十分な裏付けがないと判定されました。",
+            "evidence": [
+              {
+                "input_id": "cf39affd-6739-52de-b554-cb4fba842090",
+                "field": "answer",
+                "context_id": null,
+                "start": 1,
+                "end": 27
+              }
+            ]
+          }
+        ],
+        "message_code": "jev_claim_aggregate",
+        "generation_attempt_id": "594e53cd-aecf-4efd-8d38-c428367f8b87",
+        "prompt_version": "quality-claim-extraction-ja-v1",
+        "claim_analysis": {
+          "version": 1,
+          "aggregation": "arithmetic_mean",
+          "extraction_attempt_id": "594e53cd-aecf-4efd-8d38-c428367f8b87",
+          "judge_attempt_id": "dc6ba24d-fd6c-4b7c-8cff-a31915cce4b9",
+          "rubric_version": "hallucination-suppression-claims-ja-v1",
+          "questions_hash": "81760657ea7e5b8e251b58f7f15af781fb58f6664e87242856e58fd6f066d75c",
+          "coverage_score": 0.99,
+          "coverage_confidence": 0.97,
+          "coverage_minimum": 0.9,
+          "coverage_error_code": null,
+          "claims": [
+            {
+              "question_name": "claim_001",
+              "statement": "架空社の山田氏はCFOです。",
+              "evidence": [
+                {
+                  "input_id": "cf39affd-6739-52de-b554-cb4fba842090",
+                  "field": "answer",
+                  "context_id": null,
+                  "start": 1,
+                  "end": 27
+                }
+              ],
+              "score": 0.99,
+              "confidence": 0.9,
+              "probabilities": null,
+              "error_code": null
+            },
+            {
+              "question_name": "claim_002",
+              "statement": "山田氏は2020年に入社しました。",
+              "evidence": [
+                {
+                  "input_id": "cf39affd-6739-52de-b554-cb4fba842090",
+                  "field": "answer",
+                  "context_id": null,
+                  "start": 1,
+                  "end": 27
+                }
+              ],
+              "score": 0.1,
+              "confidence": 0.9,
+              "probabilities": null,
+              "error_code": null
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

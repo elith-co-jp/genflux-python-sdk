@@ -16,6 +16,9 @@ source = path.read_text()
 old = '    collection_receipt: BffTargetCollectionReceipt | None = None\n'
 assert source.count(old) == 1
 source = source.replace(old, '    collection_receipt: BffTargetCollectionReceipt | None = Field(\n        default=None, exclude_if=lambda value: value is None\n    )\n')
+old_claims = '    claim_analysis: ClaimAnalysis | None = None\n'
+assert source.count(old_claims) == 1
+source = source.replace(old_claims, '    claim_analysis: ClaimAnalysis | None = Field(\n        default=None, exclude_if=lambda value: value is None\n    )\n')
 old_failure = '    collection_failure_receipt: BffTargetFailureReceipt | None = None\n'
 assert source.count(old_failure) == 1
 path.write_text(source.replace(old_failure, '    collection_failure_receipt: BffTargetFailureReceipt | None = Field(\n        default=None, exclude_if=lambda value: value is None\n    )\n'))

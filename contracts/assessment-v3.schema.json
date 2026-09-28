@@ -152,6 +152,7 @@
           "enum": [
             "judge",
             "explanation",
+            "preparation",
             "target"
           ],
           "title": "Purpose",
@@ -510,6 +511,198 @@
       "title": "BffTargetFailureReceipt",
       "type": "object"
     },
+    "ClaimAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "aggregation": {
+          "const": "arithmetic_mean",
+          "default": "arithmetic_mean",
+          "title": "Aggregation",
+          "type": "string"
+        },
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/ClaimJudgment"
+          },
+          "maxItems": 24,
+          "minItems": 1,
+          "title": "Claims",
+          "type": "array"
+        },
+        "coverage_confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Coverage Confidence"
+        },
+        "coverage_error_code": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Coverage Error Code"
+        },
+        "coverage_minimum": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Minimum",
+          "type": "number"
+        },
+        "coverage_score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Coverage Score"
+        },
+        "extraction_attempt_id": {
+          "format": "uuid",
+          "title": "Extraction Attempt Id",
+          "type": "string"
+        },
+        "judge_attempt_id": {
+          "format": "uuid",
+          "title": "Judge Attempt Id",
+          "type": "string"
+        },
+        "questions_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Questions Hash",
+          "type": "string"
+        },
+        "rubric_version": {
+          "minLength": 1,
+          "title": "Rubric Version",
+          "type": "string"
+        },
+        "version": {
+          "const": 1,
+          "default": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "extraction_attempt_id",
+        "judge_attempt_id",
+        "rubric_version",
+        "questions_hash",
+        "coverage_score",
+        "coverage_confidence",
+        "coverage_minimum",
+        "coverage_error_code",
+        "claims"
+      ],
+      "title": "ClaimAnalysis",
+      "type": "object"
+    },
+    "ClaimJudgment": {
+      "additionalProperties": false,
+      "description": "One scored atomic claim tied to the original answer.",
+      "properties": {
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Confidence"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error Code"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceSpan"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "probabilities": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probabilities"
+        },
+        "question_name": {
+          "pattern": "^claim_[0-9]{3}$",
+          "title": "Question Name",
+          "type": "string"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score"
+        },
+        "statement": {
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "question_name",
+        "statement",
+        "evidence",
+        "score",
+        "confidence",
+        "error_code"
+      ],
+      "title": "ClaimJudgment",
+      "type": "object"
+    },
     "ContextEvidence": {
       "additionalProperties": false,
       "properties": {
@@ -633,6 +826,17 @@
           "title": "Assessment Revision",
           "type": "integer"
         },
+        "claim_analysis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ClaimAnalysis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "explanation_id": {
           "format": "uuid",
           "title": "Explanation Id",
@@ -686,6 +890,7 @@
         "status": {
           "enum": [
             "supported_issue",
+            "no_issues",
             "assessment_conflict",
             "insufficient_evidence",
             "generation_error",

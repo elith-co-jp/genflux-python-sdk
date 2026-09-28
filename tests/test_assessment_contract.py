@@ -298,3 +298,18 @@ def test_remote_without_provider_identity_is_explicit_failure(status, measuremen
     attempt["status"] = "measured"
     with pytest.raises(ValueError):
         parse_assessment_bundle(wire)
+
+
+def test_claim_aggregation_receipts_and_positions_survive_sdk_roundtrip():
+    """Retain the producer mean, preparation receipt and exact claim citations."""
+    wire = json.loads((Path(__file__).parent / "fixtures/assessment-claims-v3.json").read_text())
+    bundle = parse_assessment_bundle(wire)
+    assessment = bundle.assessments[0]
+    analysis = assessment.explanation.claim_analysis
+    assert assessment.outcome.score == pytest.approx(0.545)
+    assert [attempt.purpose for attempt in assessment.attempts] == ["preparation", "judge"]
+    assert [claim.model_dump()["score"] for claim in analysis.claims] == [0.99, 0.1]
+    assert analysis.model_dump()["coverage_score"] == 0.99
+    span = analysis.claims[0].evidence[0]
+    assert bundle.inputs[0].payload.answer[span.start:span.end] == "架空社の山田氏はCFOで、2020年に入社しました。"
+    assert parse_assessment_bundle(bundle.model_dump(mode="json")) == bundle

@@ -292,6 +292,10 @@ Accessed via `client.reports`. Fetch evaluation reports.
 | `target_type` | `str` | default: 'rag' |
 | `assessment_bundle` | `AssessmentBundle | None` | default: None |
 | `accepted_assessment_plan` | `AcceptedAssessmentPlan | None` | default: None |
+| `retry_parent_execution_id` | `str | None` | default: None |
+| `retry_execution_id` | `str | None` | default: None |
+| `auto_retry_pending` | `bool` | default: False |
+| `auto_retry_blocked_reason` | `str | None` | default: None |
 
 ### `JobProgress`
 

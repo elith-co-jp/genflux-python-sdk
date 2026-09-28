@@ -1000,6 +1000,10 @@ RedTeam評価の設定。
 | `target_type` | `str` | (default: 'rag') |
 | `assessment_bundle` | `AssessmentBundle \| None` | (default: None) |
 | `accepted_assessment_plan` | `AcceptedAssessmentPlan \| None` | (default: None) |
+| `retry_parent_execution_id` | `str \| None` | Parent execution ID when this job is a retry. |
+| `retry_execution_id` | `str \| None` | Child execution ID when this job was retried. |
+| `auto_retry_pending` | `bool` | Whether the original execution is awaiting automatic retry. |
+| `auto_retry_blocked_reason` | `str \| None` | Why automatic retry was stopped. |
 
 #### メソッド
 
@@ -1472,4 +1476,4 @@ result = client.jobs.wait(job.id, callback=callback)
 
 *Auto-generated at 2026-09-28 01:37 UTC by `scripts/generate_api_reference.py`*
 
-<!-- source-hash: 95a3cd57041311c9 -->
+<!-- source-hash: b527b289b5a770ce -->

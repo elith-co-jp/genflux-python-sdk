@@ -55,8 +55,11 @@ def test_job_readback_preserves_auto_retry_lineage():
     transport = Mock()
     parent_id, child_id = str(uuid4()), str(uuid4())
     transport.get.return_value = {
-        **_job_response(), "id": parent_id, "retry_execution_id": child_id,
-        "auto_retry_pending": False, "auto_retry_blocked_reason": None,
+        **_job_response(),
+        "id": parent_id,
+        "retry_execution_id": child_id,
+        "auto_retry_pending": False,
+        "auto_retry_blocked_reason": None,
     }
     parent = JobsClient(transport).get(parent_id)
     assert parent.retry_execution_id == child_id

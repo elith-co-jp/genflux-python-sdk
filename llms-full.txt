@@ -163,7 +163,7 @@ Accessed via `client.jobs`. Manages asynchronous evaluation jobs.
 **Methods:**
 
 - `cancel(job_id: str) -> Job` — 実行中のジョブをキャンセルします。
-- `create(execution_type: str, config_id: str | None = None, data: dict[str, Any] | None = None, client_request_id: str | None = None, evaluation_completion_webhook: bool = False) -> Job` — 新しいジョブを作成します。
+- `create(execution_type: str, config_id: str | None = None, data: dict[str, Any] | None = None, client_request_id: str | None = None, evaluation_completion_webhook: bool = False, evaluation_auto_retry: bool = False) -> Job` — 新しいジョブを作成します。
 - `get(job_id: str) -> Job` — IDでジョブを取得します。
 - `get_assessment_revision(job_id: str, assessment_id: str, revision: int) -> AssessmentBundle` — Read one persisted assessment revision and its exact input snapshots.
 - `get_by_client_request(client_request_id: str) -> Job` — Read an accepted job by its tenant-scoped submission UUID.

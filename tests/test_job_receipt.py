@@ -22,6 +22,35 @@ def test_create_sends_explicit_request_identity_and_legacy_omits_it():
     assert Job.from_dict(_job_response()).client_request_id is None
 
 
+def test_create_requests_completion_webhook_only_when_opted_in():
+    """Only an explicit Evaluation subscription enters the submission payload."""
+    transport = Mock()
+    transport.post.return_value = _job_response()
+    client = JobsClient(transport)
+    client.create("quick_evaluate", client_request_id=str(uuid4()), evaluation_completion_webhook=True)
+    assert transport.post.call_args.kwargs["json"]["evaluation_completion_webhook"] is True
+    client.create("quick_evaluate")
+    assert "evaluation_completion_webhook" not in transport.post.call_args.kwargs["json"]
+
+
+def test_create_requests_automatic_retry_only_when_opted_in():
+    """Automatic retry remains a separate per-job opt-in."""
+    transport = Mock()
+    transport.post.return_value = _job_response()
+    client = JobsClient(transport)
+    client.create(
+        "quick_evaluate",
+        client_request_id=str(uuid4()),
+        evaluation_completion_webhook=True,
+        evaluation_auto_retry=True,
+    )
+    payload = transport.post.call_args.kwargs["json"]
+    assert payload["evaluation_completion_webhook"] is True
+    assert payload["evaluation_auto_retry"] is True
+    client.create("quick_evaluate")
+    assert "evaluation_auto_retry" not in transport.post.call_args.kwargs["json"]
+
+
 def test_lookup_is_one_get_without_create_or_poll():
     """An uncertain create response can be resolved without resubmission."""
     transport = Mock()
@@ -48,3 +77,23 @@ def test_invalid_lookup_id_is_rejected_before_http():
     with pytest.raises(ValueError):
         JobsClient(transport).get_by_client_request("../jobs?tenant=another")
     transport.get.assert_not_called()
+
+
+def test_job_readback_preserves_auto_retry_lineage():
+    """Keep Platform lineage fields when converting HTTP JSON to SDK Job."""
+    transport = Mock()
+    parent_id, child_id = str(uuid4()), str(uuid4())
+    transport.get.return_value = {
+        **_job_response(),
+        "id": parent_id,
+        "retry_execution_id": child_id,
+        "auto_retry_pending": False,
+        "auto_retry_blocked_reason": None,
+    }
+    parent = JobsClient(transport).get(parent_id)
+    assert parent.retry_execution_id == child_id
+    assert parent.auto_retry_pending is False
+
+    transport.get.return_value = {**_job_response(), "id": child_id, "retry_parent_execution_id": parent_id}
+    child = JobsClient(transport).get(child_id)
+    assert child.retry_parent_execution_id == parent_id

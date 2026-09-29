@@ -1478,4 +1478,9 @@ result = client.jobs.wait(job.id, callback=callback)
 
 *Auto-generated at 2026-09-29 02:41 UTC by `scripts/generate_api_reference.py`*
 
-<!-- source-hash: 145527bf840d3b67 -->
+
+### 回答品質の主張別評価
+
+`assessment_bundle.assessments[].explanation.claim_analysis` は、既存の `version: 1` と、本文区間・抽出・確認・採点の試行IDを保持する `version: 2` (`AuditedClaimAnalysis`) を受け付けます。v2 の `batches` は各区間と判定の対応を保持します。`coverage_method: source_units_and_semantic_audit` は抽出率の数値ではありません。SDK は保存済み判定を読み取り、再評価しません。採点できない場合の `score: null` を成功へ変換しません。
+
+<!-- source-hash: 77e4efda4f09a52e -->

@@ -379,6 +379,22 @@ class ClaimJudgment(BaseModel):
     statement: Annotated[str, Field(min_length=1, title='Statement')]
 
 
+class ClaimUnitCoverage(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        frozen=True,
+    )
+    audit_status: Annotated[Literal['complete'], Field(title='Audit Status')]
+    claim_names: Annotated[list[str], Field(title='Claim Names')]
+    disposition: Annotated[
+        Literal['claims', 'non_factual', 'heading'], Field(title='Disposition')
+    ]
+    evidence: Annotated[
+        list[EvidenceSpan], Field(max_length=1, min_length=1, title='Evidence')
+    ]
+    unit_id: Annotated[str, Field(pattern='^unit_[0-9]{3}$', title='Unit Id')]
+
+
 class ClaimAnalysis(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -409,6 +425,45 @@ class ClaimAnalysis(BaseModel):
     version: Annotated[Literal[1], Field(title='Version')] = 1
 
 
+class ClaimBatchEvidence(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        frozen=True,
+    )
+    audit_attempt_id: Annotated[UUID, Field(title='Audit Attempt Id')]
+    extraction_attempt_id: Annotated[UUID, Field(title='Extraction Attempt Id')]
+    judge_attempt_id: Annotated[UUID | None, Field(title='Judge Attempt Id')] = None
+    units: Annotated[
+        list[ClaimUnitCoverage], Field(max_length=8, min_length=1, title='Units')
+    ]
+
+
+class AuditedClaimAnalysis(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        frozen=True,
+    )
+    aggregation: Annotated[Literal['arithmetic_mean'], Field(title='Aggregation')] = (
+        'arithmetic_mean'
+    )
+    batches: Annotated[
+        list[ClaimBatchEvidence], Field(max_length=8, min_length=1, title='Batches')
+    ]
+    claims: Annotated[
+        list[ClaimJudgment], Field(max_length=192, min_length=1, title='Claims')
+    ]
+    coverage_method: Annotated[
+        Literal['source_units_and_semantic_audit'], Field(title='Coverage Method')
+    ] = 'source_units_and_semantic_audit'
+    extraction_attempt_id: Annotated[UUID, Field(title='Extraction Attempt Id')]
+    judge_attempt_id: Annotated[UUID, Field(title='Judge Attempt Id')]
+    questions_hash: Annotated[
+        str, Field(pattern='^[a-f0-9]{64}$', title='Questions Hash')
+    ]
+    rubric_version: Annotated[str, Field(min_length=1, title='Rubric Version')]
+    version: Annotated[Literal[2], Field(title='Version')] = 2
+
+
 class ExplanationRevision(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -416,7 +471,7 @@ class ExplanationRevision(BaseModel):
     )
     assessment_id: Annotated[UUID, Field(title='Assessment Id')]
     assessment_revision: Annotated[int, Field(ge=1, title='Assessment Revision')]
-    claim_analysis: ClaimAnalysis | None = Field(
+    claim_analysis: ClaimAnalysis | AuditedClaimAnalysis | None = Field(
         default=None, exclude_if=lambda value: value is None
     )
     explanation_id: Annotated[UUID, Field(title='Explanation Id')]

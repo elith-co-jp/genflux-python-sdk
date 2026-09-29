@@ -313,3 +313,15 @@ def test_claim_aggregation_receipts_and_positions_survive_sdk_roundtrip():
     span = analysis.claims[0].evidence[0]
     assert bundle.inputs[0].payload.answer[span.start:span.end] == "架空社の山田氏はCFOで、2020年に入社しました。"
     assert parse_assessment_bundle(bundle.model_dump(mode="json")) == bundle
+
+
+def test_audited_claim_producer_fixture_roundtrips_without_losing_batch_receipts():
+    """Retain v2 audit evidence alongside existing v1 bundles."""
+    wire = json.loads((Path(__file__).parent / "fixtures/assessment-audited-claims-v3.json").read_text())
+    parsed = parse_assessment_bundle(wire)
+    assert parsed.model_dump(mode="json") == wire
+    analysis = parsed.assessments[0].explanation.claim_analysis
+    assert analysis.version == 2
+    assert analysis.coverage_method == "source_units_and_semantic_audit"
+    assert len(analysis.claims) == 3
+    assert analysis.batches[0].audit_attempt_id != analysis.batches[0].extraction_attempt_id

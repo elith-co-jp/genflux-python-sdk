@@ -457,6 +457,78 @@
       "title": "AttemptUsage",
       "type": "object"
     },
+    "AuditedClaimAnalysis": {
+      "additionalProperties": false,
+      "description": "Version 2: source-unit accounting and explicit semantic audit, no scalar coverage gate.",
+      "properties": {
+        "aggregation": {
+          "const": "arithmetic_mean",
+          "default": "arithmetic_mean",
+          "title": "Aggregation",
+          "type": "string"
+        },
+        "batches": {
+          "items": {
+            "$ref": "#/$defs/ClaimBatchEvidence"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Batches",
+          "type": "array"
+        },
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/ClaimJudgment"
+          },
+          "maxItems": 192,
+          "minItems": 1,
+          "title": "Claims",
+          "type": "array"
+        },
+        "coverage_method": {
+          "const": "source_units_and_semantic_audit",
+          "default": "source_units_and_semantic_audit",
+          "title": "Coverage Method",
+          "type": "string"
+        },
+        "extraction_attempt_id": {
+          "format": "uuid",
+          "title": "Extraction Attempt Id",
+          "type": "string"
+        },
+        "judge_attempt_id": {
+          "format": "uuid",
+          "title": "Judge Attempt Id",
+          "type": "string"
+        },
+        "questions_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Questions Hash",
+          "type": "string"
+        },
+        "rubric_version": {
+          "minLength": 1,
+          "title": "Rubric Version",
+          "type": "string"
+        },
+        "version": {
+          "const": 2,
+          "default": 2,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "extraction_attempt_id",
+        "judge_attempt_id",
+        "rubric_version",
+        "questions_hash",
+        "batches",
+        "claims"
+      ],
+      "title": "AuditedClaimAnalysis",
+      "type": "object"
+    },
     "BffTargetCollectionReceipt": {
       "additionalProperties": false,
       "description": "External collection identity; never a Platform provider-call identity.",
@@ -614,6 +686,50 @@
       "title": "ClaimAnalysis",
       "type": "object"
     },
+    "ClaimBatchEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "audit_attempt_id": {
+          "format": "uuid",
+          "title": "Audit Attempt Id",
+          "type": "string"
+        },
+        "extraction_attempt_id": {
+          "format": "uuid",
+          "title": "Extraction Attempt Id",
+          "type": "string"
+        },
+        "judge_attempt_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Judge Attempt Id"
+        },
+        "units": {
+          "items": {
+            "$ref": "#/$defs/ClaimUnitCoverage"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Units",
+          "type": "array"
+        }
+      },
+      "required": [
+        "extraction_attempt_id",
+        "audit_attempt_id",
+        "judge_attempt_id",
+        "units"
+      ],
+      "title": "ClaimBatchEvidence",
+      "type": "object"
+    },
     "ClaimJudgment": {
       "additionalProperties": false,
       "description": "One scored atomic claim tied to the original answer.",
@@ -701,6 +817,55 @@
         "error_code"
       ],
       "title": "ClaimJudgment",
+      "type": "object"
+    },
+    "ClaimUnitCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "audit_status": {
+          "const": "complete",
+          "title": "Audit Status",
+          "type": "string"
+        },
+        "claim_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Claim Names",
+          "type": "array"
+        },
+        "disposition": {
+          "enum": [
+            "claims",
+            "non_factual",
+            "heading"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceSpan"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "unit_id": {
+          "pattern": "^unit_[0-9]{3}$",
+          "title": "Unit Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "unit_id",
+        "evidence",
+        "disposition",
+        "claim_names",
+        "audit_status"
+      ],
+      "title": "ClaimUnitCoverage",
       "type": "object"
     },
     "ContextEvidence": {
@@ -832,10 +997,14 @@
               "$ref": "#/$defs/ClaimAnalysis"
             },
             {
+              "$ref": "#/$defs/AuditedClaimAnalysis"
+            },
+            {
               "type": "null"
             }
           ],
-          "default": null
+          "default": null,
+          "title": "Claim Analysis"
         },
         "explanation_id": {
           "format": "uuid",

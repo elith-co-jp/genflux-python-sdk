@@ -1,0 +1,360 @@
+{
+  "schema_version": 3,
+  "tenant_id": "49f85cd7-9a63-4040-b9e1-742554c453c2",
+  "execution_id": "370f5838-7766-474f-aa19-057cd7913521",
+  "inputs": [
+    {
+      "schema_version": 1,
+      "tenant_id": "49f85cd7-9a63-4040-b9e1-742554c453c2",
+      "execution_id": "370f5838-7766-474f-aa19-057cd7913521",
+      "input_id": "3a5679a4-eb3e-51f8-9949-88ad35c60866",
+      "case_id": "e27c3e2b-b3a0-5ae1-b1e2-f8e74cd384ef",
+      "answer_id": "098005f5-e99e-59cb-b82f-fe88482e5abd",
+      "provider_call_id": null,
+      "captured_at": "2026-09-29T04:58:01.008794Z",
+      "input_hash": "c5f542d52646e3cbcb7c92416374b633d1f4a7bc5d914b9a4cc74584e635312c",
+      "payload": {
+        "question": "fictional question",
+        "answer": "😀架空社の山田氏はCFOで、2020年に入社しました。",
+        "collection_status": "collected",
+        "target_revision": "fictional-target-v1",
+        "contexts": [
+          {
+            "context_id": "03934c8e-717d-444c-984f-e7dc931fe562",
+            "source_kind": "reference",
+            "sequence": 0,
+            "text": "山田氏はCFOです。"
+          },
+          {
+            "context_id": "542b9e4d-042b-429b-9868-9b9821ceae43",
+            "source_kind": "retrieved",
+            "sequence": 0,
+            "text": "使わない参照資料"
+          }
+        ],
+        "ground_truth": null,
+        "client_case_id": null,
+        "repeat_index": 0,
+        "scenario_id": null,
+        "turn_index": null,
+        "rule_id": null,
+        "rule_revision": null
+      }
+    },
+    {
+      "schema_version": 1,
+      "tenant_id": "49f85cd7-9a63-4040-b9e1-742554c453c2",
+      "execution_id": "370f5838-7766-474f-aa19-057cd7913521",
+      "input_id": "fa24fbcf-5d61-544e-bb46-ac0a8535a923",
+      "case_id": "4975d2c4-55d4-5bec-8047-2d25786d4445",
+      "answer_id": "17c83d33-4245-585c-a890-e64ce0440e4c",
+      "provider_call_id": null,
+      "captured_at": "2026-09-29T04:58:01.008880Z",
+      "input_hash": "782e9d8cdf4b31c975644515d14d9ea051885a00d5b45c53cd52e0808e5ddc65",
+      "payload": {
+        "question": "fictional question",
+        "answer": "架空製品は青色です。\n架空製品は青色です。\n重さは二キロです。",
+        "collection_status": "collected",
+        "target_revision": "fictional-target-v1",
+        "contexts": [
+          {
+            "context_id": "03934c8e-717d-444c-984f-e7dc931fe562",
+            "source_kind": "reference",
+            "sequence": 0,
+            "text": "山田氏はCFOです。"
+          },
+          {
+            "context_id": "542b9e4d-042b-429b-9868-9b9821ceae43",
+            "source_kind": "retrieved",
+            "sequence": 0,
+            "text": "使わない参照資料"
+          }
+        ],
+        "ground_truth": null,
+        "client_case_id": null,
+        "repeat_index": 0,
+        "scenario_id": null,
+        "turn_index": null,
+        "rule_id": null,
+        "rule_revision": null
+      }
+    }
+  ],
+  "assessments": [
+    {
+      "schema_version": 3,
+      "tenant_id": "49f85cd7-9a63-4040-b9e1-742554c453c2",
+      "execution_id": "370f5838-7766-474f-aa19-057cd7913521",
+      "assessment_id": "2a03f504-c3b8-5879-8c96-c471f8d35739",
+      "revision": 1,
+      "case_id": "4975d2c4-55d4-5bec-8047-2d25786d4445",
+      "answer_id": "17c83d33-4245-585c-a890-e64ce0440e4c",
+      "subject_kind": "answer",
+      "subject_key": "answer",
+      "inputs": [
+        {
+          "input_id": "fa24fbcf-5d61-544e-bb46-ac0a8535a923",
+          "input_hash": "782e9d8cdf4b31c975644515d14d9ea051885a00d5b45c53cd52e0808e5ddc65",
+          "role": "primary",
+          "sequence": 0,
+          "context_ids": [
+            "03934c8e-717d-444c-984f-e7dc931fe562"
+          ]
+        }
+      ],
+      "metric": {
+        "metric_id": "quality.hallucination",
+        "namespace": "quality",
+        "definition_revision": "c540595a496795712428343fc61ca074e7b6178806d05a4e8bce55d530d74ef7",
+        "rubric_version": "hallucination-suppression-claims-ja-v2",
+        "rubric_hash": "581c7cfde32965114e8904b469ab066a52c649478a569d3c449936dbdd39425a",
+        "required_inputs": [
+          "question",
+          "answer",
+          "contexts"
+        ],
+        "methodology": "jev-claims-v2:rag:reference:trim-dedupe-contexts",
+        "score_direction": "higher_is_better",
+        "acceptance_minimum": 0.5,
+        "acceptance_operator": "gte",
+        "good_minimum": 0.7,
+        "review_minimum": 0.4
+      },
+      "outcome": {
+        "measurement_status": "measured",
+        "score": 0.8000000000000002,
+        "quality_band": "good",
+        "acceptance_verdict": "pass",
+        "review_state": "not_assessed",
+        "reason_code": null
+      },
+      "selected_attempt_id": "3568f21f-9a20-4655-820a-4b4ee5d05577",
+      "attempts": [
+        {
+          "attempt_id": "9b9dfbec-53ce-4cff-9c8e-7e1dd441b316",
+          "provider_call_id": "79a15b2b-f72a-46ee-9a03-41527911a9d1",
+          "purpose": "preparation",
+          "attempt_number": 1,
+          "evaluator": "openai",
+          "execution_mode": "quick",
+          "requested_model": "fictional-requested",
+          "resolved_model": "fictional-resolved",
+          "provider_request_id": null,
+          "transport_version": "chat-completion-v1",
+          "rubric_version": "quality-unit-extraction-audit-ja-v2:extraction",
+          "rubric_hash": "581c7cfde32965114e8904b469ab066a52c649478a569d3c449936dbdd39425a",
+          "input_hash": "782e9d8cdf4b31c975644515d14d9ea051885a00d5b45c53cd52e0808e5ddc65",
+          "status": "measured",
+          "error_code": null,
+          "provider_score": null,
+          "provider_scale_maximum": null,
+          "provider_score_direction": null,
+          "probabilities": null,
+          "confidence": null,
+          "usage": {
+            "measurement": "known",
+            "input_tokens": 100,
+            "output_tokens": 50,
+            "cost_usd": null,
+            "cost_source": null,
+            "price_revision": null
+          }
+        },
+        {
+          "attempt_id": "0699acda-59ad-493c-b1f0-08683361fd70",
+          "provider_call_id": "4b28fbef-9c27-43cb-bcc5-0fdf8acf3eda",
+          "purpose": "preparation",
+          "attempt_number": 2,
+          "evaluator": "openai",
+          "execution_mode": "quick",
+          "requested_model": "fictional-requested",
+          "resolved_model": "fictional-resolved",
+          "provider_request_id": null,
+          "transport_version": "chat-completion-v1",
+          "rubric_version": "quality-unit-extraction-audit-ja-v2:audit",
+          "rubric_hash": "581c7cfde32965114e8904b469ab066a52c649478a569d3c449936dbdd39425a",
+          "input_hash": "782e9d8cdf4b31c975644515d14d9ea051885a00d5b45c53cd52e0808e5ddc65",
+          "status": "measured",
+          "error_code": null,
+          "provider_score": null,
+          "provider_scale_maximum": null,
+          "provider_score_direction": null,
+          "probabilities": null,
+          "confidence": null,
+          "usage": {
+            "measurement": "known",
+            "input_tokens": 100,
+            "output_tokens": 50,
+            "cost_usd": null,
+            "cost_source": null,
+            "price_revision": null
+          }
+        },
+        {
+          "attempt_id": "3568f21f-9a20-4655-820a-4b4ee5d05577",
+          "provider_call_id": "78ebe641-062a-4954-963f-f825cdcd6a8f",
+          "purpose": "judge",
+          "attempt_number": 3,
+          "evaluator": "jev",
+          "execution_mode": "quick",
+          "requested_model": "fixture-judge",
+          "resolved_model": null,
+          "provider_request_id": null,
+          "transport_version": null,
+          "rubric_version": "hallucination-suppression-claims-ja-v2",
+          "rubric_hash": "581c7cfde32965114e8904b469ab066a52c649478a569d3c449936dbdd39425a",
+          "input_hash": null,
+          "status": "measured",
+          "error_code": null,
+          "provider_score": null,
+          "provider_scale_maximum": null,
+          "provider_score_direction": null,
+          "probabilities": null,
+          "confidence": null,
+          "usage": {
+            "measurement": "known",
+            "input_tokens": 100,
+            "output_tokens": 20,
+            "cost_usd": null,
+            "cost_source": null,
+            "price_revision": null
+          }
+        }
+      ],
+      "explanation": {
+        "explanation_id": "818377a4-95f0-5446-8e2a-cfd4196bdb1b",
+        "revision": 1,
+        "assessment_id": "2a03f504-c3b8-5879-8c96-c471f8d35739",
+        "assessment_revision": 1,
+        "input_set_hash": "113a4c43d4e0285498f0122abe4a3b40aab38c34622d322480212eeae0276766",
+        "status": "no_issues",
+        "issues": [],
+        "message_code": "jev_claim_aggregate",
+        "generation_attempt_id": "9b9dfbec-53ce-4cff-9c8e-7e1dd441b316",
+        "prompt_version": "quality-unit-extraction-audit-ja-v2:extraction",
+        "claim_analysis": {
+          "version": 2,
+          "aggregation": "arithmetic_mean",
+          "extraction_attempt_id": "9b9dfbec-53ce-4cff-9c8e-7e1dd441b316",
+          "judge_attempt_id": "3568f21f-9a20-4655-820a-4b4ee5d05577",
+          "rubric_version": "hallucination-suppression-claims-ja-v2",
+          "questions_hash": "b75abcff0a96a60092e11ec19cbb125b41608df8237ff39a953d06c09ee7a521",
+          "coverage_method": "source_units_and_semantic_audit",
+          "batches": [
+            {
+              "extraction_attempt_id": "9b9dfbec-53ce-4cff-9c8e-7e1dd441b316",
+              "audit_attempt_id": "0699acda-59ad-493c-b1f0-08683361fd70",
+              "judge_attempt_id": "3568f21f-9a20-4655-820a-4b4ee5d05577",
+              "units": [
+                {
+                  "unit_id": "unit_001",
+                  "evidence": [
+                    {
+                      "input_id": "fa24fbcf-5d61-544e-bb46-ac0a8535a923",
+                      "field": "answer",
+                      "context_id": null,
+                      "start": 0,
+                      "end": 10
+                    }
+                  ],
+                  "disposition": "claims",
+                  "claim_names": [
+                    "claim_001"
+                  ],
+                  "audit_status": "complete"
+                },
+                {
+                  "unit_id": "unit_002",
+                  "evidence": [
+                    {
+                      "input_id": "fa24fbcf-5d61-544e-bb46-ac0a8535a923",
+                      "field": "answer",
+                      "context_id": null,
+                      "start": 11,
+                      "end": 21
+                    }
+                  ],
+                  "disposition": "claims",
+                  "claim_names": [
+                    "claim_002"
+                  ],
+                  "audit_status": "complete"
+                },
+                {
+                  "unit_id": "unit_003",
+                  "evidence": [
+                    {
+                      "input_id": "fa24fbcf-5d61-544e-bb46-ac0a8535a923",
+                      "field": "answer",
+                      "context_id": null,
+                      "start": 22,
+                      "end": 31
+                    }
+                  ],
+                  "disposition": "claims",
+                  "claim_names": [
+                    "claim_003"
+                  ],
+                  "audit_status": "complete"
+                }
+              ]
+            }
+          ],
+          "claims": [
+            {
+              "question_name": "claim_001",
+              "statement": "架空製品は青色です。",
+              "evidence": [
+                {
+                  "input_id": "fa24fbcf-5d61-544e-bb46-ac0a8535a923",
+                  "field": "answer",
+                  "context_id": null,
+                  "start": 0,
+                  "end": 10
+                }
+              ],
+              "score": 0.8,
+              "confidence": 0.9,
+              "probabilities": null,
+              "error_code": null
+            },
+            {
+              "question_name": "claim_002",
+              "statement": "架空製品は青色です。",
+              "evidence": [
+                {
+                  "input_id": "fa24fbcf-5d61-544e-bb46-ac0a8535a923",
+                  "field": "answer",
+                  "context_id": null,
+                  "start": 11,
+                  "end": 21
+                }
+              ],
+              "score": 0.8,
+              "confidence": 0.9,
+              "probabilities": null,
+              "error_code": null
+            },
+            {
+              "question_name": "claim_003",
+              "statement": "重さは二キロです。",
+              "evidence": [
+                {
+                  "input_id": "fa24fbcf-5d61-544e-bb46-ac0a8535a923",
+                  "field": "answer",
+                  "context_id": null,
+                  "start": 22,
+                  "end": 31
+                }
+              ],
+              "score": 0.8,
+              "confidence": 0.9,
+              "probabilities": null,
+              "error_code": null
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

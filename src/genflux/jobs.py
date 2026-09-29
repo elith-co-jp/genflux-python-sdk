@@ -38,6 +38,7 @@ class JobsClient:
         *,
         client_request_id: str | None = None,
         evaluation_completion_webhook: bool = False,
+        evaluation_auto_retry: bool = False,
     ) -> Job:
         """新しいジョブを作成します。
 
@@ -47,6 +48,7 @@ class JobsClient:
             data: Additional data for the job (for quick_evaluate)
             client_request_id: Stable UUID for receipt lookup after an uncertain response.
             evaluation_completion_webhook: Request a signed completion hint to Evaluation for this durable job.
+            evaluation_auto_retry: Allow Platform to create one automatic retry for this durable Evaluation job.
 
         Returns:
             Created Job object
@@ -77,6 +79,8 @@ class JobsClient:
             payload["client_request_id"] = str(UUID(client_request_id))
         if evaluation_completion_webhook:
             payload["evaluation_completion_webhook"] = True
+        if evaluation_auto_retry:
+            payload["evaluation_auto_retry"] = True
 
         # Add config_id if provided (optional)
         if config_id:

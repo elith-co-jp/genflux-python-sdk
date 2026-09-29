@@ -33,6 +33,24 @@ def test_create_requests_completion_webhook_only_when_opted_in():
     assert "evaluation_completion_webhook" not in transport.post.call_args.kwargs["json"]
 
 
+def test_create_requests_automatic_retry_only_when_opted_in():
+    """Automatic retry remains a separate per-job opt-in."""
+    transport = Mock()
+    transport.post.return_value = _job_response()
+    client = JobsClient(transport)
+    client.create(
+        "quick_evaluate",
+        client_request_id=str(uuid4()),
+        evaluation_completion_webhook=True,
+        evaluation_auto_retry=True,
+    )
+    payload = transport.post.call_args.kwargs["json"]
+    assert payload["evaluation_completion_webhook"] is True
+    assert payload["evaluation_auto_retry"] is True
+    client.create("quick_evaluate")
+    assert "evaluation_auto_retry" not in transport.post.call_args.kwargs["json"]
+
+
 def test_lookup_is_one_get_without_create_or_poll():
     """An uncertain create response can be resolved without resubmission."""
     transport = Mock()

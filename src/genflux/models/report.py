@@ -36,6 +36,15 @@ class RedTeamSummary(BaseModel):
     risk_level: Literal["low", "medium", "high", "critical"]
     total_attacks: int
     successful_attacks: int
+    # attack_success_rate は「判定できた」シナリオだけを分母にしています。
+    # この2つを併せて読まないと、total_attacks と successful_attacks から
+    # 計算した比率と attack_success_rate が食い違って見えます。
+    # None は「サーバがこの値を返さなかった」＝旧形式のレポートです。
+    #
+    # 判定器がスコアを出せなかった件数。
+    unmeasured_attacks: int | None = None
+    # スコアは出たが、採用するには確信が足りず人の確認を要する件数。
+    review_required_attacks: int | None = None
     category_breakdown: list[CategoryBreakdown] = Field(default_factory=list)
 
 

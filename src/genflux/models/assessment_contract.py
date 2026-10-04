@@ -7,8 +7,6 @@ from typing import Any
 from genflux.models.assessment import AssessmentBundle
 from genflux.models.assessment_plan import AcceptedAssessmentPlan
 
-DETERMINISTIC_EXTRACTION_EVALUATOR = "screen_extraction_rules_v1"
-
 
 def parse_assessment_bundle(value: Any) -> AssessmentBundle | None:
     """Validate JSON wire scalars without coercing strings or booleans to scores."""
@@ -50,33 +48,7 @@ def parse_assessment_bundle(value: Any) -> AssessmentBundle | None:
     for assessment in bundle.assessments:
         for attempt in assessment.attempts:
             usage = attempt.usage
-            if attempt.evaluator == DETERMINISTIC_EXTRACTION_EVALUATOR:
-                if (
-                    assessment.metric.namespace != "extraction"
-                    or assessment.metric.methodology != "screen-document-extraction-v1"
-                    or attempt.purpose != "judge"
-                    or attempt.execution_mode != "batch"
-                    or attempt.status != "measured"
-                    or attempt.provider_call_id is not None
-                    or usage.measurement != "not_incurred"
-                    or any(
-                        v is not None
-                        for v in (
-                            attempt.requested_model,
-                            attempt.resolved_model,
-                            attempt.provider_request_id,
-                            attempt.transport_version,
-                            attempt.provider_score,
-                            attempt.provider_scale_maximum,
-                            attempt.provider_score_direction,
-                            attempt.probabilities,
-                            attempt.confidence,
-                            attempt.error_code,
-                        )
-                    )
-                ):
-                    raise ValueError("Invalid deterministic extraction receipt")
-            elif attempt.execution_mode == "local_mock":
+            if attempt.execution_mode == "local_mock":
                 if (
                     attempt.provider_call_id is not None
                     or attempt.evaluator != "yaml_defined_local_evaluation_mock"

@@ -220,7 +220,7 @@ class JobsClient:
             callback: Optional callback function called on each poll with Job object
 
         Returns:
-            Completed or partial Job object (partial retains unmeasured outcomes)
+            Completed Job object
 
         Raises:
             TimeoutError: If job doesn't complete within timeout
@@ -256,8 +256,8 @@ class JobsClient:
                         logger.warning(f"Callback error for job {job_id}: {e}")
 
                 # Check status
-                if job.is_completed or job.status == "partial":
-                    logger.info("Job %s reached terminal status %s", job_id, job.status)
+                if job.is_completed:
+                    logger.info(f"Job {job_id} completed successfully")
                     return job
 
                 if job.is_failed:

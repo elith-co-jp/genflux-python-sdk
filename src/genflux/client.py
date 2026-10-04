@@ -11,6 +11,7 @@ from .clients.reports import ReportsClient
 from .constants import ENV_URLS
 from .evaluation import EvaluationClient
 from .jobs import JobsClient
+from .web_scan import WebScanClient
 
 
 @dataclass
@@ -89,6 +90,8 @@ class Genflux:
             session=self._session,
         )
         self.jobs = JobsClient(self._api)
+        # Experimental, passive, lab-only web/API scan. Disabled server-side by default.
+        self.web_scan = WebScanClient(self._api)
 
     def evaluation(self, config_id: str | None = None) -> EvaluationClient:
         """指定された設定で評価クライアントを作成します。

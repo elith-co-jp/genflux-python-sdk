@@ -276,3 +276,9 @@ API Key は [GENFLUX Platform](https://www.platform.genflux.jp/) から発行し
 ## ライセンス
 
 MIT License — 詳細は [LICENSE](LICENSE) を参照してください。
+
+## 文書抽出の評価（会社限定）
+
+収集済みのPDF・正解・抽出結果を、Platformの`extraction_evaluate`ジョブで評価できます。
+[設定と実行方法](docs/document-extraction-evaluation.md)を参照してください。
+会社の有効化と対応するPlatform・SDKの配備が必要です。SDKに評価ロジックは含めません。

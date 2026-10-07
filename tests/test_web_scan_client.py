@@ -284,3 +284,156 @@ def test_scan_uses_a_timeout_longer_than_the_client_default() -> None:
 
     assert DEFAULT_SCAN_TIMEOUT_SECONDS > 120
     assert transport.post_kwargs == [{"timeout": DEFAULT_SCAN_TIMEOUT_SECONDS}, {"timeout": 30.0}]
+
+
+# --- active (red-team) scan: parallels the passive tests above -------------------------------------
+# scan_active mirrors scan exactly except for the path; active actually sends attack payloads and is
+# lab-only. These pin that the request shape matches scan and only the path differs.
+
+
+def test_scan_active_posts_to_the_active_path() -> None:
+    """scan_active() posts to /experimental/web-scan/active with the target_url."""
+    transport = _FakeTransport(_RESPONSE)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    client.scan_active("http://127.0.0.1:8099/")
+
+    assert transport.calls == [("/experimental/web-scan/active", {"target_url": "http://127.0.0.1:8099/"})]
+
+
+def test_scan_active_includes_client_request_id_when_given() -> None:
+    """A client_request_id is forwarded in the payload when provided."""
+    transport = _FakeTransport(_RESPONSE)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    client.scan_active("http://127.0.0.1:8099/", client_request_id="req-1")
+
+    path, payload = transport.calls[0]
+    assert path == "/experimental/web-scan/active"
+    assert payload == {"target_url": "http://127.0.0.1:8099/", "client_request_id": "req-1"}
+
+
+def test_scan_active_parses_the_result() -> None:
+    """The response dict is parsed into a typed WebScanResult, same as scan()."""
+    transport = _FakeTransport(_RESPONSE)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    result = client.scan_active("http://127.0.0.1:8099/")
+
+    assert isinstance(result, WebScanResult)
+    assert result.completed is True
+    assert result.lab_relaxation["applied"] is True
+    assert result.findings == [{"rule_id": "insecure-cookie", "severity": "medium"}]
+
+
+def test_scan_active_omits_api_definition_fields_when_not_given() -> None:
+    """Without an API definition the active payload stays the original shape (backward compatible)."""
+    transport = _FakeTransport(_RESPONSE)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    client.scan_active("http://127.0.0.1:8099/", "req-1")
+
+    path, payload = transport.calls[0]
+    assert path == "/experimental/web-scan/active"
+    # Exact equality: neither api_definition nor api_definition_url is sent as null.
+    assert payload == {"target_url": "http://127.0.0.1:8099/", "client_request_id": "req-1"}
+
+
+def test_scan_active_forwards_inline_api_definition() -> None:
+    """An inline OpenAPI document is forwarded as the api_definition object."""
+    transport = _FakeTransport(_RESPONSE)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+    definition = {"openapi": "3.0.3", "info": {"title": "lab", "version": "1"}, "paths": {}}
+
+    client.scan_active("http://127.0.0.1:8099/", api_definition=definition)
+
+    path, payload = transport.calls[0]
+    assert path == "/experimental/web-scan/active"
+    assert payload == {"target_url": "http://127.0.0.1:8099/", "api_definition": definition}
+
+
+def test_scan_active_forwards_api_definition_url() -> None:
+    """An API definition URL is forwarded as api_definition_url."""
+    transport = _FakeTransport(_RESPONSE)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    client.scan_active("http://127.0.0.1:8099/", api_definition_url="http://127.0.0.1:8099/openapi.json")
+
+    path, payload = transport.calls[0]
+    assert path == "/experimental/web-scan/active"
+    assert payload == {
+        "target_url": "http://127.0.0.1:8099/",
+        "api_definition_url": "http://127.0.0.1:8099/openapi.json",
+    }
+
+
+def test_scan_active_rejects_both_api_definition_and_url_before_sending() -> None:
+    """Giving both is a caller error raised locally; nothing is sent."""
+    transport = _FakeTransport(_RESPONSE)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        client.scan_active(
+            "http://127.0.0.1:8099/",
+            api_definition={"openapi": "3.0.3"},
+            api_definition_url="http://127.0.0.1:8099/openapi.json",
+        )
+    assert transport.calls == []
+
+
+def test_scan_active_rejects_empty_dict_together_with_url() -> None:
+    """An empty dict still counts as given (None is the only "absent" value)."""
+    transport = _FakeTransport(_RESPONSE)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError):
+        client.scan_active("http://127.0.0.1:8099/", api_definition={}, api_definition_url="http://127.0.0.1:8099/x")
+    assert transport.calls == []
+
+
+def test_scan_active_rejects_non_dict_api_definition() -> None:
+    """A JSON string instead of an object is rejected locally."""
+    transport = _FakeTransport(_RESPONSE)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError):
+        client.scan_active("http://127.0.0.1:8099/", api_definition='{"openapi": "3.0.3"}')  # type: ignore[arg-type]
+    assert transport.calls == []
+
+
+def test_scan_active_raises_on_unsupported_report_version() -> None:
+    """scan_active() surfaces the fail-closed error to the caller, same as scan()."""
+    transport = _FakeTransport({**_RESPONSE, "report": {**_REPORT, "version": 2}})
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    with pytest.raises(GenfluxError):
+        client.scan_active("http://127.0.0.1:8099/")
+
+
+def test_scan_active_uses_a_timeout_longer_than_the_client_default() -> None:
+    """The synchronous active scan outlives the client's 60 s default, same as scan()."""
+    transport = _FakeTransport(_RESPONSE)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    client.scan_active("http://127.0.0.1:8099/")
+    client.scan_active("http://127.0.0.1:8099/", timeout=30.0)
+
+    assert transport.post_kwargs == [{"timeout": DEFAULT_SCAN_TIMEOUT_SECONDS}, {"timeout": 30.0}]
+
+
+def test_active_profile_gets_the_active_profile_path_and_returns_json_verbatim() -> None:
+    """active_profile() GETs /experimental/web-scan/active/profile and returns the JSON unchanged."""
+    profile = {
+        "profile": {"id": "genflux-web-active-baseline", "version": 1},
+        "limits": {"max_requests": 150},
+        "surfaces": [{"id": "active"}],
+        "exclusions": [{"id": "destructive"}],
+        "checks": [{"rule_id": "sqli", "title": "SQL インジェクション", "severity": "high", "applies_to": "api"}],
+        "not_implemented": ["SSRF"],
+    }
+    transport = _FakeTransport(profile)
+    client = WebScanClient(transport)  # type: ignore[arg-type]
+
+    assert client.active_profile() == profile
+    assert transport.get_calls == ["/experimental/web-scan/active/profile"]
+    assert transport.calls == []

@@ -6,7 +6,7 @@ from genflux.models.config import (
     ConfigListResponse,
     ConfigUpdate,
 )
-from genflux.models.job import Job, JobProgress, MetricResult
+from genflux.models.job import Job, JobProgress, MetricResult, QualityBatchJob
 from genflux.models.usage import (
     CreditUsageSummary,
     ExecutionUsageSummary,
@@ -25,6 +25,7 @@ __all__ = [
     "Job",
     "JobProgress",
     "MetricResult",
+    "QualityBatchJob",
     # Usage models
     "TokenCounts",
     "ProviderTokenUsage",

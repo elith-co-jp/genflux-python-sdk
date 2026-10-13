@@ -2,12 +2,29 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from genflux.models.assessment import AssessmentBundle
 from genflux.models.assessment_contract import parse_accepted_assessment_plan, parse_assessment_bundle
 from genflux.models.assessment_plan import AcceptedAssessmentPlan
 from genflux.models.usage import ExecutionUsageSummary
+
+
+@dataclass(frozen=True)
+class QualityBatchJob:
+    """One independently judged metric in an Evaluation quality worker batch.
+
+    Platform validates the five-question / fifty-metric group limit, config,
+    metric names, entitlement and submission identity. Reuse the exact body and
+    client_request_id after an uncertain response; never generate a new ID.
+    """
+
+    config_id: str
+    client_request_id: str
+    data: dict[str, Any]
+    execution_type: Literal["quick_evaluate"] = "quick_evaluate"
+    evaluation_completion_webhook: bool = False
+    evaluation_auto_retry: bool = False
 
 
 @dataclass

@@ -8,7 +8,7 @@ from uuid import UUID
 from .clients.base import BaseClient
 from .clients.resource_path import resource_path
 from .exceptions import JobFailedError, TimeoutError
-from .models import Job
+from .models import Job, QualityBatchJob
 from .models.assessment import AssessmentBundle
 from .models.assessment_contract import parse_assessment_bundle
 
@@ -93,6 +93,37 @@ class JobsClient:
 
         response = self._client.post("/jobs", json=payload)
         return Job.from_dict(response)
+
+    def create_quality_batch(self, jobs: list[QualityBatchJob]) -> list[Job]:
+        """Admit prepared quality metrics with shared worker startup.
+
+        Requires an Evaluation API key and a batch-capable Platform deployment.
+        A group may contain at most five question IDs and fifty metrics for one
+        config. Every metric keeps its own result, receipt, usage and cancellation.
+        Platform owns validation; this method never combines judge prompts or
+        falls back to individual submissions on an error.
+
+        Args:
+            jobs: Independently identified metric inputs, in question order.
+
+        Returns:
+            One Job per metric, using the formal result and usage models.
+        """
+        payload = []
+        for job in jobs:
+            item: dict[str, Any] = {
+                "execution_type": job.execution_type,
+                "config_id": job.config_id,
+                "client_request_id": str(UUID(job.client_request_id)),
+                "checkpoint_data": job.data,
+            }
+            if job.evaluation_completion_webhook:
+                item["evaluation_completion_webhook"] = True
+            if job.evaluation_auto_retry:
+                item["evaluation_auto_retry"] = True
+            payload.append(item)
+        response = self._client.post("/jobs/quality-batch", json={"jobs": payload})
+        return [Job.from_dict(job) for job in response["jobs"]]
 
     def list(
         self,

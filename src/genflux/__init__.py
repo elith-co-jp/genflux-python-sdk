@@ -48,6 +48,7 @@ from genflux.models.report import (
 
 # Progress
 from genflux.progress import ProgressBar, create_progress_callback
+from genflux.web_scan import WebScanClient, WebScanResult
 
 GenFlux = Genflux
 
@@ -62,6 +63,8 @@ __all__ = [
     "EvaluationClient",
     "JobsClient",
     "ReportsClient",
+    "WebScanClient",
+    "WebScanResult",
     # Models
     "Config",
     "ConfigCreate",

@@ -267,3 +267,27 @@ class WebScanClient:
             APIError: その他の API エラー。
         """
         return self._client.get("/experimental/web-scan/active/profile")
+
+    def agent_chat(
+        self,
+        question: str,
+        context: dict[str, Any] | None = None,
+        *,
+        timeout: float = 60.0,
+    ) -> dict[str, Any]:
+        """完了済み lab 診断について、自由入力の質問に LLM で答えます（報告専用。scan は走りません）。
+
+        Args:
+            question: 診断結果についての質問。
+            context: 回答の根拠となる、この診断の実データ（findings・影響・手法 等）。
+            timeout: この要求の HTTP timeout 秒数。
+
+        Returns:
+            ``{"answer": str}`` の dict。
+
+        Raises:
+            NotFoundError: サーバ側で LLM 経路が無効。
+            APIError: その他の API エラー。
+        """
+        payload: dict[str, Any] = {"question": question, "context": context or {}}
+        return self._client.post("/experimental/web-scan/agent-chat", json=payload, timeout=timeout)
